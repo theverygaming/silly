@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "silly"
+version = "0.0.1"
+description = "TODO"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {file = "LICENSE"}
+dependencies = ["flask"]
+
+[project.optional-dependencies]
+postgres = ["psycopg2"]
+dev = [
+    "pytest", "coverage", "pylint", "mypy", "black", "Sphinx",
+    "psycopg2", "types-psycopg2"
+]
+
+[tool.setuptools]
+packages = ["silly"]
