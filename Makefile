@@ -24,7 +24,7 @@ postgrescontainer:
 
 .PHONY: psql
 psql:
-	PGPASSWORD="postgres" psql -U postgres -h 127.0.0.1 $@
+	PGPASSWORD="postgres" psql -d postgres -U postgres -h 127.0.0.1 $@
 
 .PHONY: format
 format: 
