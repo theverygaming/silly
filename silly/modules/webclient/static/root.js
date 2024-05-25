@@ -17,7 +17,9 @@ class Root extends Component {
 }
 
 const templates = await Promise.all([
-    loadFile("xml/templates.xml"),
+    loadFile("/static/xml/counter/counter.xml"),
+    loadFile("/static/xml/tools/errorHandler.xml"),
+    loadFile("/static/xml/root.xml"),
 ]);
 
 await whenReady()

@@ -3,15 +3,20 @@ import threading
 import sqlite3
 import sillyorm
 import flask
-from . import renderer
+from . import renderer, modload
+
 
 env = None
 env_lock = threading.Lock()
-app = flask.Flask("silly")
+app = flask.Flask("silly", static_folder=None)
 
-@app.route('/static/<path:path>')
-def send_report(path):
-    return flask.send_from_directory('silly/static', path)
+
+@app.route("/static/<path:subpath>")
+def static_serve(subpath):
+    if subpath in modload.staticfiles:
+        return flask.send_file(modload.staticfiles[subpath])
+    return "404"
+
 
 @app.route("/")
 def hello_world():
@@ -33,14 +38,21 @@ def run_app():
     )
 
     global env
-    #env = sillyorm.Environment(
+    # env = sillyorm.Environment(
     #    sillyorm.dbms.postgresql.PostgreSQLConnection(
     #        "host=127.0.0.1 dbname=test user=postgres password=postgres"
     #    ).cursor()
-    #)
+    # )
     env = sillyorm.Environment(CustomSQLiteConnection("test.db", check_same_thread=False).cursor())
     env.register_model(renderer.Template)
 
+    modload.set_module_paths(["silly/modules"])
+
+    modload.load_module("webclient")
+
     env["template"].load_file("silly/templates/index.xml")
+
+    for template in modload.xmltemplates:
+        env["template"].load_file(template)
 
     app.run()
