@@ -45,3 +45,24 @@ window.addEventListener("unhandledrejection", async function (ev) {
     console.log(ev);
     // TODO
 });
+
+
+async function jsonrpc(url, method, id, params) {
+    const resp = await fetch(url, {
+        method: "POST",
+        body: JSON.stringify({
+            jsonrpc: "2.0",
+            id: id,
+            method: method,
+            params: params
+        }),
+        headers: {
+          "Content-type": "application/json; charset=UTF-8"
+        }
+    });
+    return (await resp.json()).result;
+}
+
+console.log(jsonrpc("/webclient/jsonrpc", "get_view", 0, {
+    model: "some_model",
+}));

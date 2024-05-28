@@ -36,7 +36,7 @@ xmltemplates = []
 def set_module_paths(paths):
     silly.modules.__path__ += paths
 
-def load_module(name):
+def load_module(name, env):
     print(f"loading module {name}...")
     modpath = None
     for dir in silly.modules.__path__:
@@ -54,7 +54,7 @@ def load_module(name):
             raise Exception(f"manifest of {name} is invalid")
     
     for dep in manifest["dependencies"]:
-        load_module(dep)
+        load_module(dep, env)
 
     for k, v in manifest["staticfiles"].items():
         staticfiles[k] = modpath / "static" / v
@@ -63,6 +63,8 @@ def load_module(name):
         xmltemplates.append(modpath / "templates" / t)
 
     mod = _import_py_module(f"silly.{name}", str(modpath / "__init__.py"))
+
+    mod.module_onload(env)
 
     print(f"loaded module {name} ({mod})")
 

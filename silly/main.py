@@ -48,7 +48,7 @@ def run_app():
 
     modload.set_module_paths(["silly/modules"])
 
-    modload.load_module("webclient")
+    modload.load_module("webclient", env)
 
     env["template"].load_file("silly/templates/index.xml")
 
