@@ -9,7 +9,8 @@
         "js/root.js": "root.js",
         "xml/root.xml": "root.xml",
     },
-    "templates": [
-        "index.xml",
+    "data": [
+        "templates/index.xml",
+        "data/data.xml",
     ],
 }

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-<template name="test2" t-strip-text=" &#10;">
-    <t t-call="html_base">
-        <t t-set="lang">en-US</t>
-        <t t-set="title">another Hello world!</t>
-        <t t-set="head">
-            <script type="importmap"><t t-raw="importmap"/></script>
-            <script type="module" src="/static/js/root.js"></script>
+    <template name="test2" t-strip-text=" &#10;">
+        <t t-call="html_base">
+            <t t-set="lang">en-US</t>
+            <t t-set="title">another Hello world!</t>
+            <t t-set="head">
+                <script type="importmap"><t t-raw="importmap"/></script>
+                <script type="module" src="/static/js/root.js"></script>
+            </t>
+            <t t-set="body"/>
         </t>
-        <t t-set="body"/>
-    </t>
-</template>
+    </template>
 </root>

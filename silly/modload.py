@@ -2,6 +2,7 @@ import importlib.util
 import sys
 import ast
 from pathlib import Path
+from lxml import etree
 import silly
 
 
@@ -11,6 +12,7 @@ def _import_py_module(name, path):
     sys.modules[name] = module
     spec.loader.exec_module(module)
     return module
+
 
 def _validate_manifest(mdict):
     if not isinstance(mdict, dict):
@@ -23,18 +25,66 @@ def _validate_manifest(mdict):
         return False
     if not isinstance(mdict["staticfiles"], dict):
         return False
-    if "templates" not in mdict:
+    if "data" not in mdict:
         return False
-    if not isinstance(mdict["templates"], list):
+    if not isinstance(mdict["data"], list):
         return False
     return True
 
 
+def load_datafile(env, fname):
+    def load_record(el):
+        model = el.attrib.get("model")
+        id = int(el.attrib.get("id"))
+
+        vals = {}
+
+        for x in el:
+            if x.tag != "field":
+                raise Exception(f"invalid tag {x.tag}")
+            name = x.attrib["name"]
+            match x.attrib["t"]:
+                case "str":
+                    vals[name] = str(x.text)
+                case "int":
+                    vals[name] = int(x.text)
+                case _:
+                    raise Exception(f"unknown type {x.attrib['t']}")
+
+        rec = env[model].browse(id)
+        if rec is None:
+            rec = env[model].create(vals)
+        else:
+            rec.write(vals)
+
+    def load_template(el):
+        name = el.attrib.get("name")
+        if not name:
+            raise Exception("name attribute required for template")
+
+        rec = env["template"].search([("name", "=", name)])
+        if rec is None:
+            rec = env["template"].create({"name": name})
+        rec.xml = etree.tostring(el).decode("utf-8")
+
+    parser = etree.XMLParser(remove_comments=True)
+    tree = etree.parse(fname, parser=parser)
+    for el in tree.getroot():
+        match el.tag:
+            case "record":
+                load_record(el)
+            case "template":
+                load_template(el)
+            case _:
+                raise Exception(f"unknown tag {el.tag}")
+
+
 staticfiles = {}
-xmltemplates = []
+
 
 def set_module_paths(paths):
     silly.modules.__path__ += paths
+
 
 def load_module(name, env):
     print(f"loading module {name}...")
@@ -52,19 +102,21 @@ def load_module(name, env):
         manifest = ast.literal_eval(f.read())
         if not _validate_manifest(manifest):
             raise Exception(f"manifest of {name} is invalid")
-    
+
     for dep in manifest["dependencies"]:
         load_module(dep, env)
 
     for k, v in manifest["staticfiles"].items():
         staticfiles[k] = modpath / "static" / v
-    
-    for t in manifest["templates"]:
-        xmltemplates.append(modpath / "templates" / t)
 
     mod = _import_py_module(f"silly.{name}", str(modpath / "__init__.py"))
 
     mod.module_onload(env)
+
+    for d in manifest["data"]:
+        print(f"loading data {d}")
+        load_datafile(env, modpath / d)
+        print(f"loaded data {d}")
 
     print(f"loaded module {name} ({mod})")
 

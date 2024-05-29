@@ -8,9 +8,7 @@ import silly.modload
 @app.route("/webclient")
 def webclient():
 
-    importmap = {
-        "imports": {}
-    }
+    importmap = {"imports": {}}
 
     for file in silly.modload.staticfiles:
         if not file.startswith("js/"):
@@ -21,15 +19,18 @@ def webclient():
 
     env_lock.acquire()
     try:
-        return env["template"].render("test2", {
-            "importmap": json.dumps(importmap),
-        })
+        return env["template"].render(
+            "test2",
+            {
+                "importmap": json.dumps(importmap),
+            },
+        )
     # TODO: error page
     finally:
         env_lock.release()
 
 
-@app.route("/webclient/jsonrpc", methods = ["POST"])
+@app.route("/webclient/jsonrpc", methods=["POST"])
 def jsonrpc():
     rdata = json.loads(request.data)
     rpc_id = rdata["id"]
@@ -45,7 +46,7 @@ def jsonrpc():
                     "result": {
                         "component_name": view.type_id.component_name,
                         "xml": view.xml,
-                    }
+                    },
                 }
             finally:
                 env_lock.release()

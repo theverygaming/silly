@@ -114,21 +114,6 @@ class Template(sillyorm.model.Model):
     name = sillyorm.fields.String(length=255)
     xml = sillyorm.fields.Text()
 
-    def load_file(self, fname):
-        parser = etree.XMLParser(remove_comments=True)
-        tree = etree.parse(fname, parser=parser)
-        for el in tree.getroot():
-            if el.tag != "template":
-                continue
-            name = el.attrib.get("name")
-            if not name:
-                raise Exception("name attribute required for template")
-
-            rec = self.env["template"].search([("name", "=", name)])
-            if rec is None:
-                rec = self.env["template"].create({"name": name})
-            rec.xml = etree.tostring(el).decode("utf-8")
-
     def render(self, name, vals):
         def get_template(name):
             template = self.env["template"].search([("name", "=", name)])

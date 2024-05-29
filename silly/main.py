@@ -50,9 +50,6 @@ def run_app():
 
     modload.load_module("webclient", env)
 
-    env["template"].load_file("silly/templates/index.xml")
-
-    for template in modload.xmltemplates:
-        env["template"].load_file(template)
+    modload.load_datafile(env, "silly/templates/index.xml")
 
     app.run()

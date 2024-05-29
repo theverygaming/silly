@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <record model="view_type" id="1">
+        <field name="component_name" t="str">somecomp</field>
+    </record>
+
+    <record model="view" id="1">
+        <field name="model_name" t="str">some_model</field>
+        <field name="type_id" t="int">1</field>
+        <field name="xml" t="str">hello world! 2</field>
+    </record>
+</root>
