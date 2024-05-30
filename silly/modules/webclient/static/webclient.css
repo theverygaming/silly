@@ -1,0 +1,15 @@
+.table-nice {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.table-nice td,
+.table-nice th {
+    text-align: left;
+    border: 1px solid #000000;
+    padding: 10px;
+}
+
+.table-nice tr:nth-child(even) {
+    background-color: #bbbbbb;
+}

@@ -43,9 +43,14 @@ def load_datafile(env, fname):
             if x.tag != "field":
                 raise Exception(f"invalid tag {x.tag}")
             name = x.attrib["name"]
+            eltext = x.text
+            for child in x:
+                eltext += (child.text if child.text is not None else "") + etree.tostring(
+                    child
+                ).decode("utf-8")
             match x.attrib["t"]:
                 case "str":
-                    vals[name] = str(x.text)
+                    vals[name] = eltext
                 case "int":
                     vals[name] = int(x.text)
                 case _:

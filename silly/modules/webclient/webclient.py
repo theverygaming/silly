@@ -50,3 +50,13 @@ def jsonrpc():
                 }
             finally:
                 env_lock.release()
+        case "search_read":
+            env_lock.acquire()
+            try:
+                data = env[rpc_params["model"]].search(rpc_params["domain"])
+                return {
+                    "jsonrpc": "2.0",
+                    "result": data.read(rpc_params["fields"]),
+                }
+            finally:
+                env_lock.release()

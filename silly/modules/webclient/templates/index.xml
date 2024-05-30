@@ -7,6 +7,7 @@
             <t t-set="head">
                 <script type="importmap"><t t-raw="importmap"/></script>
                 <script type="module" src="/static/js/root.js"></script>
+                <link rel="stylesheet" href="/static/css/webclient.css"/>
             </t>
             <t t-set="body"/>
         </t>

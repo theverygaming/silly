@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+   <t t-name="formController">
+      <table class="table-nice">
+         <tr>
+            <t t-foreach="state.fields" t-as="field" t-key="field_index">
+               <th t-esc="field"/>
+            </t>
+         </tr>
+         <t t-foreach="state.data" t-as="data" t-key="data_index">
+            <tr>
+               <t t-foreach="state.fields" t-as="field" t-key="field_index">
+                  <td t-esc="data[field]"/>
+               </t>
+            </tr>
+         </t>
+      </table>
+   </t>
+</templates>

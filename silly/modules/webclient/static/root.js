@@ -1,10 +1,11 @@
 import { Component, useState, App, loadFile, whenReady, reactive } from "@odoo/owl";
 import { Counter } from "@counter/counter";
 import { ErrorHandler } from "@tools/errorHandler"
+import { FormController } from "@formController";
 
 
 class Root extends Component {
-    static components = { ErrorHandler, Counter };
+    static components = { ErrorHandler, Counter, FormController };
     static template = "root"
 
     setup() {
@@ -19,6 +20,7 @@ class Root extends Component {
 const templates = await Promise.all([
     loadFile("/static/xml/counter/counter.xml"),
     loadFile("/static/xml/tools/errorHandler.xml"),
+    loadFile("/static/xml/formController.xml"),
     loadFile("/static/xml/root.xml"),
 ]);
 
@@ -45,24 +47,3 @@ window.addEventListener("unhandledrejection", async function (ev) {
     console.log(ev);
     // TODO
 });
-
-
-async function jsonrpc(url, method, id, params) {
-    const resp = await fetch(url, {
-        method: "POST",
-        body: JSON.stringify({
-            jsonrpc: "2.0",
-            id: id,
-            method: method,
-            params: params
-        }),
-        headers: {
-          "Content-type": "application/json; charset=UTF-8"
-        }
-    });
-    return (await resp.json()).result;
-}
-
-console.log(jsonrpc("/webclient/jsonrpc", "get_view", 0, {
-    model: "some_model",
-}));

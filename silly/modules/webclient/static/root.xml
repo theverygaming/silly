@@ -8,6 +8,8 @@
       <br/>
       Total: <t t-esc="state.total"/>
       <br/>
+      <FormController/>
+      <br/>
       <t t-foreach="state.errors" t-as="error" t-key="error_index">
         error: <t t-esc="error"/><br/>
       </t>

@@ -7,6 +7,9 @@
     <record model="view" id="1">
         <field name="model_name" t="str">some_model</field>
         <field name="type_id" t="int">1</field>
-        <field name="xml" t="str">hello world! 2</field>
+        <field name="xml" t="str">
+            <field name="name"/>
+            <field name="xml"/>
+        </field>
     </record>
 </root>
