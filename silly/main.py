@@ -50,6 +50,8 @@ def run_app():
 
     modload.load_module("webclient", env)
 
+    modload.load_module("activitypub", env)
+
     modload.load_datafile(env, "silly/templates/index.xml")
 
     app.run()

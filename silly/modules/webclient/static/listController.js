@@ -3,8 +3,8 @@ import { jsonrpc } from "@jsonrpc";
 import { ViewHelper } from "@viewHelper";
 
 
-export class FormController extends Component {
-    static template = "formController";
+export class ListController extends Component {
+    static template = "listController";
 
     setup() {
         this.state = useState({ fields: [], data: [] });
@@ -30,15 +30,10 @@ export class FormController extends Component {
             console.log(fields);
             this.state.fields = fields;
 
-            this.viewhelper.browseRecords(this.state.fields, [1]).then((res) => {
+            this.viewhelper.searchRecords(this.state.fields).then((res) => {
                 console.log(res);
-                this.state.data = res[0];
+                this.state.data = res;
             });
         });
-    }
-
-    async btnSave() {
-        await this.viewhelper.writeRecords({name: "broken!"}, [1]);
-        console.log("saved");
     }
 }

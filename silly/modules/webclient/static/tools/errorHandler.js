@@ -7,7 +7,7 @@ export class ErrorHandler extends Component {
     setup() {
         this.state = useState({error: false });
         onError(function(error) {
-            console.log(error);
+            console.log(error, error.cause);
             this.state.error = true;
         });
     }

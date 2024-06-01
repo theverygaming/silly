@@ -60,3 +60,24 @@ def jsonrpc():
                 }
             finally:
                 env_lock.release()
+        case "browse_read":
+            env_lock.acquire()
+            try:
+                data = env[rpc_params["model"]].browse(rpc_params["ids"])
+                return {
+                    "jsonrpc": "2.0",
+                    "result": data.read(rpc_params["fields"]),
+                }
+            finally:
+                env_lock.release()
+        case "browse_write":
+            env_lock.acquire()
+            try:
+                data = env[rpc_params["model"]].browse(rpc_params["ids"])
+                data.write(rpc_params["data"])
+                return {
+                    "jsonrpc": "2.0",
+                    "result": True,
+                }
+            finally:
+                env_lock.release()

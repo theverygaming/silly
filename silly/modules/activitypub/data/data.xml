@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <record model="activitypub_actor" id="1">
+        <field name="username" t="str">colonthree</field>
+
+        <field name="publickey" t="str">-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwEyEp3gn4vvOfG0r81ht
+nMNfDh4IVmTrPinUR0pKXGle08HAGKaQNXQ+e/B4joGLrRxKgXcUMTJnbS65XfIp
+plt+Z7o+JxFb7Z0ZEQizP2cs3HH6Gf0cbD8Ae6qQuUaMHv39BM0lR9g3sHgwyko9
+HJNuJivQe/BBRW8TGWoUtZnbvMSENDxO1zLWGml75mLI+irsdfgNml/l9ZHx1HCr
+WS4C7i7xvo4JapAk7xCaSWr/8EtrROd0viB8Lu/84a+lPjz9FLFOyrZkyM6r/4ec
+QoM084Ih4qdhlJN5/AInWovHdPwWGomI7uOJ0NGZVB3elBlZaTqiqBX0ifaFXxPX
+ZwIDAQAB
+-----END PUBLIC KEY-----
+</field>
+        <field name="privatekey" t="str">-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDATISneCfi+858
+bSvzWG2cw18OHghWZOs+KdRHSkpcaV7TwcAYppA1dD578HiOgYutHEqBdxQxMmdt
+Lrld8immW35nuj4nEVvtnRkRCLM/ZyzccfoZ/RxsPwB7qpC5Rowe/f0EzSVH2Dew
+eDDKSj0ck24mK9B78EFFbxMZahS1mdu8xIQ0PE7XMtYaaXvmYsj6Kux1+A2aX+X1
+kfHUcKtZLgLuLvG+jglqkCTvEJpJav/wS2tE53S+IHwu7/zhr6U+PP0UsU7KtmTI
+zqv/h5xCgzTzgiHip2GUk3n8Aidai8d0/BYaiYju44nQ0ZlUHd6UGVlpOqKoFfSJ
+9oVfE9dnAgMBAAECggEAOEDKF4F3TZey3kRDdKLcId0nO+Z+MuO/y0YKQraRTTpH
+0rNdgfiLvA9ezfvZEHsGBKR/iSLwBbpEdjSSZlCWbYNbVXWug9g4p6hqskh0wynn
+/i7bZmncPDAr8IFDZ+eiytgrAZIPg1ZVaCqovyx7dxYLxV/Q08jDF1A4aplVKJAx
+X0lV3BS363WtpZNjc5oaUmHoLXPrJrwU8FKmjiXQpagwBGntnzueeNiUHUZIiE2w
+OdDdCDRKcvpPI/L0ZvNdSWMpfVCHqTAugniqdNayxLRd/KaxQ+6bbsGiYxD+Om50
+fHehwQz5K/Fu9Oq2YLwMmf5siRSi0Co5IeeT4RC9MQKBgQDeD8JYZkUNKE2xTzrQ
+/xmFqV6Vbceb612hbv4TShtTI9g1vGIsYlRTT5TUJ8GOL0xL/QqNVbQb0isCa+MP
+TjbUjevheVUl9U2iQZsXr1RDPiyXkXNM6GS4KEtiy4l05Gwpdl8yz3iQINEen5Ui
+Tph4Dvga2/sNvqFrk8elsIpk1wKBgQDdsEiuNLXtHzhz39UdQo+aCbI/QjGth8mb
+oS0IF2XYWi3Ay3ZINlv+KomWVku0c2VrvH2sLEYKKvt57ptyv5LnciHCWs3NRlow
+Xn+sWwcluNuaW7nkxc+XwjHlTlL1CNopbePIkjV4Qw66WFvSJOpTZ4hBwaaJMnuu
+gJleOJY/8QKBgDRrxfY2VlCv1f9oc7sIrY63F+PwoXF2U4kbeZE2KlMrIAw3Z3mQ
+0NVF8R1QMUoOclVx677Hn5f9ujd9HoHrddghlLCKgwZN7UDDeghSVHL3R3GUXYKn
+TbeHk5xD7jQRBFOZZQnKnmxvws4W4A7UPPwClKFKku6AtPx/S18a2ODLAoGBAKWQ
+T2eTRD94bp/TjgURPdAr56xo0lMoM0CAyfHeD5jaGIuBKLBbsK6MtD7L6jQ1boxc
+tHrOgex8F14D/qJfQuaJjX7qdAMXxKmVGcLuJNNeUNviH14lAZn0VXFM4pXP66a/
+RDv6Pea4JhqzfLfgDAUIMHHzn12dj1NPBbuhhUzxAoGAb96NlLTgf9m5Hfq0skIY
+9Rxh3ZHQBu82mS79XHxCg7nfeuew1PEion8gmPiuW+oJv4b7qc3ftrvEZdE4zFwX
+pdZCV4VbziUUgROPUD8DwyM6+RWmpdUy6hS8dlGNjnE83fBUI1U0S5SmDSzrH1Cu
+GE5/8MMvtCndXXUMNJVzVGs=
+-----END PRIVATE KEY-----
+</field>
+    </record>
+</root>

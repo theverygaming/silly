@@ -2,10 +2,11 @@ import { Component, useState, App, loadFile, whenReady, reactive } from "@odoo/o
 import { Counter } from "@counter/counter";
 import { ErrorHandler } from "@tools/errorHandler"
 import { FormController } from "@formController";
+import { ListController } from "@listController";
 
 
 class Root extends Component {
-    static components = { ErrorHandler, Counter, FormController };
+    static components = { ErrorHandler, Counter, FormController, ListController };
     static template = "root"
 
     setup() {
@@ -21,6 +22,7 @@ const templates = await Promise.all([
     loadFile("/static/xml/counter/counter.xml"),
     loadFile("/static/xml/tools/errorHandler.xml"),
     loadFile("/static/xml/formController.xml"),
+    loadFile("/static/xml/listController.xml"),
     loadFile("/static/xml/root.xml"),
 ]);
 

@@ -8,9 +8,13 @@
         "xml/tools/errorHandler.xml": "tools/errorHandler.xml",
         "js/formController.js": "formController.js",
         "xml/formController.xml": "formController.xml",
+        "js/listController.js": "listController.js",
+        "xml/listController.xml": "listController.xml",
         "js/root.js": "root.js",
         "xml/root.xml": "root.xml",
         "css/webclient.css": "webclient.css",
+        "js/viewHelper.js": "viewHelper.js",
+        "js/jsonrpc.js": "jsonrpc.js",
     },
     "data": [
         "templates/index.xml",
