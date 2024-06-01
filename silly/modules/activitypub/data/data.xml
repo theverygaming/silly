@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
     <record model="activitypub_actor" id="1">
-        <field name="username" t="str">colonthree</field>
+        <field name="username" t="str">meow3</field>
 
         <field name="publickey" t="str">-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwEyEp3gn4vvOfG0r81ht
@@ -11,8 +11,7 @@ HJNuJivQe/BBRW8TGWoUtZnbvMSENDxO1zLWGml75mLI+irsdfgNml/l9ZHx1HCr
 WS4C7i7xvo4JapAk7xCaSWr/8EtrROd0viB8Lu/84a+lPjz9FLFOyrZkyM6r/4ec
 QoM084Ih4qdhlJN5/AInWovHdPwWGomI7uOJ0NGZVB3elBlZaTqiqBX0ifaFXxPX
 ZwIDAQAB
------END PUBLIC KEY-----
-</field>
+-----END PUBLIC KEY-----</field>
         <field name="privatekey" t="str">-----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDATISneCfi+858
 bSvzWG2cw18OHghWZOs+KdRHSkpcaV7TwcAYppA1dD578HiOgYutHEqBdxQxMmdt
@@ -40,7 +39,6 @@ RDv6Pea4JhqzfLfgDAUIMHHzn12dj1NPBbuhhUzxAoGAb96NlLTgf9m5Hfq0skIY
 9Rxh3ZHQBu82mS79XHxCg7nfeuew1PEion8gmPiuW+oJv4b7qc3ftrvEZdE4zFwX
 pdZCV4VbziUUgROPUD8DwyM6+RWmpdUy6hS8dlGNjnE83fBUI1U0S5SmDSzrH1Cu
 GE5/8MMvtCndXXUMNJVzVGs=
------END PRIVATE KEY-----
-</field>
+-----END PRIVATE KEY-----</field>
     </record>
 </root>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <template name="test2" t-strip-text=" &#10;">
+    <template name="test3" t-strip-text=" &#10;">
         <t t-call="html_base">
             <t t-set="lang">en-US</t>
             <t t-set="title">another Hello world!</t>

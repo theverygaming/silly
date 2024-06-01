@@ -1,4 +1,4 @@
-from . import activitypub, models
+from . import activitypub, models, webfinger, get_user
 
 
 def module_onload(env):
