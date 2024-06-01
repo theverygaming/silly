@@ -1,5 +1,44 @@
+import ast
+import copy
 from lxml import etree
 import sillyorm
+
+
+def _safe_eval(node, vars, value=None):
+    # print(f"entering _safe_eval vars: {vars} value: {value}")
+    # print(ast.dump(node, indent=2))
+    if isinstance(node, ast.Expr):
+        if isinstance(node.value, ast.Name):
+            assert isinstance(node.value.ctx, ast.Load)
+            return vars[node.value.id]
+        if isinstance(node.value, ast.Subscript):
+            return _safe_eval(node.value, vars, vars)
+    if isinstance(node, ast.Constant):
+        return node.value
+    if isinstance(node, ast.Name):
+        assert isinstance(node.ctx, ast.Load)
+        return node.id
+    if isinstance(node, ast.Subscript):
+        assert isinstance(node.ctx, ast.Load)
+        if isinstance(node.value, ast.Name):
+            # load variable
+            var = value[_safe_eval(node.value, vars)]
+        else:
+            # we need to go deeper
+            var = _safe_eval(node.value, vars, value)
+        # do the actual subscript
+        return var[_safe_eval(node.slice, vars)]
+    return None
+
+
+def safe_eval(expr, vars):
+    # return vars[expr]
+    nodes = ast.parse(expr).body
+    if len(nodes) != 1:
+        raise Exception("safe_eval expected one AST node")
+    ret = _safe_eval(nodes[0], vars)
+    # print(f"exiting safe_eval with {ret}")
+    return ret
 
 
 _HTML_SELFCLOSING_TAGS = [
@@ -25,6 +64,8 @@ _HTML_SELFCLOSING_TAGS = [
 
 
 def _render_html(get_template_fn, element, render_ctx, render_self=False):
+    element = copy.deepcopy(element)  # NOTE: miiiight have broken _something_?
+
     def f_render_element_beg(render_tag, render_text):
         output = ""
         if render_tag:
@@ -56,12 +97,12 @@ def _render_html(get_template_fn, element, render_ctx, render_self=False):
             # t-att-
             if k.startswith("t-att-"):
                 del element.attrib[k]
-                element.attrib[k.removeprefix("t-att-")] = render_ctx[v]
+                element.attrib[k.removeprefix("t-att-")] = safe_eval(v, render_ctx)
                 continue
             # t-raw
             if k == "t-raw":
                 del element.attrib[k]
-                element.text = render_ctx[v]
+                element.text = safe_eval(v, render_ctx)
                 continue
             # t-set
             if k == "t-set":
@@ -76,6 +117,13 @@ def _render_html(get_template_fn, element, render_ctx, render_self=False):
                     element.text if element.text is not None else ""
                 ) + f_render_children()
                 output += _render_html(get_template_fn, get_template_fn(v), render_ctx)
+                continue
+            # t-foreach
+            if k == "t-foreach":
+                render_tag = render_tail = render_text = render_children = False
+                for x in safe_eval(v, render_ctx):
+                    render_ctx[element.attrib["t-as"]] = x
+                    output += f_render_children()
                 continue
             # t-strip
             if k.startswith("t-strip-"):

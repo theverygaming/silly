@@ -17,7 +17,7 @@ class Actor(sillyorm.model.Model):
                 {
                     "rel": "self",
                     "type": "application/activity+json",
-                    "href": f"https://fedi.theverygaming.furrypri.de/@{self.username}",
+                    "href": f"https://fedi.theverygaming.furrypri.de/users/{self.username}",
                 }
             ],
         }
@@ -28,13 +28,13 @@ class Actor(sillyorm.model.Model):
                 "https://www.w3.org/ns/activitystreams",
                 "https://w3id.org/security/v1",
             ],
-            "id": f"https://fedi.theverygaming.furrypri.de/@{self.username}",
+            "id": f"https://fedi.theverygaming.furrypri.de/users/{self.username}",
             "type": "Person",
             "preferredUsername": self.username,
-            "inbox": f"https://fedi.theverygaming.furrypri.de/@{self.username}/inbox",
+            "inbox": f"https://fedi.theverygaming.furrypri.de/users/{self.username}/inbox",
             "publicKey": {
-                "id": f"https://fedi.theverygaming.furrypri.de/@{self.username}#key",
-                "owner": f"https://fedi.theverygaming.furrypri.de/@{self.username}",
+                "id": f"https://fedi.theverygaming.furrypri.de/users/{self.username}#key",
+                "owner": f"https://fedi.theverygaming.furrypri.de/users/{self.username}",
                 "publicKeyPem": self.publickey,
             },
             # optional

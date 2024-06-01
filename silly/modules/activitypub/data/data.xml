@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
     <record model="activitypub_actor" id="1">
-        <field name="username" t="str">meow3</field>
+        <field name="username" t="str">meow4</field>
 
         <field name="publickey" t="str">-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwEyEp3gn4vvOfG0r81ht

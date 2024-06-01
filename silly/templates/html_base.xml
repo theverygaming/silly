@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<template name="html_base" t-strip-text=" &#10;">
+&lt;!DOCTYPE HTML&gt;
+<html t-att-lang="lang">
+<head>
+    <title t-raw="title"/>
+    <t t-raw="head"/>
+</head>
+<body>
+    <t t-raw="body"></t>
+    <br/>
+</body>
+</html>
+</template>
+</root>

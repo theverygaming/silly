@@ -2,7 +2,7 @@
     "dependencies": [],
     "staticfiles": {},
     "data": [
-        "templates/index.xml",
+        "templates/templates.xml",
         "data/data.xml",
     ],
 }

@@ -18,15 +18,6 @@ def static_serve(subpath):
     return "404"
 
 
-@app.route("/")
-def hello_world():
-    env_lock.acquire()
-    try:
-        return env["template"].render("test", {})
-    finally:
-        env_lock.release()
-
-
 class CustomSQLiteConnection(sillyorm.dbms.sqlite.SQLiteConnection):
     def __init__(self, *args, **kwargs):
         self._conn = sqlite3.connect(*args, **kwargs)
@@ -52,6 +43,6 @@ def run_app():
 
     modload.load_module("activitypub", env)
 
-    modload.load_datafile(env, "silly/templates/index.xml")
+    modload.load_datafile(env, "silly/templates/html_base.xml")
 
     app.run()
