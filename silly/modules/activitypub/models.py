@@ -1,8 +1,20 @@
 import sillyorm
 
 
+# TODO: sillyORM working inheritance
+
+
+class AObject(sillyorm.model.Model):
+    isRemote = sillyorm.fields.Integer()  # TODO: sillyORM boolean
+
+
 class Actor(sillyorm.model.Model):
     _name = "activitypub_actor"
+
+    # fields from activitypub Object
+    isRemote = sillyorm.fields.Integer()  # TODO: sillyORM boolean
+
+    # actor fields
 
     username = sillyorm.fields.String(length=255)
 

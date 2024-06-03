@@ -30,9 +30,18 @@ def get_profile(username):
 
 @app.route("/users/<username>/inbox", methods=["GET", "POST"])
 def get_profile_inbox(username):
-    print(request.data)
     if request.accept_mimetypes["text/html"]:
         print(f"requested inbox page (HTML) for: {username}")
         return "no HTML inbox display for u :3c"
-    elif request.accept_mimetypes["application/activity+json"]:
+    else:
         print(f"requested inbox (JSON) for: {username}")
+        print(request.data)
+        rjson = request.get_json()
+        print(rjson)
+        if rjson["type"] == "Delete":
+            print(f"cache invalidation request for {rjson['object']}")
+            return Response(
+                "404 not found", status=404
+            )  # spec says if it doesn't exist we return 404
+        if rjson["type"] == "Create":
+            print(f"creation request for {rjson['object']}")

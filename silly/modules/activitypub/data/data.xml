@@ -40,5 +40,6 @@ RDv6Pea4JhqzfLfgDAUIMHHzn12dj1NPBbuhhUzxAoGAb96NlLTgf9m5Hfq0skIY
 pdZCV4VbziUUgROPUD8DwyM6+RWmpdUy6hS8dlGNjnE83fBUI1U0S5SmDSzrH1Cu
 GE5/8MMvtCndXXUMNJVzVGs=
 -----END PRIVATE KEY-----</field>
+    <field name="isRemote" t="int">0</field>
     </record>
 </root>
