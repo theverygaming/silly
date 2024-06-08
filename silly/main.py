@@ -37,7 +37,7 @@ def run_app():
     env = sillyorm.Environment(CustomSQLiteConnection("test.db", check_same_thread=False).cursor())
     env.register_model(renderer.Template)
 
-    modload.set_module_paths(["silly/modules"])
+    modload.set_module_paths(["modules/"])
 
     modload.load_module("webclient", env)
 

@@ -37,8 +37,16 @@ export class FormController extends Component {
         });
     }
 
-    async btnSave() {
-        await this.viewhelper.writeRecords({name: "broken!"}, [1]);
-        console.log("saved");
+    async btnSave(ev) {
+        let vals = {}
+        for (const node of ev.target.parentElement.children) {
+            const name = node.name;
+            if (!this.state.fields.includes(name)) {
+                continue;
+            }
+            vals[name] = node.value;
+        }
+        await this.viewhelper.writeRecords(vals, [1]);
+        console.log("saved", vals);
     }
 }

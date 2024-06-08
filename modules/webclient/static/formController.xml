@@ -3,8 +3,8 @@
    <t t-name="formController">
       <table class="table-nice">
          <t t-foreach="state.fields" t-as="field" t-key="field_index">
-            <label t-att-for="'input_' + field"><t t-raw="field"/></label><br/>
-            <textarea t-att-name="'input_' + field" type="text" t-att-value="state.data[field]" />
+            <label t-att-for="field"><t t-raw="field"/></label><br/>
+            <textarea t-att-name="field" type="text" t-att-value="state.data[field]" />
             <br/>
          </t>
          <button t-on-click="btnSave">save</button>
