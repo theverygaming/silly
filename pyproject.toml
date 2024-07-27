@@ -9,16 +9,18 @@ description = "TODO"
 readme = "README.md"
 requires-python = ">=3.11"
 license = {file = "LICENSE"}
-dependencies = ["flask"]
+dependencies = [
+    "sillyorm==0.4.0",
+    "flask",
+    "lxml",
+]
 
 [project.optional-dependencies]
 postgres = ["psycopg2"]
 dev = [
-    "sillyorm==0.4.0",
-    "lxml",
     "psycopg2", "types-psycopg2",
     "pytest", "coverage", "pylint", "mypy", "black", "Sphinx",
 ]
 
 [tool.setuptools]
-packages = ["silly"]
+packages = ["silly", "silly.modules"]
