@@ -2,7 +2,7 @@ with import (fetchTarball https://github.com/NixOS/nixpkgs/archive/5ad6a14c6bf09
 let
   sillyORMPackage = pkgs.python312Packages.buildPythonPackage rec {
     pname = "sillyorm";
-    version = "0.4.0";
+    version = "0.5.0";
     pyproject = true;
 
     build-system = [
@@ -11,7 +11,7 @@ let
 
     src = fetchPypi {
       inherit pname version;
-      hash = "sha256-Ap8gfExQnvucR5I0ydin9f3wTecoLHvvzxtAxkETHMc=";
+      hash = "sha256-2UYka4ddE43LBQi0gdqLYKaEIWwYBPWYNkudsc3+O8A=";
     };
   };
 in
