@@ -5,7 +5,7 @@ let
     version = "0.4.0";
     pyproject = true;
 
-    nativeBuildInputs = [
+    build-system = [
       python312Packages.setuptools
     ];
 
