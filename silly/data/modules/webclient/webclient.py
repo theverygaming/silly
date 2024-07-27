@@ -8,7 +8,9 @@ import silly.modload
 @app.route("/webclient")
 def webclient():
 
-    importmap = {"imports": {}}
+    importmap = {"imports": {
+        "@odoo/owl": "https://unpkg.com/@odoo/owl@2.3.0/dist/owl.es.js"
+    }}
 
     for file in silly.modload.staticfiles:
         if not file.startswith("js/"):
