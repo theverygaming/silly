@@ -17,32 +17,14 @@ def static_serve(subpath):
         return flask.send_file(modload.staticfiles[subpath])
     return "404"
 
-
-class CustomSQLiteConnection(sillyorm.dbms.sqlite.SQLiteConnection):
-    def __init__(self, *args, **kwargs):
-        self._conn = sqlite3.connect(*args, **kwargs)
-
-
-def run_app():
+def init(sql_connection):
     logging.basicConfig(
         format="%(asctime)s %(levelname)s %(name)s: %(message)s", level=logging.DEBUG
     )
-
     global env
-    # env = sillyorm.Environment(
-    #    sillyorm.dbms.postgresql.PostgreSQLConnection(
-    #        "host=127.0.0.1 dbname=test user=postgres password=postgres"
-    #    ).cursor()
-    # )
-    env = sillyorm.Environment(CustomSQLiteConnection("test.db", check_same_thread=False).cursor())
+    env = sillyorm.Environment(sql_connection.cursor())
     env.register_model(renderer.Template)
 
-    modload.set_module_paths(["modules/"])
 
-    modload.load_module("webclient", env)
-
-    modload.load_module("activitypub", env)
-
-    modload.load_datafile(env, "silly/templates/html_base.xml")
-
+def run():
     app.run()

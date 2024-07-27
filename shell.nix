@@ -1,51 +1,51 @@
-with import (fetchTarball https://github.com/NixOS/nixpkgs/archive/66adc1e47f8784803f2deb6cacd5e07264ec2d5c.tar.gz) { };
+with import (fetchTarball https://github.com/NixOS/nixpkgs/archive/5ad6a14c6bf098e98800b091668718c336effc95.tar.gz) { };
 let
-  sillyORMPackage = pkgs.python311Packages.buildPythonPackage rec {
+  sillyORMPackage = pkgs.python312Packages.buildPythonPackage rec {
     pname = "sillyorm";
-    version = "0.1.0";
+    version = "0.4.0";
     pyproject = true;
 
     nativeBuildInputs = [
-      python311Packages.setuptools
+      python312Packages.setuptools
     ];
 
     src = fetchPypi {
       inherit pname version;
-      hash = "sha256-Q/opMMklfM/PDJKZ2To1ohekU9YRau1JzaCVaZSKK0o=";
+      hash = "sha256-Ap8gfExQnvucR5I0ydin9f3wTecoLHvvzxtAxkETHMc=";
     };
   };
 in
 stdenv.mkDerivation {
   name = "silly";
   buildInputs = [
-    python311
+    python312
 
     sillyORMPackage
 
     # lint, fmt, type, docs
-    python311Packages.pylint
-    python311Packages.mypy
-    python311Packages.black
+    python312Packages.pylint
+    python312Packages.mypy
+    python312Packages.black
     sphinx
     gnumake
 
     # test
-    python311Packages.coverage
-    python311Packages.pytest
+    python312Packages.coverage
+    python312Packages.pytest
 
     # build
-    python311Packages.build
+    python312Packages.build
 
     # deps
-    python311Packages.flask
+    python312Packages.flask
 
     # postgres
-    python311Packages.psycopg2
-    python311Packages.types-psycopg2
+    python312Packages.psycopg2
+    python312Packages.types-psycopg2
     postgresql_16
 
     # xml & web experiments
-    python311Packages.lxml
+    python312Packages.lxml
 
     # for convenience
     sqlitebrowser

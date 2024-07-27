@@ -57,7 +57,7 @@ def load_datafile(env, fname):
                     raise Exception(f"unknown type {x.attrib['t']}")
 
         rec = env[model].browse(id)
-        if rec is None:
+        if not rec:
             rec = env[model].create(vals)
         else:
             rec.write(vals)
@@ -68,7 +68,7 @@ def load_datafile(env, fname):
             raise Exception("name attribute required for template")
 
         rec = env["template"].search([("name", "=", name)])
-        if rec is None:
+        if not rec:
             rec = env["template"].create({"name": name})
         rec.xml = etree.tostring(el).decode("utf-8")
 

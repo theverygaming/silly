@@ -14,8 +14,10 @@ dependencies = ["flask"]
 [project.optional-dependencies]
 postgres = ["psycopg2"]
 dev = [
+    "sillyorm==0.4.0"
+    "lxml",
+    "psycopg2", "types-psycopg2",
     "pytest", "coverage", "pylint", "mypy", "black", "Sphinx",
-    "psycopg2", "types-psycopg2"
 ]
 
 [tool.setuptools]

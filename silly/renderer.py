@@ -165,7 +165,7 @@ class Template(sillyorm.model.Model):
     def render(self, name, vals):
         def get_template(name):
             template = self.env["template"].search([("name", "=", name)])
-            if template is None:
+            if not template:
                 raise Exception(f"template {name} not found in database")
             return etree.fromstring(template.xml)
 

@@ -1,5 +1,5 @@
 {
-    "dependencies": [],
+    "dependencies": ["html_base"],
     "staticfiles": {
         "js/odoo/owl.js": "owl.js",
         "js/counter/counter.js": "counter/counter.js",
