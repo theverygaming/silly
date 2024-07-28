@@ -98,6 +98,7 @@ def _render_html(get_template_fn, element, render_ctx, render_self=False):
             if k.startswith("t-att-"):
                 del element.attrib[k]
                 val = safe_eval(v, render_ctx)
+                # if an attribute evaluates to None, don't add it at all
                 if val is not None:
                     element.attrib[k.removeprefix("t-att-")] = val
                 continue
