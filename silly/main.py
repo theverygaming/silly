@@ -24,7 +24,11 @@ def init(sql_connection):
     global env
     env = sillyorm.Environment(sql_connection.cursor())
     env.register_model(renderer.Template)
+    env["template"]._table_init()  # a little cursed but does work i guess
 
 
 def run():
+    modload.load_all(env)
+    env.init_tables()
+    modload.load_all_data(env)
     app.run(host="0.0.0.0")

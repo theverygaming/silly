@@ -90,8 +90,9 @@ staticfiles = {}
 def set_module_paths(paths):
     silly.modules.__path__ += paths
 
+_data_to_load = []
 
-def load_module(name, env):
+def _load_module(name, env):
     print(f"loading module {name}...")
     modpath = None
     for dir in silly.modules.__path__:
@@ -109,7 +110,7 @@ def load_module(name, env):
             raise Exception(f"manifest of {name} is invalid")
 
     for dep in manifest["dependencies"]:
-        load_module(dep, env)
+        _load_module(dep, env)
 
     for k, v in manifest["staticfiles"].items():
         staticfiles[k] = modpath / "static" / v
@@ -119,10 +120,27 @@ def load_module(name, env):
     mod.module_onload(env)
 
     for d in manifest["data"]:
-        print(f"loading data {d}")
-        load_datafile(env, modpath / d)
-        print(f"loaded data {d}")
+        _data_to_load.append(modpath / d)
 
     print(f"loaded module {name} ({mod})")
 
     return mod
+
+
+_modules_to_load = []
+
+
+def load_module(name):
+    _modules_to_load.append(name)
+
+
+def load_all(env):
+    for name in _modules_to_load:
+        _load_module(name, env)
+
+
+def load_all_data(env):
+    for f in _data_to_load:
+        print(f"loading data {f}")
+        load_datafile(env, f)
+        print(f"loaded data {f}")

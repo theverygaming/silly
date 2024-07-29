@@ -9,6 +9,6 @@ if __name__ == "__main__":
 
     silly.main.init(conn)
     silly.modload.set_module_paths(["silly/data/modules/"])
-    silly.modload.load_module("webclient", silly.main.env)
-    silly.modload.load_module("activitypub", silly.main.env)
+    silly.modload.load_module("webclient")
+    silly.modload.load_module("activitypub")
     silly.main.run()
