@@ -17,6 +17,7 @@ def static_serve(subpath):
         return flask.send_file(modload.staticfiles[subpath])
     return "404"
 
+
 def init(sql_connection):
     logging.basicConfig(
         format="%(asctime)s %(levelname)s %(name)s: %(message)s", level=logging.DEBUG

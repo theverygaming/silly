@@ -90,7 +90,9 @@ staticfiles = {}
 def set_module_paths(paths):
     silly.modules.__path__ += paths
 
+
 _data_to_load = []
+
 
 def _load_module(name, env):
     print(f"loading module {name}...")
