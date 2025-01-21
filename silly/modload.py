@@ -35,7 +35,7 @@ def _validate_manifest(mdict):
 def load_datafile(env, fname):
     def load_record(el):
         model = el.attrib.get("model")
-        id = int(el.attrib.get("id"))
+        id = int(el.attrib.get("id")) if el.attrib.get("id") else el.attrib.get("xmlid")
 
         vals = {}
 
@@ -45,6 +45,8 @@ def load_datafile(env, fname):
             name = x.attrib["name"]
             eltext = x.text
             for child in x:
+                if eltext is None:
+                    eltext = ""
                 eltext += (child.text if child.text is not None else "") + etree.tostring(
                     child
                 ).decode("utf-8")
@@ -55,10 +57,18 @@ def load_datafile(env, fname):
                     vals[name] = int(x.text)
                 case _:
                     raise Exception(f"unknown type {x.attrib['t']}")
-
-        rec = env[model].browse(id)
+        
+        if isinstance(id, int):
+            rec = env[model].browse(id)
+        else:
+            rec = env.xmlid_lookup(id)
+            if rec and rec._name != model:
+                # In case of model mismatch: overwrite the old xmlid and create a new record
+                rec = env[model] # empty recordset
         if not rec:
             rec = env[model].create(vals)
+            if not isinstance(id, int):
+                env["xmlid"].assign(id, rec, overwrite=True)
         else:
             rec.write(vals)
 

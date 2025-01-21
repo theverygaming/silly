@@ -1,4 +1,4 @@
-with import (fetchTarball https://github.com/NixOS/nixpkgs/archive/5ad6a14c6bf098e98800b091668718c336effc95.tar.gz) { };
+with import (fetchTarball https://github.com/NixOS/nixpkgs/archive/107d5ef05c0b1119749e381451389eded30fb0d5.tar.gz) { };
 let
   sillyORMPackage = pkgs.python312Packages.buildPythonPackage rec {
     pname = "sillyorm";

@@ -3,7 +3,7 @@ import threading
 import sqlite3
 import sillyorm
 import flask
-from . import renderer, modload
+from . import renderer, modload, xmlids
 
 
 env = None
@@ -17,14 +17,18 @@ def static_serve(subpath):
         return flask.send_file(modload.staticfiles[subpath])
     return "404"
 
+class CustomEnvironment(sillyorm.Environment):
+    def xmlid_lookup(self, xmlid):
+        return self["xmlid"].lookup(xmlid)
 
 def init(sql_connection):
     logging.basicConfig(
         format="%(asctime)s %(levelname)s %(name)s: %(message)s", level=logging.DEBUG
     )
     global env
-    env = sillyorm.Environment(sql_connection.cursor())
+    env = CustomEnvironment(sql_connection.cursor())
     env.register_model(renderer.Template)
+    env.register_model(xmlids.XMLId)
     env["template"]._table_init()  # a little cursed but does work i guess
 
 

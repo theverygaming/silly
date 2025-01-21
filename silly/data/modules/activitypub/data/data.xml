@@ -1,17 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <record model="activitypub_actor" id="1">
+    <record model="activitypub_actor" xmlid="actor_meow4">
         <field name="username" t="str">meow4</field>
 
-        <field name="publickey" t="str">-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwEyEp3gn4vvOfG0r81ht
-nMNfDh4IVmTrPinUR0pKXGle08HAGKaQNXQ+e/B4joGLrRxKgXcUMTJnbS65XfIp
-plt+Z7o+JxFb7Z0ZEQizP2cs3HH6Gf0cbD8Ae6qQuUaMHv39BM0lR9g3sHgwyko9
-HJNuJivQe/BBRW8TGWoUtZnbvMSENDxO1zLWGml75mLI+irsdfgNml/l9ZHx1HCr
-WS4C7i7xvo4JapAk7xCaSWr/8EtrROd0viB8Lu/84a+lPjz9FLFOyrZkyM6r/4ec
-QoM084Ih4qdhlJN5/AInWovHdPwWGomI7uOJ0NGZVB3elBlZaTqiqBX0ifaFXxPX
-ZwIDAQAB
------END PUBLIC KEY-----</field>
+        <field name="publickey" t="str"><meow><a x="hiii :3"/></meow></field>
         <field name="privatekey" t="str">-----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDATISneCfi+858
 bSvzWG2cw18OHghWZOs+KdRHSkpcaV7TwcAYppA1dD578HiOgYutHEqBdxQxMmdt
