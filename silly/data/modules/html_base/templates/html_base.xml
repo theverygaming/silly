@@ -9,7 +9,6 @@
 </head>
 <body>
     <t t-raw="body"></t>
-    <br/>
 </body>
 </html>
 </template>

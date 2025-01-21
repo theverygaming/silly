@@ -39,12 +39,10 @@
                                 <th>username</th>
                                 <th>profile URL</th>
                             </tr>
-                            <t t-foreach="userlist" t-as="user">
-                                <tr>
-                                    <td t-raw="user['username']"/>
-                                    <td><a t-raw="user['url']" t-att-href="user['url']"/></td>
-                                </tr>
-                            </t>
+                            <tr t-foreach="userlist" t-as="user">
+                                <td t-raw="user['username']"/>
+                                <td><a t-raw="user['url']" t-att-href="user['url']"/></td>
+                            </tr>
                         </table>
                     </t>
                 </t>
