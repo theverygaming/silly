@@ -1,27 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <template name="test3" t-strip-text=" &#10;">
-        <t t-call="html_base">
-            <t t-set="lang">en-US</t>
-            <t t-set="title">another Hello world!</t>
-            <t t-set="head"></t>
-            <t t-set="body"></t>
-        </t>
-    </template>
-
-    <template name="index" t-strip-text=" &#10;">
-        <t t-call="html_base">
-            <t t-set="lang">en-US</t>
-            <t t-set="title">hi hello :3</t>
-            <t t-set="head"><script src="test"/></t>
-            <t t-set="body">
-                <h1>Silly</h1>
-                <hr/>
-                <p>this is a fedi instance see</p>
-                <a href="/users">users</a>
-            </t>
-        </t>
-    </template>
+    <record model="template" xmlid="template_index">
+        <field name="name" t="str">index</field>
+        <field name="xml" t="str">
+            <template t-strip-text=" &#10;">
+                <t t-call="html_base">
+                    <t t-set="lang">en-US</t>
+                    <t t-set="title">hi hello :3</t>
+                    <t t-set="head"><script src="test"/></t>
+                    <t t-set="body">
+                        <h1>Silly</h1>
+                        <hr/>
+                        <p>this is a fedi instance see</p>
+                        <a href="/users">users</a>
+                    </t>
+                </t>
+            </template>
+        </field>
+    </record>
 
     <record model="template" xmlid="template_users">
         <field name="name" t="str">users</field>

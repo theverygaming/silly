@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-<template name="html_base" t-strip-text=" &#10;">
+    <record model="template" xmlid="template_html_base">
+        <field name="name" t="str">html_base</field>
+        <field name="xml" t="str">
+<template t-strip-text=" &#10;">
 &lt;!DOCTYPE HTML&gt;
 <html t-att-lang="lang">
 <head>
@@ -12,4 +15,6 @@
 </body>
 </html>
 </template>
+        </field>
+    </record>
 </root>

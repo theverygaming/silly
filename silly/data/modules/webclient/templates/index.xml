@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <template name="test2" t-strip-text=" &#10;">
-        <t t-call="html_base">
-            <t t-set="lang">en-US</t>
-            <t t-set="title">another Hello world!</t>
-            <t t-set="head">
-                <script type="importmap"><t t-raw="importmap"/></script>
-                <script type="module" src="/static/js/root.js"></script>
-                <link rel="stylesheet" href="/static/css/webclient.css"/>
-            </t>
-            <t t-set="body"/>
-        </t>
-    </template>
+    <record model="template" xmlid="template_test2">
+        <field name="name" t="str">test2</field>
+        <field name="xml" t="str">
+            <template t-strip-text=" &#10;">
+                <t t-call="html_base">
+                    <t t-set="lang">en-US</t>
+                    <t t-set="title">another Hello world!</t>
+                    <t t-set="head">
+                        <script type="importmap"><t t-raw="importmap"/></script>
+                        <script type="module" src="/static/js/root.js"></script>
+                        <link rel="stylesheet" href="/static/css/webclient.css"/>
+                    </t>
+                    <t t-set="body"/>
+                </t>
+            </template>
+        </field>
+    </record>
 </root>

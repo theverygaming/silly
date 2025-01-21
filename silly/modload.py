@@ -72,24 +72,12 @@ def load_datafile(env, fname):
         else:
             rec.write(vals)
 
-    def load_template(el):
-        name = el.attrib.get("name")
-        if not name:
-            raise Exception("name attribute required for template")
-
-        rec = env["template"].search([("name", "=", name)])
-        if not rec:
-            rec = env["template"].create({"name": name})
-        rec.xml = etree.tostring(el).decode("utf-8")
-
     parser = etree.XMLParser(remove_comments=True)
     tree = etree.parse(fname, parser=parser)
     for el in tree.getroot():
         match el.tag:
             case "record":
                 load_record(el)
-            case "template":
-                load_template(el)
             case _:
                 raise Exception(f"unknown tag {el.tag}")
 
