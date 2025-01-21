@@ -23,27 +23,32 @@
         </t>
     </template>
 
-    <template name="users" t-strip-text=" &#10;">
-        <t t-call="html_base">
-            <t t-set="lang">en-US</t>
-            <t t-set="title">hi hello :3</t>
-            <t t-set="head"><script src="test"/></t>
-            <t t-set="body">
-                <h1>users</h1>
-                <hr/>
-                <table>
-                    <tr>
-                        <th>username</th>
-                        <th>profile URL</th>
-                    </tr>
-                    <t t-foreach="userlist" t-as="user">
-                        <tr>
-                            <td t-raw="user['username']"/>
-                            <td><a t-raw="user['url']" t-att-href="user['url']"/></td>
-                        </tr>
+    <record model="template" xmlid="template_users">
+        <field name="name" t="str">users</field>
+        <field name="xml" t="str">
+            <template t-strip-text=" &#10;">
+                <t t-call="html_base">
+                    <t t-set="lang">en-US</t>
+                    <t t-set="title">hi hello :3</t>
+                    <t t-set="head"><script src="test"/></t>
+                    <t t-set="body">
+                        <h1>users</h1>
+                        <hr/>
+                        <table>
+                            <tr>
+                                <th>username</th>
+                                <th>profile URL</th>
+                            </tr>
+                            <t t-foreach="userlist" t-as="user">
+                                <tr>
+                                    <td t-raw="user['username']"/>
+                                    <td><a t-raw="user['url']" t-att-href="user['url']"/></td>
+                                </tr>
+                            </t>
+                        </table>
                     </t>
-                </table>
-            </t>
-        </t>
-    </template>
+                </t>
+            </template>
+        </field>
+    </record>
 </root>
