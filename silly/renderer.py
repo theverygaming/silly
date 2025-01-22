@@ -4,40 +4,9 @@ from lxml import etree
 import sillyorm
 
 
-def _safe_eval(node, vars, value=None):
-    # print(f"entering _safe_eval value: {value} vars: {vars}")
-    # print(ast.dump(node, indent=2))
-    if isinstance(node, ast.Expr):
-        if isinstance(node.value, ast.Name):
-            assert isinstance(node.value.ctx, ast.Load)
-            return vars[node.value.id]
-        if isinstance(node.value, ast.Subscript):
-            return _safe_eval(node.value, vars, vars)
-    if isinstance(node, ast.Constant):
-        return node.value
-    if isinstance(node, ast.Name):
-        assert isinstance(node.ctx, ast.Load)
-        return node.id
-    if isinstance(node, ast.Subscript):
-        assert isinstance(node.ctx, ast.Load)
-        if isinstance(node.value, ast.Name):
-            # load variable
-            var = value[_safe_eval(node.value, vars)]
-        else:
-            # we need to go deeper
-            var = _safe_eval(node.value, vars, value)
-        # do the actual subscript
-        return var[_safe_eval(node.slice, vars, value)]
-    return None
-
-
-def safe_eval(expr, vars):
-    # return vars[expr]
-    nodes = ast.parse(expr).body
-    if len(nodes) != 1:
-        raise Exception("safe_eval expected one AST node")
-    ret = _safe_eval(nodes[0], vars)
-    # print(f"exiting safe_eval with {ret}")
+# FIXME: we do kinda want a safer eval
+def horribly_unsafe_eval(expr, vars):
+    ret = eval(expr, {}, vars)
     return ret
 
 
@@ -98,7 +67,7 @@ def _render_html(get_template_fn, element, render_ctx, render_self=False):
             # t-att-
             if k.startswith("t-att-"):
                 del element.attrib[k]
-                val = safe_eval(v, render_ctx)
+                val = horribly_unsafe_eval(v, render_ctx)
                 # if an attribute evaluates to None, don't add it at all
                 if val is not None:
                     element.attrib[k.removeprefix("t-att-")] = val
@@ -106,7 +75,7 @@ def _render_html(get_template_fn, element, render_ctx, render_self=False):
             # t-raw
             if k == "t-raw":
                 del element.attrib[k]
-                element.text = str(safe_eval(v, render_ctx))
+                element.text = str(horribly_unsafe_eval(v, render_ctx))
                 continue
             # t-set
             if k == "t-set":
@@ -125,7 +94,7 @@ def _render_html(get_template_fn, element, render_ctx, render_self=False):
             # t-foreach
             if k == "t-foreach":
                 render_tag = render_tail = render_text = render_children = False
-                for x in safe_eval(v, render_ctx):
+                for x in horribly_unsafe_eval(v, render_ctx):
                     render_ctx[element.attrib["t-as"]] = x
                     output += f_render_children()
                 continue
