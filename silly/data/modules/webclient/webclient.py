@@ -20,7 +20,7 @@ def webclient():
     env_lock.acquire()
     try:
         return env["template"].render(
-            "test2",
+            "template_test2",
             {
                 "importmap": json.dumps(importmap),
             },

@@ -8,7 +8,10 @@ class XMLId(sillyorm.model.Model):
     model_id = sillyorm.fields.Integer()
     model_name = sillyorm.fields.String(length=255)
 
-    def lookup(self, xmlid):
+    def lookup(self, model, xmlid):
+        domain = [("xmlid", "=", xmlid)]
+        if model:
+            domain += ["&", ("model_name", "=", model)]
         record = self.search([("xmlid", "=", xmlid)])
         if not record:
             return False

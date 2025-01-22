@@ -163,14 +163,13 @@ def _render_html(get_template_fn, element, render_ctx, render_self=False):
 class Template(sillyorm.model.Model):
     _name = "template"
 
-    name = sillyorm.fields.String(length=255)
     xml = sillyorm.fields.Text()
 
-    def render(self, name, vals):
-        def get_template(name):
-            template = self.env["template"].search([("name", "=", name)])
+    def render(self, xmlid, vals):
+        def get_template(xmlid):
+            template = self.env.xmlid_lookup("template", xmlid)
             if not template:
-                raise Exception(f"template {name} not found in database")
+                raise Exception(f"template with xmlid '{xmlid}' not found in database")
             return etree.fromstring(template.xml)
 
-        return _render_html(get_template, get_template(name), vals)
+        return _render_html(get_template, get_template(xmlid), vals)

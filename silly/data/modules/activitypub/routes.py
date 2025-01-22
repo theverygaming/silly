@@ -5,7 +5,7 @@ from silly.main import app, env, env_lock
 def index():
     env_lock.acquire()
     try:
-        return env["template"].render("index", {})
+        return env["template"].render("template_index", {})
     finally:
         env_lock.release()
 
@@ -16,7 +16,7 @@ def users():
     try:
         actors = env["activitypub_actor"].search([])
         return env["template"].render(
-            "users",
+            "template_users",
             {
                 "userlist": [
                     {

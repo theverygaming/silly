@@ -61,7 +61,7 @@ def load_datafile(env, fname):
         if isinstance(id, int):
             rec = env[model].browse(id)
         else:
-            rec = env.xmlid_lookup(id)
+            rec = env.xmlid_lookup(model, id)
             if rec and rec._name != model:
                 # In case of model mismatch: overwrite the old xmlid and create a new record
                 rec = env[model] # empty recordset

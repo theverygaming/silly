@@ -18,8 +18,8 @@ def static_serve(subpath):
     return "404"
 
 class CustomEnvironment(sillyorm.Environment):
-    def xmlid_lookup(self, xmlid):
-        return self["xmlid"].lookup(xmlid)
+    def xmlid_lookup(self, model, xmlid):
+        return self["xmlid"].lookup(model, xmlid)
 
 def init(sql_connection):
     logging.basicConfig(
