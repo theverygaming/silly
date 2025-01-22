@@ -9,7 +9,6 @@
         <field name="type_id" t="int">1</field>
         <field name="xml" t="str">
             <field name="id"/>
-            <field name="name"/>
             <field name="xml"/>
         </field>
     </record>
