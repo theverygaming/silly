@@ -5,7 +5,7 @@ import sillyorm
 
 
 def _safe_eval(node, vars, value=None):
-    # print(f"entering _safe_eval vars: {vars} value: {value}")
+    # print(f"entering _safe_eval value: {value} vars: {vars}")
     # print(ast.dump(node, indent=2))
     if isinstance(node, ast.Expr):
         if isinstance(node.value, ast.Name):
@@ -27,7 +27,7 @@ def _safe_eval(node, vars, value=None):
             # we need to go deeper
             var = _safe_eval(node.value, vars, value)
         # do the actual subscript
-        return var[_safe_eval(node.slice, vars)]
+        return var[_safe_eval(node.slice, vars, value)]
     return None
 
 
@@ -106,7 +106,7 @@ def _render_html(get_template_fn, element, render_ctx, render_self=False):
             # t-raw
             if k == "t-raw":
                 del element.attrib[k]
-                element.text = safe_eval(v, render_ctx)
+                element.text = str(safe_eval(v, render_ctx))
                 continue
             # t-set
             if k == "t-set":
