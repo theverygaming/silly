@@ -1,4 +1,4 @@
-from . import webclient, models
+from . import list_view, form_view, models
 
 
 def module_onload(env):

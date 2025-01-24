@@ -5,8 +5,8 @@ from silly.main import app, env, env_lock
 import silly.modload
 
 
-@app.route("/webclient2")
-def webclient2():
+@app.route("/webclient2/view/form/<view_id>")
+def webclient2_form(view_id):
     view = {
         "model": "xmlid",
         "fields": [
@@ -33,15 +33,16 @@ def webclient2():
         ],
     }
 
-    read_vals = list(set([field["field"] for field in view["fields"]]))
-
     env_lock.acquire()
     try:
+        read_vals = list(set([field["field"] for field in view["fields"]]))
+
         return env["template"].render(
-            "template_render_view_list",
+            "template_render_view_form",
             {
+                "view": view,
                 "fields": view["fields"],
-                "rows": env[view["model"]].search([]).read(read_vals),
+                "data": env[view["model"]].browse(int(request.args["id"])).read(read_vals)[0],
             },
         )
     finally:

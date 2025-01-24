@@ -6,7 +6,11 @@ import sillyorm
 
 # FIXME: we do kinda want a safer eval
 def horribly_unsafe_eval(expr, vars):
-    ret = eval(expr, {}, vars)
+    try:
+        ret = eval(expr, {}, vars)
+    except Exception as e:
+        print(f"Error evalutating '{expr}' - available vars: {vars}")
+        raise e
     return ret
 
 
@@ -70,7 +74,7 @@ def _render_html(get_template_fn, element, render_ctx, render_self=False):
                 val = horribly_unsafe_eval(v, render_ctx)
                 # if an attribute evaluates to None, don't add it at all
                 if val is not None:
-                    element.attrib[k.removeprefix("t-att-")] = val
+                    element.attrib[k.removeprefix("t-att-")] = str(val)
                 continue
             # t-raw
             if k == "t-raw":
