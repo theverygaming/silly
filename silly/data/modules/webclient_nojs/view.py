@@ -1,3 +1,5 @@
+import urllib.parse
+
 views = {
     "some_list": {
         "type": "list",
@@ -57,7 +59,7 @@ views = {
     },
 }
 
-def _render_view_form(env, view, params):
+def _render_view_form(env, view, view_name, params):
     read_vals = list(set([field["field"] for field in view["fields"]]))
     return env["template"].render(
         "template_render_view_form",
@@ -68,19 +70,26 @@ def _render_view_form(env, view, params):
         },
     )
 
-def _render_view_list(env, view, params):
+def _render_view_list(env, view, view_name, params):
     domain = []
     total_records = env[view["model"]].search_count(domain)
 
     # important: these offsets are meant for humans and start at 1
     offset_start = int(params.get("offset_start", 1))
     offset_end = int(params.get("offset_end", view["pagination"]["default_page_size"]))
+    if offset_start < 1:
+        offset_start = 1
+    if offset_end < 1:
+        offset_end = view["pagination"]["default_page_size"]
     if offset_end > total_records:
         offset_end = total_records
     if offset_start > offset_end:
         offset_start = offset_end
 
     read_vals = list(set([field["field"] for field in view["fields"]]))
+
+    def _gen_url_params(url_params):
+        return urllib.parse.urlencode(url_params)
 
     return env["template"].render(
         "template_render_view_list",
@@ -92,7 +101,10 @@ def _render_view_list(env, view, params):
                 "offset_start": offset_start,
                 "offset_end": offset_end,
                 "total_records": total_records,
-            }
+            },
+            "request_params_get": params,
+            "active_url": f"/webclient2/view/{view_name}",
+            "gen_url_params": _gen_url_params,
         },
     )
 
@@ -102,4 +114,4 @@ def render_view(env, name, params):
         "list": _render_view_list,
         "form": _render_view_form,
     }
-    return view_t_lookup[view["type"]](env, view, params)
+    return view_t_lookup[view["type"]](env, view, name, params)

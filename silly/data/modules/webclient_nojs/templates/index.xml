@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
+    <record model="template" xmlid="template_render_hidden_form_params">
+        <field name="xml" t="str">
+            <template>
+                <t t-foreach="request_params_get.items()" t-as="param">
+                    <input t-if="param[0] not in form_params" type="hidden" t-att-name="param[0]" t-att-value="param[1]"/>
+                </t>
+            </template>
+        </field>
+    </record>
+
     <record model="template" xmlid="template_render_view_list">
         <field name="xml" t="str">
             <template t-strip-text=" &#10;">
@@ -15,7 +25,21 @@
                         </style>
                     </t>
                     <t t-set="body">
-                        <t t-raw="f&quot;{pagination['offset_start']}-{pagination['offset_end']} of {pagination['total_records']}&quot;"/>
+                        <!-- Pagination -->
+                        <form method="GET">
+                            <t t-call="template_render_hidden_form_params">
+                                <t t-set="form_params" t-value="['offset_start', 'offset_end']"/>
+                            </t>
+                            <input type="number" id="offset_start" name="offset_start" min="1" t-att-max="pagination['total_records']" t-att-value="pagination['offset_start']"/>
+                            -
+                            <input type="number" id="offset_end" name="offset_end" min="1" t-att-max="pagination['total_records']" t-att-value="pagination['offset_end']"/>
+                            of <t t-raw="pagination['total_records']"/>
+                            <button type="submit">X</button>
+                        </form>
+                        <t t-set="recs_per_page" t-value="pagination['offset_end'] - (pagination['offset_start']-1)"/>
+                        <a t-att-href="(active_url + '?' + gen_url_params({**request_params_get, 'offset_start': pagination['offset_start'] - recs_per_page, 'offset_end': pagination['offset_end'] - recs_per_page })) if pagination['offset_start'] &gt; 1 else None">prev</a>
+                        <a t-att-href="(active_url + '?' + gen_url_params({**request_params_get, 'offset_start': pagination['offset_start'] + recs_per_page, 'offset_end': pagination['offset_end'] + recs_per_page })) if pagination['offset_end'] &lt; pagination['total_records'] else None">next</a>
+
                         <table>
                             <t t-set="has_form_view" t-value="'form_view_id' in view"/>
                             <tr>
