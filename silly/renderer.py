@@ -70,6 +70,7 @@ def _render_html(get_template_fn, element, render_ctx, render_self=False):
             # FIXME: a bunch of these ofc allow injecting HTML (t-att for example), they do gotta be fixed
             # t-att-
             if k.startswith("t-att-"):
+                # FIXME: somehow attribs added by this don't have spaces between them???
                 del element.attrib[k]
                 val = horribly_unsafe_eval(v, render_ctx)
                 # if an attribute evaluates to None, don't add it at all
@@ -92,7 +93,7 @@ def _render_html(get_template_fn, element, render_ctx, render_self=False):
                 continue
             # t-call
             if k == "t-call":
-                render_tag = render_tail = render_text = render_children = False
+                render_tag = render_text = render_children = False
                 render_ctx["0"] = (
                     element.text if element.text is not None else ""
                 ) + f_render_children()
@@ -100,9 +101,10 @@ def _render_html(get_template_fn, element, render_ctx, render_self=False):
                 continue
             # t-foreach / t-as
             if k == "t-foreach":
-                render_tag = render_tail = render_text = render_children = False
+                render_tag = render_text = render_children = False
                 for x in horribly_unsafe_eval(v, render_ctx):
                     render_ctx[element.attrib["t-as"]] = x
+                    output += element.text if element.text is not None else ""
                     output += f_render_children()
                 continue
             # t-strip
@@ -124,7 +126,7 @@ def _render_html(get_template_fn, element, render_ctx, render_self=False):
                     del element.attrib[k]
                     continue
                 else:
-                    render_tag = render_tail = render_text = render_children = False
+                    render_tag = render_text = render_children = False
                     break
         return output, render_tag, render_tail, render_text, render_children
 
