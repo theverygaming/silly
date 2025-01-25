@@ -81,11 +81,14 @@ def _render_html(get_template_fn, element, render_ctx, render_self=False):
                 del element.attrib[k]
                 element.text = str(horribly_unsafe_eval(v, render_ctx))
                 continue
-            # t-set
+            # t-set / t-value
             if k == "t-set":
                 render_tag = render_text = render_children = False
-                render_ctx[v] = element.text if element.text is not None else ""
-                render_ctx[v] += f_render_children()
+                if "t-value" not in element.attrib:
+                    render_ctx[v] = element.text if element.text is not None else ""
+                    render_ctx[v] += f_render_children()
+                else:
+                    render_ctx[v] = horribly_unsafe_eval(element.attrib["t-value"], render_ctx)
                 continue
             # t-call
             if k == "t-call":
@@ -95,7 +98,7 @@ def _render_html(get_template_fn, element, render_ctx, render_self=False):
                 ) + f_render_children()
                 output += _render_html(get_template_fn, get_template_fn(v), render_ctx)
                 continue
-            # t-foreach
+            # t-foreach / t-as
             if k == "t-foreach":
                 render_tag = render_tail = render_text = render_children = False
                 for x in horribly_unsafe_eval(v, render_ctx):
@@ -114,6 +117,15 @@ def _render_html(get_template_fn, element, render_ctx, render_self=False):
                     case _:
                         raise Exception(f'invalid {k}="{v}"')
                 continue
+            # t-if
+            if k == "t-if":
+                ev_res = horribly_unsafe_eval(v, render_ctx)
+                if ev_res:
+                    del element.attrib[k]
+                    continue
+                else:
+                    render_tag = render_tail = render_text = render_children = False
+                    break
         return output, render_tag, render_tail, render_text, render_children
 
     if not isinstance(element.tag, str):
