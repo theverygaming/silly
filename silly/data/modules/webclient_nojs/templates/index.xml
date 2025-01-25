@@ -17,19 +17,20 @@
                     <t t-set="body">
                         <t t-raw="f&quot;{pagination['offset_start']}-{pagination['offset_end']} of {pagination['total_records']}&quot;"/>
                         <table>
+                            <t t-set="has_form_view" t-value="'form_view_id' in view"/>
                             <tr>
                                 <t t-foreach="fields" t-as="field">
                                     <th t-raw="field['name']"/>
                                 </t>
-                                <th/>
+                                <th t-if="has_form_view"/>
                             </tr>
                             <t t-foreach="rows" t-as="row">
                                 <tr>
                                     <t t-foreach="fields" t-as="field">
                                         <td t-raw="row[field['field']]"/>
                                     </t>
-                                    <td>
-                                        <a t-att-href="f&quot;/webclient2/view/form/{view['form_view_id']}?id={row['id']}&quot;">form</a>
+                                    <td t-if="has_form_view">
+                                        <a t-att-href="f&quot;/webclient2/view/{view['form_view_id']}?id={row['id']}&quot;">form</a>
                                     </td>
                                 </tr>
                             </t>

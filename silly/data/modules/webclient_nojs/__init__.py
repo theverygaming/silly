@@ -1,4 +1,4 @@
-from . import list_view, form_view, models
+from . import routes, models
 
 
 def module_onload(env):
