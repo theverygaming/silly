@@ -67,10 +67,10 @@ def _render_html(get_template_fn, element, render_ctx, render_self=False):
     def process_attrs(render_tag, render_tail, render_text, render_children):
         output = ""
         for k, v in element.attrib.items():
+            # FIXME: somehow attribs don't have spaces between them after rendering???
             # FIXME: a bunch of these ofc allow injecting HTML (t-att for example), they do gotta be fixed
             # t-att-
             if k.startswith("t-att-"):
-                # FIXME: somehow attribs added by this don't have spaces between them???
                 del element.attrib[k]
                 val = horribly_unsafe_eval(v, render_ctx)
                 # if an attribute evaluates to None, don't add it at all

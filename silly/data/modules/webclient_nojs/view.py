@@ -1,3 +1,4 @@
+import re
 import urllib.parse
 
 views = {
@@ -38,22 +39,28 @@ views = {
             {
                 "name": "ID",
                 "field": "id",
+                "type": "text",
             },
             {
                 "name": "XML ID",
                 "field": "xmlid",
+                "type": "text",
             },
             {
                 "name": "Model Name",
                 "field": "model_name",
+                "type": "largetext",
             },
             {
                 "name": "Model ID",
                 "field": "model_id",
+                "type": "text",
+                "type_conv": "int",
             },
             {
                 "name": "ID (dupe lol)",
                 "field": "id",
+                "type": "text",
             },
         ],
     },
@@ -69,6 +76,24 @@ def _render_view_form(env, view, view_name, params):
             "data": env[view["model"]].browse(int(params["id"])).read(read_vals)[0],
         },
     )
+
+def _form_handle_post(env, view, view_name, params, post_params):
+    if post_params["type"] == "save":
+        def _conv_type(val, t):
+            match t:
+                case "int":
+                    return int(val)
+                case _:
+                    return val
+        field_hash_lookup_idx = {str(hash(str(field))): idx for idx, field in enumerate(view["fields"])}
+        # TODO: fields that occour twice? whatever, will fix later
+        vals = {view["fields"][(v_f_idx := field_hash_lookup_idx[m.group(1)])]["field"]: (_conv_type(v, view["fields"][v_f_idx]["type_conv"]) if "type_conv" in view["fields"][v_f_idx] else v) for k, v in post_params.items() if (m := re.match(r"^field_(-?\d+)$", k)) is not None}
+        # remove fields we can't write
+        for k in vals.copy():
+            if k in ["id"]:
+                del vals[k]
+
+        env[view["model"]].browse(int(params["id"])).write(vals)
 
 def _render_view_list(env, view, view_name, params):
     domain = []
@@ -115,3 +140,12 @@ def render_view(env, name, params):
         "form": _render_view_form,
     }
     return view_t_lookup[view["type"]](env, view, name, params)
+
+def handle_post(env, name, params, post_params):
+    view = views[name]
+    view_t_lookup = {
+        "form": _form_handle_post,
+    }
+    # TODO: some sort of thing to return warnings etc.
+    view_t_lookup[view["type"]](env, view, name, params, post_params)
+    return render_view(env, name, params)
