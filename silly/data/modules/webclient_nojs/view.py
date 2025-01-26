@@ -110,6 +110,11 @@ def _render_view_list(env, view, view_name, params):
         offset_end = total_records
     if offset_start > offset_end:
         offset_start = offset_end
+    
+    order_by = int(x) if (x := params.get("order_by")) is not None else x
+    order_asc = (not x == "descending") if (x := params.get("order_asc")) is not None else True
+    if order_by is not None and (order_by < 0 or order_by >= len(view["fields"])):
+        order_by = None
 
     read_vals = list(set([field["field"] for field in view["fields"]]))
 
@@ -121,11 +126,21 @@ def _render_view_list(env, view, view_name, params):
         {
             "view": view,
             "fields": view["fields"],
-            "rows": env[view["model"]].search(domain, offset=offset_start-1, limit=offset_end - (offset_start-1)).read(read_vals),
+            "rows": env[view["model"]].search(
+                domain,
+                offset=offset_start-1,
+                limit=offset_end - (offset_start-1),
+                order_by=view["fields"][order_by]["field"] if order_by is not None else None,
+                order_asc=order_asc
+            ).read(read_vals),
             "pagination": {
                 "offset_start": offset_start,
                 "offset_end": offset_end,
                 "total_records": total_records,
+            },
+            "sorting": {
+                "order_by": order_by,
+                "order_asc": order_asc,
             },
             "request_params_get": params,
             "active_url": f"/webclient2/view/{view_name}",

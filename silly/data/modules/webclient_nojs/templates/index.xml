@@ -25,20 +25,42 @@
                         </style>
                     </t>
                     <t t-set="body">
-                        <!-- Pagination -->
+                        <!-- Pagination & Sorting -->
                         <form method="GET">
                             <t t-call="template_render_hidden_form_params">
-                                <t t-set="form_params" t-value="['offset_start', 'offset_end']"/>
+                                <t t-set="form_params" t-value="['offset_start', 'offset_end', 'order_by', 'order_asc']"/>
                             </t>
+
+                            <!-- Pagination -->
                             <input type="number" id="offset_start" name="offset_start" min="1" t-att-max="pagination['total_records']" t-att-value="pagination['offset_start']"/>
                             -
                             <input type="number" id="offset_end" name="offset_end" min="1" t-att-max="pagination['total_records']" t-att-value="pagination['offset_end']"/>
                             of <t t-raw="pagination['total_records']"/>
+                            <br/>
+                            <!-- prev/next buttons -->
+                            <t t-set="recs_per_page" t-value="pagination['offset_end'] - (pagination['offset_start']-1)"/>
+                            <a t-att-href="(active_url + '?' + gen_url_params({**request_params_get, 'offset_start': pagination['offset_start'] - recs_per_page, 'offset_end': pagination['offset_end'] - recs_per_page })) if pagination['offset_start'] &gt; 1 else None">prev</a>
+                            <a t-att-href="(active_url + '?' + gen_url_params({**request_params_get, 'offset_start': pagination['offset_start'] + recs_per_page, 'offset_end': pagination['offset_end'] + recs_per_page })) if pagination['offset_end'] &lt; pagination['total_records'] else None">next</a>
+
+                            <br/>
+
+                            <!-- Sorting -->
+                            <label for="order_by">Order by</label>
+                            <select name="order_by" id="order_by">
+                                <option t-att-value="-1" t-att-selected="sorting['order_by']">Order by..</option>
+                                <t t-foreach="enumerate(fields)" t-as="field_en">
+                                    <t t-set="field_idx" t-value="field_en[0]"/>
+                                    <t t-set="field" t-value="field_en[1]"/>
+                                    <option t-att-value="field_idx" t-att-selected="'1' if sorting['order_by'] == field_idx else None"><t t-raw="field['name']"/></option>
+                                </t>
+                            </select>
+                            <input type="checkbox" id="order_asc" name="order_asc" value="descending" t-att-checked="'1' if not sorting['order_asc'] else None"/>
+                            <label for="order_asc">Descending</label>
+
+                            <br/>
+
                             <button type="submit">X</button>
                         </form>
-                        <t t-set="recs_per_page" t-value="pagination['offset_end'] - (pagination['offset_start']-1)"/>
-                        <a t-att-href="(active_url + '?' + gen_url_params({**request_params_get, 'offset_start': pagination['offset_start'] - recs_per_page, 'offset_end': pagination['offset_end'] - recs_per_page })) if pagination['offset_start'] &gt; 1 else None">prev</a>
-                        <a t-att-href="(active_url + '?' + gen_url_params({**request_params_get, 'offset_start': pagination['offset_start'] + recs_per_page, 'offset_end': pagination['offset_end'] + recs_per_page })) if pagination['offset_end'] &lt; pagination['total_records'] else None">next</a>
 
                         <table>
                             <t t-set="has_form_view" t-value="'form_view_id' in view"/>
