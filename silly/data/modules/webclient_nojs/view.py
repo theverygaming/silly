@@ -85,9 +85,8 @@ def _form_handle_post(env, view, view_name, params, post_params):
                     return int(val)
                 case _:
                     return val
-        field_hash_lookup_idx = {str(hash(str(field))): idx for idx, field in enumerate(view["fields"])}
         # TODO: fields that occour twice? whatever, will fix later
-        vals = {view["fields"][(v_f_idx := field_hash_lookup_idx[m.group(1)])]["field"]: (_conv_type(v, view["fields"][v_f_idx]["type_conv"]) if "type_conv" in view["fields"][v_f_idx] else v) for k, v in post_params.items() if (m := re.match(r"^field_(-?\d+)$", k)) is not None}
+        vals = {view["fields"][(v_f_idx := int(m.group(1)))]["field"]: (_conv_type(v, view["fields"][v_f_idx]["type_conv"]) if "type_conv" in view["fields"][v_f_idx] else v) for k, v in post_params.items() if (m := re.match(r"^field_(\d+)$", k)) is not None}
         # remove fields we can't write
         for k in vals.copy():
             if k in ["id"]:

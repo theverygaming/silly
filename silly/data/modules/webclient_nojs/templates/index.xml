@@ -97,8 +97,10 @@
                     <t t-set="body">
                         <form method="POST">
                             <input type="hidden" name="type" value="save"/>
-                            <t t-foreach="fields" t-as="field">
-                                <t t-set="field_id" t-value="'field_' +  str(hash(repr(field)))"/>
+                            <t t-foreach="enumerate(fields)" t-as="field_en">
+                                <t t-set="field_idx" t-value="field_en[0]"/>
+                                <t t-set="field" t-value="field_en[1]"/>
+                                <t t-set="field_id" t-value="'field_' +  str(field_idx)"/>
                                 <label t-att-for="field_id"><t t-raw="field['name']"/></label><br/>
                                 <t t-if="field['type'] == 'text'">
                                     <input type="text" t-att-id="field_id" t-att-name="field_id" t-att-value="data[field['field']]"></input><br/>
