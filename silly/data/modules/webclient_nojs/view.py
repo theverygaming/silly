@@ -69,7 +69,7 @@ views = {
 def _render_view_form(env, view, view_name, params):
     read_vals = list(set([field["field"] for field in view["fields"]]))
     return env["template"].render(
-        "template_render_view_form",
+        "webclient_nojs.view_form",
         {
             "view": view,
             "fields": view["fields"],
@@ -121,7 +121,7 @@ def _render_view_list(env, view, view_name, params):
         return urllib.parse.urlencode(url_params)
 
     return env["template"].render(
-        "template_render_view_list",
+        "webclient_nojs.view_list",
         {
             "view": view,
             "fields": view["fields"],
