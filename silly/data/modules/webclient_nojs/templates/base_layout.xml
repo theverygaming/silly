@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <record model="template" xmlid="webclient_nojs.base_layout">
+        <field name="xml" t="str">
+            <template t-strip-text=" &#10;">
+                <t t-call="template_html_base">
+                    <t t-set="lang">en-US</t>
+                    <t t-set="title">webclient2:tm:</t>
+                    <t t-set="head">
+                        <t t-raw="head"/>
+                    </t>
+                    <t t-set="body">
+                        <t t-raw="content"/>
+                    </t>
+                </t>
+            </template>
+        </field>
+    </record>
+</root>
