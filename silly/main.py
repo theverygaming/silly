@@ -8,10 +8,10 @@ from . import renderer, modload, xmlids, http
 
 env = None
 env_lock = threading.Lock()
-app = flask.Flask("silly", static_folder=None)
+flask_app = flask.Flask("silly", static_folder=None)
 
 
-@app.route("/static/<path:subpath>")
+@flask_app.route("/static/<path:subpath>")
 def static_serve(subpath):
     if subpath in modload.staticfiles:
         return flask.send_file(modload.staticfiles[subpath])
@@ -36,5 +36,5 @@ def run():
     modload.load_all(env)
     env.init_tables()
     modload.load_all_data(env)
-    http.init_routers(app)
-    app.run(host="0.0.0.0")
+    http.init_routers(flask_app)
+    flask_app.run(host="0.0.0.0")
