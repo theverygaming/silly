@@ -120,7 +120,7 @@ def _load_module(name, env):
     for k, v in manifest["staticfiles"].items():
         staticfiles[k] = modpath / "static" / v
 
-    mod = _import_py_module(f"silly.{name}", str(modpath / "__init__.py"))
+    mod = _import_py_module(f"silly.modules.{name}", str(modpath / "__init__.py"))
 
     mod.module_onload(env)
 
