@@ -5,6 +5,7 @@ from silly.main import app, env, env_lock
 import silly.modload
 
 from . import view
+from . import menu
 
 @app.route("/webclient2/view/<view_id>", methods=["GET", "POST"])
 def webclient2_render_view(view_id):
@@ -22,11 +23,6 @@ def webclient2_render_view(view_id):
 def webclient2_home():
     env_lock.acquire()
     try:
-        return env["template"].render(
-            "webclient_nojs.menu",
-            {
-                
-            },
-        )
+        return menu.show_menu(env)
     finally:
         env_lock.release()

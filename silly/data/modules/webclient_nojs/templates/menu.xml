@@ -6,7 +6,10 @@
                 <t t-call="webclient_nojs.base_layout">
                     <t t-set="head"/>
                     <t t-set="content">
-                        <p>test</p>
+                        <t t-foreach="menus.values()" t-as="menu">
+                            <a t-att-href="menu['url']"><t t-raw="menu['label']"/></a>
+                            <br/>
+                        </t>
                     </t>
                 </t>
             </template>
