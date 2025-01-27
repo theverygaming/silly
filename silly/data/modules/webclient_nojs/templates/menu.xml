@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <record model="template" xmlid="webclient_nojs.menu">
+        <field name="xml" t="str">
+            <template t-strip-text=" &#10;">
+                <t t-call="webclient_nojs.base_layout">
+                    <t t-set="head"/>
+                    <t t-set="content">
+                        <p>test</p>
+                    </t>
+                </t>
+            </template>
+        </field>
+    </record>
+</root>

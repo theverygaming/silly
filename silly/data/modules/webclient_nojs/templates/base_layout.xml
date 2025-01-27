@@ -10,7 +10,13 @@
                         <t t-raw="head"/>
                     </t>
                     <t t-set="body">
-                        <t t-raw="content"/>
+                        <div>
+                            <a href="/webclient2">Home</a>
+                        </div>
+                        <br/>
+                        <div>
+                            <t t-raw="content"/>
+                        </div>
                     </t>
                 </t>
             </template>

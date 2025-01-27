@@ -17,3 +17,16 @@ def webclient2_render_view(view_id):
                 return view.handle_post(env, view_id, request.args, request.form)
     finally:
         env_lock.release()
+
+@app.route("/webclient2", methods=["GET"])
+def webclient2_home():
+    env_lock.acquire()
+    try:
+        return env["template"].render(
+            "webclient_nojs.menu",
+            {
+                
+            },
+        )
+    finally:
+        env_lock.release()
