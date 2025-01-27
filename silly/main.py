@@ -3,7 +3,7 @@ import threading
 import sqlite3
 import sillyorm
 import flask
-from . import renderer, modload, xmlids
+from . import renderer, modload, xmlids, http
 
 
 env = None
@@ -36,4 +36,5 @@ def run():
     modload.load_all(env)
     env.init_tables()
     modload.load_all_data(env)
+    http.init_routers(app)
     app.run(host="0.0.0.0")
