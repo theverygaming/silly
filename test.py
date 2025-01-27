@@ -12,4 +12,5 @@ if __name__ == "__main__":
     silly.modload.load_module("webclient")
     silly.modload.load_module("activitypub")
     silly.modload.load_module("webclient_nojs")
+    silly.modload.load_module("webclient_nojs_samples")
     silly.main.run()

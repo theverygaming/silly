@@ -91,8 +91,13 @@ def set_module_paths(paths):
 
 _data_to_load = []
 
+_loaded_modules = []
 
 def _load_module(name, env):
+    if name in _loaded_modules:
+        print(f"will not load module {name} again because it has already been loaded")
+        return
+    _loaded_modules.append(name)
     print(f"loading module {name}...")
     modpath = None
     for dir in silly.modules.__path__:

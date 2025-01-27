@@ -1,12 +1,7 @@
 import re
 import urllib.parse
 
-menus = {
-    "some_app": {
-        "label": "Some App",
-        "url": "/webclient2/view/some_list"
-    },
-}
+menus = []
 
 def show_menu(env):
     return env["template"].render(
