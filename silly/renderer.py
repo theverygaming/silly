@@ -86,8 +86,12 @@ def _render_html(get_template_fn, element, render_ctx, render_self=False):
             if k == "t-set":
                 render_tag = render_text = render_children = False
                 if "t-value" not in element.attrib:
-                    render_ctx[v] = element.text if element.text is not None else ""
-                    render_ctx[v] += f_render_children()
+                    # Temporary variable so we can overwrite
+                    # variables with the same name of the variable we are setting
+                    # in t-set
+                    set_val = element.text if element.text is not None else ""
+                    set_val += f_render_children()
+                    render_ctx[v] = set_val
                 else:
                     render_ctx[v] = horribly_unsafe_eval(element.attrib["t-value"], render_ctx)
                 continue
