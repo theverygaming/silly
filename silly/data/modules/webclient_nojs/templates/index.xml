@@ -107,7 +107,7 @@
             <template t-strip-text=" &#10;">
                 <t t-call="webclient_nojs.base_layout">
                     <t t-set="head"/>
-                    <t t-set="body">
+                    <t t-set="content">
                         <form method="POST">
                             <input type="hidden" name="type" value="save"/>
                             <t t-foreach="enumerate(fields)" t-as="field_en">
