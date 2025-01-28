@@ -35,11 +35,21 @@ _HTML_SELFCLOSING_TAGS = [
     "frame",
 ]
 
-
 def _render_html(get_template_fn, element, render_ctx, render_self=False):
+    try:
+        return _def_render_html(get_template_fn, element, render_ctx, render_self=render_self)
+    except Exception as e:
+        # TODO: maybe later the exception should be done differently
+        if not hasattr(e, "_render_html_error_bubbling"):
+            print(f"redering error, {e}\nSomewhere Inside:\n{etree.tostring(element, pretty_print=True, encoding='utf-8').decode('utf-8')}")
+            setattr(e, "_render_html_error_bubbling", True)
+        raise e
+
+def _def_render_html(get_template_fn, element, render_ctx, render_self=False):
     element = copy.deepcopy(element)  # NOTE: miiiight have broken _something_?
 
     def f_render_element_beg(render_tag, render_text):
+        # FIXME: attribs don't have spaces between them after rendering???
         output = ""
         if render_tag:
             output += f"<{element.tag}" + (" " if len(element.items()) else "")
@@ -67,7 +77,6 @@ def _render_html(get_template_fn, element, render_ctx, render_self=False):
     def process_attrs(render_tag, render_tail, render_text, render_children):
         output = ""
         for k, v in element.attrib.items():
-            # FIXME: somehow attribs don't have spaces between them after rendering???
             # FIXME: a bunch of these ofc allow injecting HTML (t-att for example), they do gotta be fixed
             # t-att-
             if k.startswith("t-att-"):
