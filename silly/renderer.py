@@ -49,12 +49,11 @@ def _def_render_html(get_template_fn, element, render_ctx, render_self=False):
     element = copy.deepcopy(element)  # NOTE: miiiight have broken _something_?
 
     def f_render_element_beg(render_tag, render_text):
-        # FIXME: attribs don't have spaces between them after rendering???
         output = ""
         if render_tag:
             output += f"<{element.tag}" + (" " if len(element.items()) else "")
-            for k, v in element.items():
-                output += f'{k}="{v}"'
+            for i, (k, v) in enumerate(element.items()):
+                output += f'{k}="{v}"{' ' if i != len(element.items()) - 1 else ''}'
             output += f">"
         if render_text and element.text is not None:
             output += element.text
