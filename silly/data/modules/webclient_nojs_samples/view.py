@@ -62,5 +62,22 @@ views.update({
                 "type": "text",
             },
         ],
+        "actions": [
+            {
+                "fn": lambda env, rec: None,
+                "per-record": True,
+                "label": "something",
+            },
+            {
+                "fn": lambda env, rec: {"view_msgs": [f"rec: {rec}"]},
+                "per-record": True,
+                "label": "Another Thing (Form Action)",
+            },
+            {
+                "fn": lambda env: {"view_msgs": [f"hello world!"]},
+                "per-record": False,
+                "label": "Another Thing (Form Action) -- NOT per-record",
+            },
+        ],
     },
 })

@@ -91,6 +91,21 @@
                 <t t-call="webclient_nojs.base_layout">
                     <t t-set="head"/>
                     <t t-set="content">
+                        <!-- Actions -->
+                        <t t-foreach="enumerate(view['actions'])" t-as="action_en">
+                            <t t-set="action_idx" t-value="action_en[0]"/>
+                            <t t-set="action" t-value="action_en[1]"/>
+                            <form method="POST">
+                                <input type="hidden" name="type" value="action"/>
+                                <input type="hidden" name="action_id" t-att-value="action_idx"/>
+                                <button type="submit"><t t-raw="action['label']"/></button>
+                            </form>
+                        </t>
+                        <!-- Action return messages -->
+                        <t t-foreach="action_view_msgs" t-as="msg">
+                            <p t-raw="msg"/>
+                        </t>
+                        <!-- Fields -->
                         <form method="POST">
                             <input type="hidden" name="type" value="save"/>
                             <t t-foreach="enumerate(fields)" t-as="field_en">

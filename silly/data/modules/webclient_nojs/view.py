@@ -3,7 +3,7 @@ import urllib.parse
 
 views = {}
 
-def _render_view_form(env, view, view_name, params):
+def _render_view_form(env, view, view_name, params, action_view_msgs=[]):
     read_vals = list(set([field["field"] for field in view["fields"]]))
     return env["template"].render(
         "webclient_nojs.view_form",
@@ -11,25 +11,37 @@ def _render_view_form(env, view, view_name, params):
             "view": view,
             "fields": view["fields"],
             "data": env[view["model"]].browse(int(params["id"])).read(read_vals)[0],
+            "action_view_msgs": action_view_msgs,
         },
     )
 
 def _form_handle_post(env, view, view_name, params, post_params):
-    if post_params["type"] == "save":
-        def _conv_type(val, t):
-            match t:
-                case "int":
-                    return int(val)
-                case _:
-                    return val
-        # TODO: fields that occour twice? whatever, will fix later
-        vals = {view["fields"][(v_f_idx := int(m.group(1)))]["field"]: (_conv_type(v, view["fields"][v_f_idx]["type_conv"]) if "type_conv" in view["fields"][v_f_idx] else v) for k, v in post_params.items() if (m := re.match(r"^field_(\d+)$", k)) is not None}
-        # remove fields we can't write
-        for k in vals.copy():
-            if k in ["id"]:
-                del vals[k]
+    match post_params["type"]:
+        case "save":
+            def _conv_type(val, t):
+                match t:
+                    case "int":
+                        return int(val)
+                    case _:
+                        return val
+            # TODO: fields that occour twice? whatever, will fix later
+            vals = {view["fields"][(v_f_idx := int(m.group(1)))]["field"]: (_conv_type(v, view["fields"][v_f_idx]["type_conv"]) if "type_conv" in view["fields"][v_f_idx] else v) for k, v in post_params.items() if (m := re.match(r"^field_(\d+)$", k)) is not None}
+            # remove fields we can't write
+            for k in vals.copy():
+                if k in ["id"]:
+                    del vals[k]
 
-        env[view["model"]].browse(int(params["id"])).write(vals)
+            env[view["model"]].browse(int(params["id"])).write(vals)
+            return {
+                "view_msgs": ["saved successfully"],
+            }
+        case "action":
+            action = view["actions"][int(post_params["action_id"])]
+            if action["per-record"]:
+                rec = env[view["model"]].browse(int(params["id"]))
+                return action["fn"](env, rec)
+            return action["fn"](env)
+
 
 def _render_view_list(env, view, view_name, params):
     domain = []
@@ -84,19 +96,22 @@ def _render_view_list(env, view, view_name, params):
         },
     )
 
-def render_view(env, name, params):
+def render_view(env, name, params, **kwargs):
     view = views[name]
     view_t_lookup = {
         "list": _render_view_list,
         "form": _render_view_form,
     }
-    return view_t_lookup[view["type"]](env, view, name, params)
+    return view_t_lookup[view["type"]](env, view, name, params, **kwargs)
 
 def handle_post(env, name, params, post_params):
     view = views[name]
     view_t_lookup = {
         "form": _form_handle_post,
     }
-    # TODO: some sort of thing to return warnings etc.
-    view_t_lookup[view["type"]](env, view, name, params, post_params)
-    return render_view(env, name, params)
+    action_return = view_t_lookup[view["type"]](env, view, name, params, post_params)
+    if action_return is None:
+        return render_view(env, name, params)
+    if action_return.get("view_msgs") is not None:
+        return render_view(env, name, params, action_view_msgs=action_return["view_msgs"])
+    raise Exception(f"could not parse action return {action_return}")
