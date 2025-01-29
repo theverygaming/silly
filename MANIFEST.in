@@ -1,1 +1,1 @@
-recursive-include silly/data/modules/** *
+recursive-include silly/modules/** *
