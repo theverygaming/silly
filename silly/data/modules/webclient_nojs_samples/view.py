@@ -27,7 +27,7 @@ views.update({
             },
         ],
         "pagination": {
-            "default_page_size": 50,
+            "default_page_size": 5,
         },
         "form_view_id": "some_form",
     },
@@ -38,29 +38,28 @@ views.update({
             {
                 "name": "ID",
                 "field": "id",
-                "type": "text",
+                "type": "str",
             },
             {
                 "name": "XML ID",
                 "field": "xmlid",
-                "type": "text",
+                "type": "str",
             },
             {
                 "name": "Model Name",
                 "field": "model_name",
-                "type": "largetext",
+                "type": "str",
+                "widget": {
+                    "type": "textarea",
+                },
+                "readonly": True,
             },
             {
                 "name": "Model ID",
                 "field": "model_id",
-                "type": "text",
-                "type_conv": "int",
-            },
-            {
-                "name": "ID (dupe lol)",
-                "field": "id",
-                "type": "text",
-            },
+                "type": "int",
+                "readonly": True,
+            }
         ],
         "actions": [
             {
