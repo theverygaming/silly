@@ -8,7 +8,7 @@ if __name__ == "__main__":
     conn = sillyorm.dbms.sqlite.SQLiteConnection("test.db", check_same_thread=False)
 
     silly.main.init(conn)
-    silly.modload.set_module_paths(["silly/data/modules/"])
+    silly.modload.add_module_paths(["modules/", "silly/modules/"])
     silly.modload.load_module("webclient")
     silly.modload.load_module("activitypub")
     silly.modload.load_module("webclient_nojs")

@@ -85,7 +85,7 @@ def load_datafile(env, fname):
 staticfiles = {}
 
 
-def set_module_paths(paths):
+def add_module_paths(paths):
     silly.modules.__path__ += paths
 
 
