@@ -86,5 +86,8 @@ def init_routers(flask_app):
             if "endpoint" not in route_kwargs:
                 route_kwargs["endpoint"] = f"{cls.__module__}.{cls.__name__}.{fn_name}"
 
+            # Allow the endpoint to be accessed by the user
+            setattr(getattr(cls, fn_name), "endpoint", route_kwargs["endpoint"])
+
             # decorate the function
             flask_app.route(route_url, **route_kwargs)(fn)
