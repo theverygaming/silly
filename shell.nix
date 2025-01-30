@@ -9,9 +9,17 @@ let
       python312Packages.setuptools
     ];
 
+    # FIXME: release new sillyorm soon:tm:
+    /*
     src = fetchPypi {
       inherit pname version;
       hash = "sha256-J/k/P178iNjoGApD0kj08uymqlftFXsqGfUoUIHhcIc=";
+    };
+    */
+    src = fetchgit {
+      url = "https://github.com/theverygaming/sillyORM.git";
+      rev = "06b63004479fc6411db2a9c7002cc2ba0293968e";
+      hash = "sha256-T40FncjSgEt6d8252zZVrGWW7BG4LNefUy1ZA1ZIokc=";
     };
   };
 in
