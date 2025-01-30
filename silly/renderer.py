@@ -88,7 +88,8 @@ def _def_render_html(get_template_fn, element, render_ctx, render_self=False):
             # t-raw
             if k == "t-raw":
                 del element.attrib[k]
-                element.text = str(horribly_unsafe_eval(v, render_ctx))
+                val = horribly_unsafe_eval(v, render_ctx)
+                element.text = str(val) if val is not None else None
                 continue
             # t-set / t-value
             if k == "t-set":
