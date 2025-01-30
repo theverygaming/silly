@@ -10,7 +10,7 @@ from . import menu
 from silly.http import Router, route
 import silly.http as http
 
-class test(Router):
+class Webclient(Router):
     @http.route("/webclient2", methods=["GET"])
     def webclient2_home(self):
         env_lock.acquire()
