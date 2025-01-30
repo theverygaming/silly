@@ -59,9 +59,11 @@
 
                             <button type="submit">X</button>
                         </form>
+                        
+                        <t t-set="has_form_view" t-value="'form_view_id' in view"/>
+                        <a t-if="has_form_view" t-att-href="f&quot;/webclient2/view/{view['form_view_id']}&quot;">create new</a>
 
                         <table>
-                            <t t-set="has_form_view" t-value="'form_view_id' in view"/>
                             <tr>
                                 <t t-foreach="fields" t-as="field">
                                     <th t-raw="field['name']"/>

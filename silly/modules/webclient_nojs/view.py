@@ -1,5 +1,7 @@
 import re
 import urllib.parse
+import flask
+from . import routes
 
 views = {}
 
@@ -7,7 +9,11 @@ def _render_view_form(env, view, view_name, params, action_view_msgs=[]):
     read_vals = list(set([field["field"] for field in view["fields"]]))
     if len(read_vals) != len(view["fields"]):
         raise Exception("duplicate fields in view")
-    data = env[view["model"]].browse(int(params["id"])).read(read_vals)[0]
+    if "id" in params:
+        data = env[view["model"]].browse(int(params["id"])).read(read_vals)[0]
+    else:
+        # TODO: some sort of default values?
+        data = {k: "" for k in read_vals}
 
     for field in view["fields"]:
         data[field["field"]] = _conv_type_read_form(data[field["field"]], field["type"])
@@ -31,6 +37,8 @@ def _conv_type_write_form(val, t):
     raise Exception(f"unknown type {t}")
 
 def _conv_type_read_form(val, t):
+    if val is None:
+        return val
     return str(val)
 
 def _form_handle_post(env, view, view_name, params, post_params):
@@ -42,6 +50,15 @@ def _form_handle_post(env, view, view_name, params, post_params):
             for k in vals.copy():
                 if k in ["id"]:
                     del vals[k]
+            
+            # new record
+            if not "id" in params:
+                params_new = dict(params) # params dict is immutable
+                params_new["id"] = env[view["model"]].create(vals).id
+                params_new["view_id"] = view_name
+                return {
+                    "redirect": flask.url_for(routes.Webclient.webclient2_render_view.endpoint, **params_new),
+                }
 
             env[view["model"]].browse(int(params["id"])).write(vals)
             return {
@@ -124,6 +141,8 @@ def handle_post(env, name, params, post_params):
     action_return = view_t_lookup[view["type"]](env, view, name, params, post_params)
     if action_return is None:
         return render_view(env, name, params)
-    if action_return.get("view_msgs") is not None:
-        return render_view(env, name, params, action_view_msgs=action_return["view_msgs"])
+    if (val := action_return.get("view_msgs")) is not None:
+        return render_view(env, name, params, action_view_msgs=val)
+    if (val := action_return.get("redirect")) is not None:
+        return flask.redirect(val)
     raise Exception(f"could not parse action return {action_return}")
