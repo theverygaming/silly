@@ -120,8 +120,8 @@
                                     <t t-if="field['type'] == 'str'">
                                         <input type="text" t-att-id="field_id" t-att-name="field_id" t-att-value="data[field['field']]" t-att-disabled="field_disabled_att"></input><br/>
                                     </t>
-                                    <t t-if="field['type'] == 'int'">
-                                        <input type="number" t-att-id="field_id" t-att-name="field_id" t-att-value="data[field['field']]" t-att-disabled="field_disabled_att"></input><br/>
+                                    <t t-if="field['type'] in ['int', 'float']">
+                                        <input type="number" t-att-id="field_id" t-att-name="field_id" t-att-value="data[field['field']]" t-att-disabled="field_disabled_att" t-att-step="'any' if field['type'] == 'float' else None"></input><br/>
                                     </t>
                                 </t>
                                 <t t-if="field.get('widget') is not None">

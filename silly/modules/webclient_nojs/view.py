@@ -16,7 +16,7 @@ def _render_view_form(env, view, view_name, params, action_view_msgs=[]):
         data = {k: "" for k in read_vals}
 
     for field in view["fields"]:
-        data[field["field"]] = _conv_type_read_form(data[field["field"]], field["type"])
+        data[field["field"]] = _conv_type_read_form(data[field["field"]], field)
 
     return env["template"].render(
         "webclient_nojs.view_form",
@@ -28,15 +28,19 @@ def _render_view_form(env, view, view_name, params, action_view_msgs=[]):
         },
     )
 
-def _conv_type_write_form(val, t):
+def _conv_type_write_form(val, field):
+    t = field["type"]
     match t:
         case "int":
             return int(val)
+        case "float":
+            return float(val)
         case "str":
             return str(val)
     raise Exception(f"unknown type {t}")
 
-def _conv_type_read_form(val, t):
+def _conv_type_read_form(val, field):
+    t = field["type"]
     if val is None:
         return val
     return str(val)
@@ -45,7 +49,7 @@ def _form_handle_post(env, view, view_name, params, post_params):
     match post_params["type"]:
         case "save":
             raw_field_vals = {int(m.group(1)): v for k, v in post_params.items() if (m := re.match(r"^field_(\d+)$", k)) is not None}
-            vals = {view["fields"][k]["field"]: _conv_type_write_form(v, view["fields"][k]["type"]) for k, v in raw_field_vals.items() if not view["fields"][k].get("readonly", False)}
+            vals = {view["fields"][k]["field"]: _conv_type_write_form(v, view["fields"][k]) for k, v in raw_field_vals.items() if not view["fields"][k].get("readonly", False)}
             # remove fields we can't write
             for k in vals.copy():
                 if k in ["id"]:
