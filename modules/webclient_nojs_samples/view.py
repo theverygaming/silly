@@ -79,4 +79,106 @@ views.update({
             },
         ],
     },
+    "test_model_list": {
+        "type": "list",
+        "model": "test_model",
+        "fields": [
+            {
+                "name": "ID",
+                "field": "id",
+            },
+            {
+                "name": "Integer",
+                "field": "integer",
+            },
+            {
+                "name": "Float",
+                "field": "float",
+            },
+            {
+                "name": "String",
+                "field": "string",
+            },
+            {
+                "name": "Text",
+                "field": "text",
+            },
+            {
+                "name": "Date",
+                "field": "date",
+            },
+            {
+                "name": "Datetime",
+                "field": "datetime",
+            },
+            {
+                "name": "Boolean",
+                "field": "boolean",
+            },
+            {
+                "name": "Selection",
+                "field": "selection",
+            },
+        ],
+        "pagination": {
+            "default_page_size": 5,
+        },
+        "form_view_id": "test_model_form",
+    },
+    "test_model_form": {
+        "type": "form",
+        "model": "test_model",
+        "fields": [
+            {
+                "name": "ID",
+                "field": "id",
+                "type": "int",
+                "readonly": True,
+            },
+            {
+                "name": "Integer",
+                "field": "integer",
+                "type": "int",
+            },
+            {
+                "name": "Float",
+                "field": "float",
+                "type": "float",
+            },
+            {
+                "name": "String",
+                "field": "string",
+                "type": "str",
+            },
+            {
+                "name": "Text",
+                "field": "text",
+                "type": "str",
+                "widget": {
+                    "type": "textarea",
+                },
+            },
+            {
+                "name": "Date",
+                "field": "date",
+                "type": "date",
+            },
+            {
+                "name": "Datetime",
+                "field": "datetime",
+                "type": "datetime",
+            },
+            {
+                "name": "Boolean",
+                "field": "boolean",
+                "type": "bool",
+            },
+            {
+                "name": "Selection",
+                "field": "selection",
+                "type": "str", # TODO: selection widget
+            },
+        ],
+        "actions": [],
+    },
 })

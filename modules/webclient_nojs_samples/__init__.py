@@ -1,5 +1,5 @@
-from . import menu, view
+from . import menu, view, models
 
 
 def module_onload(env):
-    pass
+    env.register_model(models.TestModel)
