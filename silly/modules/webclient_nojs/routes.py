@@ -27,6 +27,10 @@ class Webclient(Router):
                 case "GET":
                     return view.render_view(env, view_id, request.args)
                 case "POST":
-                    return view.handle_post(env, view_id, request.args, request.form)
+                    # by default when ImmutableMultiDict (the type of request.form)
+                    # has two values with the same it will return only the first key.
+                    # We want different behavior, we want the last key
+                    form_processed = {k: request.form.getlist(k)[-1] for k in request.form}
+                    return view.handle_post(env, view_id, request.args, form_processed)
         finally:
             env_lock.release()

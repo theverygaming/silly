@@ -37,12 +37,17 @@ def _conv_type_write_form(val, field):
             return float(val)
         case "str":
             return str(val)
+        case "bool":
+            return val == "1"
     raise Exception(f"unknown type {t}")
 
 def _conv_type_read_form(val, field):
-    t = field["type"]
     if val is None:
         return val
+    t = field["type"]
+    match t:
+        case "bool":
+            return val
     return str(val)
 
 def _form_handle_post(env, view, view_name, params, post_params):
@@ -54,7 +59,7 @@ def _form_handle_post(env, view, view_name, params, post_params):
             for k in vals.copy():
                 if k in ["id"]:
                     del vals[k]
-            
+
             # new record
             if not "id" in params:
                 params_new = dict(params) # params dict is immutable
@@ -91,7 +96,7 @@ def _render_view_list(env, view, view_name, params):
         offset_end = total_records
     if offset_start > offset_end:
         offset_start = offset_end
-    
+
     order_by = int(x) if (x := params.get("order_by")) is not None else x
     order_asc = (not x == "descending") if (x := params.get("order_asc")) is not None else True
     if order_by is not None and (order_by < 0 or order_by >= len(view["fields"])):

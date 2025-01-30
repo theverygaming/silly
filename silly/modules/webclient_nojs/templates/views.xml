@@ -118,10 +118,20 @@
                                 <t t-set="field_disabled_att" t-value="'1' if field.get('readonly', False) else None"/>
                                 <t t-if="field.get('widget') is None">
                                     <t t-if="field['type'] == 'str'">
-                                        <input type="text" t-att-id="field_id" t-att-name="field_id" t-att-value="data[field['field']]" t-att-disabled="field_disabled_att"></input><br/>
+                                        <input type="text" t-att-id="field_id" t-att-name="field_id" t-att-value="data[field['field']]" t-att-disabled="field_disabled_att"/><br/>
                                     </t>
                                     <t t-if="field['type'] in ['int', 'float']">
-                                        <input type="number" t-att-id="field_id" t-att-name="field_id" t-att-value="data[field['field']]" t-att-disabled="field_disabled_att" t-att-step="'any' if field['type'] == 'float' else None"></input><br/>
+                                        <input type="number" t-att-id="field_id" t-att-name="field_id" t-att-value="data[field['field']]" t-att-disabled="field_disabled_att" t-att-step="'any' if field['type'] == 'float' else None"/><br/>
+                                    </t>
+                                    <t t-if="field['type'] == 'bool'">
+                                        <!--
+                                            Checkboxes don't POST anything if unchecked, we still need a value in the backend though
+                                            so what we do is add a second input, before the checkbox.
+                                            In case of the checkbox not being checked only that input will be sent to the server and everything is as normal.
+                                            In case of the checkbox being checked both inputs will be sent to the server and the server hopefully chooses only the last.
+                                        -->
+                                        <input type="hidden" t-att-id="field_id" t-att-name="field_id" value="0"/>
+                                        <input type="checkbox" t-att-id="field_id" t-att-name="field_id" value="1" t-att-disabled="field_disabled_att" t-att-checked="'1' if data[field['field']] else None"/><br/>
                                     </t>
                                 </t>
                                 <t t-if="field.get('widget') is not None">
