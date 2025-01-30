@@ -176,7 +176,14 @@ views.update({
             {
                 "name": "Selection",
                 "field": "selection",
-                "type": "str", # TODO: selection widget
+                "type": "str",
+                "widget": {
+                    "type": "selection",
+                    "options": [
+                        "option 1",
+                        "option 2",
+                    ],
+                },
             },
         ],
         "actions": [],

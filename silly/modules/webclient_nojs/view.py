@@ -29,6 +29,12 @@ def _render_view_form(env, view, view_name, params, action_view_msgs=[]):
     )
 
 def _conv_type_write_form(val, field):
+    if field.get("widget") is not None:
+        if field["widget"]["type"] == "selection":
+            print(val)
+            if val == "SELECTNONE":
+                return None
+            return re.match(r"^SELECT_(.+)$", val).group(1)
     t = field["type"]
     match t:
         case "int":

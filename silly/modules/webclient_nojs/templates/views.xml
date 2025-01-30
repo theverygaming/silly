@@ -138,6 +138,15 @@
                                     <t t-if="field['widget']['type'] == 'textarea'">
                                         <textarea t-att-id="field_id" t-att-name="field_id" t-att-disabled="field_disabled_att"><t t-raw="data[field['field']]"/></textarea><br/>
                                     </t>
+                                    <t t-if="field['widget']['type'] == 'selection'">
+                                        <select t-att-id="field_id" t-att-name="field_id">
+                                            <option value="SELECTNONE" t-att-selected="data[field['field']] is None">Selection..</option>
+                                            <t t-foreach="field['widget']['options']" t-as="option">
+                                                <option t-att-value="'SELECT_' + option" t-att-selected="'1' if data[field['field']] == option else None"><t t-raw="option"/></option>
+                                            </t>
+                                        </select>
+                                        <br/>
+                                    </t>
                                 </t>
                             </t>
                             <button type="submit">save</button>
