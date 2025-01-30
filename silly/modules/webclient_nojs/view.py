@@ -108,7 +108,9 @@ def _render_view_list(env, view, view_name, params):
     if order_by is not None and (order_by < 0 or order_by >= len(view["fields"])):
         order_by = None
 
-    read_vals = list(set([field["field"] for field in view["fields"]]))
+    # read the values, we always read the ID field no matter what
+    # at the time of writing this it's required in the template for generating the link to the form
+    read_vals = list(set([field["field"] for field in view["fields"]] + ["id"]))
 
     def _gen_url_params(url_params):
         return urllib.parse.urlencode(url_params)

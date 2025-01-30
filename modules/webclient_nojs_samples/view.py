@@ -6,10 +6,6 @@ views.update({
         "model": "xmlid",
         "fields": [
             {
-                "name": "ID",
-                "field": "id",
-            },
-            {
                 "name": "XML ID",
                 "field": "xmlid",
             },
@@ -22,8 +18,8 @@ views.update({
                 "field": "model_id",
             },
             {
-                "name": "ID (dupe lol)",
-                "field": "id",
+                "name": "XML ID (Dupe lol)",
+                "field": "xmlid",
             },
         ],
         "pagination": {
@@ -35,11 +31,6 @@ views.update({
         "type": "form",
         "model": "xmlid",
         "fields": [
-            {
-                "name": "ID",
-                "field": "id",
-                "type": "str",
-            },
             {
                 "name": "XML ID",
                 "field": "xmlid",
