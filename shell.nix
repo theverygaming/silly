@@ -18,8 +18,8 @@ let
     */
     src = fetchgit {
       url = "https://github.com/theverygaming/sillyORM.git";
-      rev = "32a5b121ea1e072b871e0f333a92309f7a3e9ec4";
-      hash = "sha256-awCMipb7hxodO+GAO6/jzl63UyM+fvU1BK+c7OtHQiw=";
+      rev = "cfddd5c848f287faee8f0c9d7971034202588d25";
+      hash = "sha256-o9mNc7RQtUkMyCM6HmdnmtXhzV+T7MhCMmGEOODcqiE=";
     };
   };
 in
