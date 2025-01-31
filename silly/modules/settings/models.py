@@ -36,10 +36,12 @@ class Setting(sillyorm.model.Model):
             })
         res.value = value
 
-    def get_value(self, key, default=None):
+    def get_value(self, key, default=None, error=False):
         res = self.search([("key", "=", key)])
         if len(res) > 1:
             raise Exception(f"duplicate settings key {key}")  # this should technically be impossible
         if len(res) == 0:
+            if error:
+                raise Exception(f"settings key {key} not found")
             return default
         return res.value
