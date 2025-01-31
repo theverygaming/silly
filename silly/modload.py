@@ -38,6 +38,7 @@ def load_datafile(env, fname):
     def load_record(el):
         model = el.attrib.get("model")
         id = int(el.attrib.get("id")) if el.attrib.get("id") else el.attrib.get("xmlid")
+        noupdate = el.attrib["noupdate"] == "1" if "noupdate" in el.attrib else False
 
         vals = {}
 
@@ -71,7 +72,7 @@ def load_datafile(env, fname):
             rec = env[model].create(vals)
             if not isinstance(id, int):
                 env["xmlid"].assign(id, rec, overwrite=True)
-        else:
+        elif not noupdate:
             rec.write(vals)
 
     parser = etree.XMLParser(remove_comments=True)
