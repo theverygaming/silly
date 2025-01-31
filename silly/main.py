@@ -1,4 +1,3 @@
-import logging
 import threading
 import sqlite3
 import sillyorm
@@ -22,9 +21,6 @@ class CustomEnvironment(sillyorm.Environment):
         return self["xmlid"].lookup(model, xmlid)
 
 def init(sql_connection):
-    logging.basicConfig(
-        format="%(asctime)s %(levelname)s %(name)s: %(message)s", level=logging.DEBUG
-    )
     global env
     env = CustomEnvironment(sql_connection.cursor())
     env.register_model(renderer.Template)
