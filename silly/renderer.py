@@ -1,15 +1,17 @@
+import logging
 import ast
 import copy
 from lxml import etree
 import sillyorm
 
+_logger = logging.getLogger(__name__)
 
 # FIXME: we do kinda want a safer eval
 def horribly_unsafe_eval(expr, vars):
     try:
         ret = eval(expr, {}, vars)
     except Exception as e:
-        print(f"Error evalutating '{expr}' - available vars: {vars}")
+        _logger.error("Error evalutating %s - available vars: %s", repr(expr), repr(vars))
         raise e
     return ret
 
@@ -41,7 +43,7 @@ def _render_html(get_template_fn, element, render_ctx, render_self=False):
     except Exception as e:
         # TODO: maybe later the exception should be done differently
         if not hasattr(e, "_render_html_error_bubbling"):
-            print(f"redering error, {e}\nSomewhere Inside:\n{etree.tostring(element, pretty_print=True, encoding='utf-8').decode('utf-8')}")
+            _logger.error("Rendering error, %s Somewhere inside:\n%s", repr(e), etree.tostring(element, pretty_print=True, encoding='utf-8').decode('utf-8'))
             setattr(e, "_render_html_error_bubbling", True)
         raise e
 

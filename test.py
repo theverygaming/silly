@@ -4,7 +4,7 @@ import sillyorm
 
 if __name__ == "__main__":
     logging.basicConfig(
-        format="%(asctime)s %(levelname)s %(name)s: %(message)s", level=logging.INFO
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s", level=logging.DEBUG
     )
     #conn = sillyorm.dbms.postgresql.PostgreSQLConnection(
     #    "host=127.0.0.1 dbname=test user=postgres password=postgres"

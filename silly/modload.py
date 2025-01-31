@@ -1,3 +1,4 @@
+import logging
 import importlib.util
 import sys
 import ast
@@ -5,6 +6,7 @@ from pathlib import Path
 from lxml import etree
 import silly
 
+_logger = logging.getLogger(__name__)
 
 def _import_py_module(name, path):
     spec = importlib.util.spec_from_file_location(name, path)
@@ -95,10 +97,10 @@ _loaded_modules = []
 
 def _load_module(name, env):
     if name in _loaded_modules:
-        print(f"will not load module {name} again because it has already been loaded")
+        _logger.debug("will not load module %s again because it has already been loaded", name)
         return
     _loaded_modules.append(name)
-    print(f"loading module {name}...")
+    _logger.info("loading module %s", name)
     modpath = None
     for dir in silly.modules.__path__:
         p = Path(dir) / name
@@ -109,12 +111,15 @@ def _load_module(name, env):
     if modpath is None:
         raise Exception(f"could not find module {name}")
 
+    _logger.debug("module %s from path %s", name, modpath)
+
     with open(modpath / "__manifest__.py", encoding="utf-8") as f:
         manifest = ast.literal_eval(f.read())
         if not _validate_manifest(manifest):
             raise Exception(f"manifest of {name} is invalid")
 
     for dep in manifest["dependencies"]:
+        _logger.debug("loading dependency %s of module %s", dep, name)
         _load_module(dep, env)
 
     for k, v in manifest["staticfiles"].items():
@@ -127,7 +132,7 @@ def _load_module(name, env):
     for d in manifest["data"]:
         _data_to_load.append(modpath / d)
 
-    print(f"loaded module {name} ({mod})")
+    _logger.info("loaded module %s", name)
 
     return mod
 
@@ -146,6 +151,5 @@ def load_all(env):
 
 def load_all_data(env):
     for f in _data_to_load:
-        print(f"loading data {f}")
+        _logger.info("loading data file %s", f)
         load_datafile(env, f)
-        print(f"loaded data {f}")

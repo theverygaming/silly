@@ -1,6 +1,9 @@
+import logging
 import functools
 import inspect
 import flask
+
+_logger = logging.getLogger(__name__)
 
 def route(*args, **kwargs):
     def decorator(function):
@@ -56,7 +59,9 @@ def init_routers(flask_app):
 
     for cls in Router.direct_children:
         final_classes = list(_unique(get_final_classes(cls)))
-        print("Router getting extended by: " + ", ".join([f"{x.__module__}.{x.__name__}" for x in final_classes if x is not cls]))
+        router_ext_strs = [f"{x.__module__}.{x.__name__}" for x in final_classes if x is not cls]
+        if len(router_ext_strs) > 0:
+            _logger.info("Router %s.%s getting extended by: " + ", ".join(router_ext_strs), cls.__module__, cls.__name__)
 
         # Build a final Router class that inherits all the other ones
         # Also create an instance of it
