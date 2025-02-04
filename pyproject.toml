@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = {file = "LICENSE"}
 dependencies = [
-    "sillyorm==0.8.1",
+    "sillyorm==0.9.0",
     "flask",
     "lxml",
 ]
