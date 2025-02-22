@@ -93,6 +93,16 @@ def _def_render_html(get_template_fn, element, render_ctx, render_self=False):
                 val = horribly_unsafe_eval(v, render_ctx)
                 element.text = str(val) if val is not None else None
                 continue
+            # t-render
+            if k == "t-render":
+                del element.attrib[k]
+                val = horribly_unsafe_eval(v, render_ctx)
+                render_tag = render_text = render_children = False
+                render_ctx["0"] = (
+                    element.text if element.text is not None else ""
+                ) + f_render_children()
+                output += _render_html(get_template_fn, etree.fromstring(val), render_ctx)
+                continue
             # t-set / t-value
             if k == "t-set":
                 render_tag = render_text = render_children = False
