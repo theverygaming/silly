@@ -5,13 +5,16 @@ class XMLId(sillyorm.model.Model):
     _name = "xmlid"
 
     xmlid = sillyorm.fields.String(length=255)
-    model_id = sillyorm.fields.Integer()
     model_name = sillyorm.fields.String(length=255)
+    model_id = sillyorm.fields.Integer()
+
+    def reverse_lookup(self, model, id):
+        record = self.search([("model_name", "=", model), "&", ("model_id", "=", id)])
+        if not record:
+            return False
+        return record.xmlid
 
     def lookup(self, model, xmlid):
-        domain = [("xmlid", "=", xmlid)]
-        if model:
-            domain += ["&", ("model_name", "=", model)]
         record = self.search([("xmlid", "=", xmlid)])
         if not record:
             return False
