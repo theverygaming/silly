@@ -1,5 +1,7 @@
 {
     "dependencies": ["webclient_nojs"],
     "staticfiles": {},
-    "data": [],
+    "data": [
+        "views/views.xml",
+    ],
 }

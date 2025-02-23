@@ -23,14 +23,19 @@ class Webclient(Router):
     def webclient2_render_view(self, view_id):
         env_lock.acquire()
         try:
+            xml_view = env.xmlid_lookup("webclient_nojs_view", view_id)
             match request.method:
                 case "GET":
+                    if xml_view:
+                        return xml_view.nojs_render(request.args)
                     return view.render_view(env, view_id, request.args)
                 case "POST":
                     # by default when ImmutableMultiDict (the type of request.form)
                     # has two values with the same it will return only the first key.
-                    # We want different behavior, we want the last key
+                    # We want different behavior, we want the last key!
                     form_processed = {k: request.form.getlist(k)[-1] for k in request.form}
+                    if xml_view:
+                        return xml_view.nojs_handle_post(request.args, form_processed)
                     return view.handle_post(env, view_id, request.args, form_processed)
         finally:
             env_lock.release()

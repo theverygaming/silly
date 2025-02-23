@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <record model="webclient_nojs_view" xmlid="webclient_nojs_samples.test_form_view">
+        <field name="model_name" t="str">xmlid</field>
+        <field name="view_type" t="str">form</field>
+        <field name="xml" t="str">
+            <main>
+                <label for="xmlid">XML ID</label>
+                <field name="xmlid"/>
+                <label for="model_name">Model Name</label>
+                <field name="model_name"/>
+                <div>
+                    <p>This field shall be inside a div</p>
+                    <!--
+                    # TODO: we can't do int fields yet because we are missing type conversion
+                    <label for="model_id">Model ID</label>
+                    <field name="model_id"/>
+                    -->
+                    <label for="id">ID</label>
+                    <field name="id"/>
+                </div>
+                <p>This is some random ass HTML!</p>
+            </main>
+        </field>
+    </record>
+</root>

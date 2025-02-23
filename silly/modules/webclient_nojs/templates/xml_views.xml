@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <record model="template" xmlid="webclient_nojs.view_xml_form_widget">
+        <field name="xml" t="str">
+            <template>
+                <t t-if="widget == 'str'">
+                    <input type="text" t-att-id="name" t-att-name="form_name" t-att-value="data[form_name]"/>
+                </t>
+            </template>
+        </field>
+    </record>
+
+    <record model="template" xmlid="webclient_nojs.view_xml_form">
+        <field name="xml" t="str">
+            <template t-strip-text=" &#10;">
+                <t t-call="webclient_nojs.base_layout">
+                    <t t-set="head"/>
+                    <t t-set="content">
+                        <form method="POST">
+                            <input type="hidden" name="type" value="save"/>
+                            <button type="submit">save</button>
+                            <!-- Main -->
+                            <div>
+                                <t t-render="xml_main"/>
+                            </div>
+                        </form>
+                    </t>
+                </t>
+            </template>
+        </field>
+    </record>
+</root>
