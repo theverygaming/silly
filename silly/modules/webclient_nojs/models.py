@@ -15,23 +15,26 @@ class View(sillyorm.model.Model):
         vals = {}
         match self.view_type:
             case "form":
-                read_vals = list(set(self.get_field_id_lookup().values()))
+                read_vals = list(set(self._nojs_field_name_lookup().values()))
                 if "id" in params:
                     read_data = self.env[self.model_name].browse(int(params["id"])).read(read_vals)[0]
                 else:
                     # TODO: some sort of default values?
                     read_data = {k: "" for k in read_vals}
                 # TODO: type conversion
-                vals["data"] = {fform: read_data[fname] for fform, fname in self.get_field_id_lookup().items()}
+                vals["data"] = {fform: read_data[fname] for fform, fname in self._nojs_field_name_lookup().items()}
         return vals
 
-    def get_field_id_lookup(self):
+    def _nojs_field_lookup(self):
         self.ensure_one()
-        field_id_lookup = {}
+        field_lookup = {}
         main_tree = etree.fromstring(self.xml).xpath("/main")[0]
         for field_idx, field in enumerate(main_tree.xpath("//field")):
-            field_id_lookup[f"field_{field_idx}"] = field.attrib["name"]
-        return field_id_lookup
+            field_lookup[f"field_{field_idx}"] = dict(field.attrib)
+        return field_lookup
+
+    def _nojs_field_name_lookup(self):
+        return {k: v["name"] for k, v in self._nojs_field_lookup().items()}
 
     def _nojs_expand_xml(self):
         tree = etree.fromstring(self.xml)
@@ -75,7 +78,7 @@ class View(sillyorm.model.Model):
             case "form":
                 match post_params["type"]:
                     case "save":
-                        field_id_lookup = self.get_field_id_lookup()
+                        field_id_lookup = self._nojs_field_name_lookup()
                         raw_field_vals = {k: v for k, v in post_params.items() if k in field_id_lookup}
                         # TODO: we need to handle readonly fields here (at the time of writing this XML views don't support them yet though lol)
                         # TODO: type conversion
