@@ -3,8 +3,24 @@
     <record model="template" xmlid="webclient_nojs.view_xml_form_widget">
         <field name="xml" t="str">
             <template>
-                <t t-if="widget == 'str'">
-                    <input type="text" t-att-id="name" t-att-name="form_name" t-att-value="data[form_name]"/>
+                <t t-if="widget == 'string'">
+                    <input
+                        type="text"
+                        t-att-id="name"
+                        t-att-name="form_name"
+                        t-att-value="data[form_name]"
+                    />
+                </t>
+                <t t-if="widget in ['integer', 'float']">
+                    <input
+                        type="number"
+                        t-att-id="name"
+                        t-att-name="form_name"
+                        t-att-value="data[form_name]"
+                        t-att-min="widget_attribs.get('min')"
+                        t-att-max="widget_attribs.get('max')"
+                        t-att-step="None if widget == 'integer' else widget_attribs.get('step', 'any')"
+                    />
                 </t>
             </template>
         </field>

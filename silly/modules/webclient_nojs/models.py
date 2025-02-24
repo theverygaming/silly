@@ -37,11 +37,25 @@ class View(sillyorm.model.Model):
 
     def _nojs_convert_type_read(self, field, value):
         attrs = self._nojs_field_lookup()[field]
-        return value
+        if value is None:
+            return ""
+        match attrs["widget"]:
+            case "string" | "integer" | "float":
+                return str(value)
+        raise Exception(f"unknown widget '{attrs['widget']}'")
     
     def _nojs_convert_type_write(self, field, value):
         attrs = self._nojs_field_lookup()[field]
-        return value
+        if value is None:
+            return ""
+        match attrs["widget"]:
+            case "string":
+                return str(value)
+            case "integer":
+                return int(value)
+            case "float":
+                return float(value)
+        raise Exception(f"unknown widget '{attrs['widget']}'")
 
     def _nojs_expand_xml(self):
         tree = etree.fromstring(self.xml)
@@ -62,6 +76,10 @@ class View(sillyorm.model.Model):
                 t_set = etree.Element("t", attrib={"t-set": k})
                 t_set.text = v
                 t_call.append(t_set)
+
+            # attribs itself is specified in another t-set in case a widget wants to
+            # define default values (othewise might get undefined variable errors)!
+            t_call.append(etree.Element("t", attrib={"t-set": "widget_attribs", "t-value": repr(dict(attribs))}))
 
             parent = field.getparent()
             parent.replace(field, t_call)
