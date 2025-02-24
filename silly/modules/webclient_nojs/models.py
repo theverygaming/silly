@@ -21,8 +21,7 @@ class View(sillyorm.model.Model):
                 else:
                     # TODO: some sort of default values?
                     read_data = {k: "" for k in read_vals}
-                # TODO: type conversion
-                vals["data"] = {fform: read_data[fname] for fform, fname in self._nojs_field_name_lookup().items()}
+                vals["data"] = {fform: self._nojs_convert_type_read(fform, read_data[fname]) for fform, fname in self._nojs_field_name_lookup().items()}
         return vals
 
     def _nojs_field_lookup(self):
@@ -35,6 +34,14 @@ class View(sillyorm.model.Model):
 
     def _nojs_field_name_lookup(self):
         return {k: v["name"] for k, v in self._nojs_field_lookup().items()}
+
+    def _nojs_convert_type_read(self, field, value):
+        attrs = self._nojs_field_lookup()[field]
+        return value
+    
+    def _nojs_convert_type_write(self, field, value):
+        attrs = self._nojs_field_lookup()[field]
+        return value
 
     def _nojs_expand_xml(self):
         tree = etree.fromstring(self.xml)
@@ -81,8 +88,7 @@ class View(sillyorm.model.Model):
                         field_id_lookup = self._nojs_field_name_lookup()
                         raw_field_vals = {k: v for k, v in post_params.items() if k in field_id_lookup}
                         # TODO: we need to handle readonly fields here (at the time of writing this XML views don't support them yet though lol)
-                        # TODO: type conversion
-                        vals = {field_id_lookup[k]: v for k, v in raw_field_vals.items()}
+                        vals = {field_id_lookup[k]: self._nojs_convert_type_write(k, v) for k, v in raw_field_vals.items()}
 
                         # remove fields we can't write
                         for k in vals.copy():
