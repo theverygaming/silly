@@ -54,8 +54,9 @@ class View(sillyorm.model.Model):
 
             attribs["form_name"] = f"field_{field_idx}"
 
-            if "widget" not in attribs:
-                attribs["widget"] = "str"
+            for attrib in ["widget"]:
+                if attrib not in attribs:
+                    raise Exception(f"attribute '{attrib}' missing")
 
             for k, v in attribs.items():
                 t_set = etree.Element("t", attrib={"t-set": k})

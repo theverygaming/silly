@@ -6,9 +6,9 @@
         <field name="xml" t="str">
             <main>
                 <label for="xmlid">XML ID</label>
-                <field name="xmlid"/>
+                <field widget="str" name="xmlid"/>
                 <label for="model_name">Model Name</label>
-                <field name="model_name"/>
+                <field widget="str" name="model_name"/>
                 <div>
                     <p>This field shall be inside a div</p>
                     <!--
@@ -17,7 +17,7 @@
                     <field name="model_id"/>
                     -->
                     <label for="id">ID</label>
-                    <field name="id"/>
+                    <field widget="str" name="id"/>
                 </div>
                 <p>This is some random ass HTML!</p>
             </main>
