@@ -27,7 +27,7 @@ class View(sillyorm.model.Model):
     def _nojs_field_lookup(self):
         self.ensure_one()
         field_lookup = {}
-        main_tree = etree.fromstring(self.xml).xpath("/main")[0]
+        main_tree = etree.fromstring(self.xml).xpath("/view/main")[0]
         for field_idx, field in enumerate(main_tree.xpath("//field")):
             field_lookup[f"field_{field_idx}"] = dict(field.attrib)
         return field_lookup
@@ -59,8 +59,34 @@ class View(sillyorm.model.Model):
 
     def _nojs_expand_xml(self):
         tree = etree.fromstring(self.xml)
-        main_tree = tree.xpath("/main")[0]
 
+        header_tree = tree.xpath("/view/header")[0]
+        for field_idx, field in enumerate(header_tree.xpath("//button")):
+            t_call = etree.Element("t", attrib={"t-call": f"webclient_nojs.view_xml_{self.view_type}_button"})
+
+            attribs = field.attrib
+
+            for attrib in ["label", "type", "target"]:
+                if attrib not in attribs:
+                    raise Exception(f"attribute '{attrib}' missing")
+
+            if not attribs["type"] == "action":
+                raise Exception(f"button type '{attribs['type']}' not supported")
+
+            for k, v in attribs.items():
+                t_set = etree.Element("t", attrib={"t-set": k})
+                t_set.text = v
+                t_call.append(t_set)
+
+            # attribs itself is specified in another t-set in case a button wants to
+            # define default values (othewise might get undefined variable errors)!
+            t_call.append(etree.Element("t", attrib={"t-set": "button_attribs", "t-value": repr(dict(attribs))}))
+
+            parent = field.getparent()
+            parent.replace(field, t_call)
+        new_header_xml = "".join(etree.tostring(child, encoding="utf-8").decode("utf-8") for child in header_tree)
+
+        main_tree = tree.xpath("/view/main")[0]
         for field_idx, field in enumerate(main_tree.xpath("//field")):
             t_call = etree.Element("t", attrib={"t-call": f"webclient_nojs.view_xml_{self.view_type}_widget"})
 
@@ -83,19 +109,25 @@ class View(sillyorm.model.Model):
 
             parent = field.getparent()
             parent.replace(field, t_call)
-        new_xml = "".join(etree.tostring(child, encoding="utf-8").decode("utf-8") for child in main_tree)
-        return f"<template>{new_xml}</template>"
+        new_main_xml = "".join(etree.tostring(child, encoding="utf-8").decode("utf-8") for child in main_tree)
 
-    def nojs_render(self, params):
+        return {
+            "header": f"<template>{new_header_xml}</template>",
+            "main": f"<template>{new_main_xml}</template>",
+        }
+
+    def nojs_render(self, params, **kwargs):
         self.ensure_one()
         view_vals = self._nojs_build_view_vals(params)
         print(f"params: {params} view_vals: {view_vals}")
-        expanded_main = self._nojs_expand_xml()
-        print(expanded_main)
+        expanded_xml = self._nojs_expand_xml()
+        print(expanded_xml)
         return self.env["template"].render(
             f"webclient_nojs.view_xml_{self.view_type}",
             {
-                "xml_main": expanded_main,
+                "xml_header": expanded_xml["header"],
+                "xml_main": expanded_xml["main"],
+                "action_msg": kwargs.get("action_msg")
             } | view_vals,
         )
 
@@ -126,6 +158,13 @@ class View(sillyorm.model.Model):
 
                         self.env[self.model_name].browse(int(params["id"])).write(vals)
                         return None
+                    case "action":
+                        if "id" in params:
+                            record = self.env[self.model_name].browse(int(params["id"]))
+                        else:
+                            record = self.env[self.model_name]
+                        fn = getattr(record, f"action_{post_params['action']}")
+                        return fn()
 
     def nojs_handle_post(self, params, post_params):
         self.ensure_one()
@@ -136,4 +175,6 @@ class View(sillyorm.model.Model):
             match action_return["type"]:
                 case "redirect":
                     return flask.redirect(action_return["url"])
+                case "message":
+                    return self.nojs_render(params, action_msg=action_return["message"])
         return self.nojs_render(params)

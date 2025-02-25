@@ -4,20 +4,23 @@
         <field name="model_name" t="str">xmlid</field>
         <field name="view_type" t="str">form</field>
         <field name="xml" t="str">
-            <main>
-                <label for="xmlid">XML ID</label>
-                <field name="xmlid" widget="string" />
-                <label for="model_name">Model Name</label>
-                <field name="model_name" widget="string" />
-                <div>
-                    <p>This field shall be inside a div</p>
-                    <label for="model_id">Model ID</label>
-                    <field name="model_id" widget="integer"/>
-                    <label for="id">ID</label>
-                    <field name="id" widget="string" />
-                </div>
-                <p>This is some random ass HTML!</p>
-            </main>
+            <view>
+                <header></header>
+                <main>
+                    <label for="xmlid">XML ID</label>
+                    <field name="xmlid" widget="string" />
+                    <label for="model_name">Model Name</label>
+                    <field name="model_name" widget="string" />
+                    <div>
+                        <p>This field shall be inside a div</p>
+                        <label for="model_id">Model ID</label>
+                        <field name="model_id" widget="integer"/>
+                        <label for="id">ID</label>
+                        <field name="id" widget="string" />
+                    </div>
+                    <p>This is some random ass HTML!</p>
+                </main>
+            </view>
         </field>
     </record>
 
@@ -25,25 +28,30 @@
         <field name="model_name" t="str">test_model</field>
         <field name="view_type" t="str">form</field>
         <field name="xml" t="str">
-            <main>
-                <label for="integer">Integer</label>
-                <field name="integer" widget="integer" />
-                <br/>
-                <label for="float">Float</label>
-                <field name="float" widget="float" />
-                <br/>
-                <label for="string">String</label>
-                <field name="string" widget="string" />
-                <br/>
-                <!--
-                TODO: missing widgets:
-                - text
-                - date
-                - datetime
-                - boolean
-                - selection
-                -->
-            </main>
+            <view>
+                <header>
+                    <button label="run test action" type="action" target="test"/>
+                </header>
+                <main>
+                    <label for="integer">Integer</label>
+                    <field name="integer" widget="integer" />
+                    <br/>
+                    <label for="float">Float</label>
+                    <field name="float" widget="float" />
+                    <br/>
+                    <label for="string">String</label>
+                    <field name="string" widget="string" />
+                    <br/>
+                    <!--
+                    TODO: missing widgets:
+                    - text
+                    - date
+                    - datetime
+                    - boolean
+                    - selection
+                    -->
+                </main>
+            </view>
         </field>
     </record>
 </root>

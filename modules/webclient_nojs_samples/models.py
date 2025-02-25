@@ -12,3 +12,11 @@ class TestModel(sillyorm.model.Model):
     boolean = sillyorm.fields.Boolean()
     selection = sillyorm.fields.Selection(["option 1", "option 2"])
     # TODO: many2one and one2many
+
+    def action_test(self):
+        x = f"action_test!! self: {self}"
+        print(x)
+        return {
+            "type": "message",
+            "message": x,
+        }
