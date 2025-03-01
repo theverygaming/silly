@@ -1,5 +1,6 @@
 import threading
 import logging
+import pathlib
 import sillyorm
 import flask
 from . import modload, http, model
@@ -28,7 +29,7 @@ def reload(cursor, modules_to_load):
     _logger.info("silly init stage 1 (load core module)")
     modload.unload_all()
     env_initial = CustomEnvironment(cursor)
-    modload.add_module_paths(["silly/modules/"])
+    modload.add_module_paths([str(pathlib.Path(__file__).parent / "modules")])
     modload.load_module("core")
     modload.load_all(env_initial)
     env_initial.init_tables()
