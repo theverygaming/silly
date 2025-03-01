@@ -5,6 +5,7 @@ from . import routes
 
 views = {}
 
+
 def _render_view_form(env, view, view_name, params, action_view_msgs=[]):
     read_vals = list(set([field["field"] for field in view["fields"]]))
     if len(read_vals) != len(view["fields"]):
@@ -28,6 +29,7 @@ def _render_view_form(env, view, view_name, params, action_view_msgs=[]):
         },
     )
 
+
 def _conv_type_write_form(val, field):
     if field.get("widget") is not None:
         if field["widget"]["type"] == "selection":
@@ -46,6 +48,7 @@ def _conv_type_write_form(val, field):
             return val == "1"
     raise Exception(f"unknown type {t}")
 
+
 def _conv_type_read_form(val, field):
     if val is None:
         return val
@@ -55,11 +58,20 @@ def _conv_type_read_form(val, field):
             return val
     return str(val)
 
+
 def _form_handle_post(env, view, view_name, params, post_params):
     match post_params["type"]:
         case "save":
-            raw_field_vals = {int(m.group(1)): v for k, v in post_params.items() if (m := re.match(r"^field_(\d+)$", k)) is not None}
-            vals = {view["fields"][k]["field"]: _conv_type_write_form(v, view["fields"][k]) for k, v in raw_field_vals.items() if not view["fields"][k].get("readonly", False)}
+            raw_field_vals = {
+                int(m.group(1)): v
+                for k, v in post_params.items()
+                if (m := re.match(r"^field_(\d+)$", k)) is not None
+            }
+            vals = {
+                view["fields"][k]["field"]: _conv_type_write_form(v, view["fields"][k])
+                for k, v in raw_field_vals.items()
+                if not view["fields"][k].get("readonly", False)
+            }
             # remove fields we can't write
             for k in vals.copy():
                 if k in ["id"]:
@@ -67,11 +79,13 @@ def _form_handle_post(env, view, view_name, params, post_params):
 
             # new record
             if not "id" in params:
-                params_new = dict(params) # params dict is immutable
+                params_new = dict(params)  # params dict is immutable
                 params_new["id"] = env[view["model"]].create(vals).id
                 params_new["view_id"] = view_name
                 return {
-                    "redirect": flask.url_for(routes.Webclient.webclient2_render_view.endpoint, **params_new),
+                    "redirect": flask.url_for(
+                        routes.Webclient.webclient2_render_view.endpoint, **params_new
+                    ),
                 }
 
             env[view["model"]].browse(int(params["id"])).write(vals)
@@ -119,13 +133,15 @@ def _render_view_list(env, view, view_name, params):
         {
             "view": view,
             "fields": view["fields"],
-            "rows": env[view["model"]].search(
+            "rows": env[view["model"]]
+            .search(
                 domain,
-                offset=offset_start-1,
-                limit=offset_end - (offset_start-1),
+                offset=offset_start - 1,
+                limit=offset_end - (offset_start - 1),
                 order_by=view["fields"][order_by]["field"] if order_by is not None else None,
-                order_asc=order_asc
-            ).read(read_vals),
+                order_asc=order_asc,
+            )
+            .read(read_vals),
             "pagination": {
                 "offset_start": offset_start,
                 "offset_end": offset_end,
@@ -141,6 +157,7 @@ def _render_view_list(env, view, view_name, params):
         },
     )
 
+
 def render_view(env, name, params, **kwargs):
     view = views[name]
     view_t_lookup = {
@@ -148,6 +165,7 @@ def render_view(env, name, params, **kwargs):
         "form": _render_view_form,
     }
     return view_t_lookup[view["type"]](env, view, name, params, **kwargs)
+
 
 def handle_post(env, name, params, post_params):
     view = views[name]

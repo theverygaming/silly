@@ -3,8 +3,10 @@ import ast
 import copy
 from lxml import etree
 import sillyorm
+from . import model
 
 _logger = logging.getLogger(__name__)
+
 
 # FIXME: we do kinda want a safer eval
 def horribly_unsafe_eval(expr, vars):
@@ -37,15 +39,21 @@ _HTML_SELFCLOSING_TAGS = [
     "frame",
 ]
 
+
 def _render_html(get_template_fn, element, render_ctx, render_self=False):
     try:
         return _def_render_html(get_template_fn, element, render_ctx, render_self=render_self)
     except Exception as e:
         # TODO: maybe later the exception should be done differently
         if not hasattr(e, "_render_html_error_bubbling"):
-            _logger.error("Rendering error, %s Somewhere inside:\n%s", repr(e), etree.tostring(element, pretty_print=True, encoding='utf-8').decode('utf-8'))
+            _logger.error(
+                "Rendering error, %s Somewhere inside:\n%s",
+                repr(e),
+                etree.tostring(element, pretty_print=True, encoding="utf-8").decode("utf-8"),
+            )
             setattr(e, "_render_html_error_bubbling", True)
         raise e
+
 
 def _def_render_html(get_template_fn, element, render_ctx, render_self=False):
     element = copy.deepcopy(element)  # NOTE: miiiight have broken _something_?
@@ -172,7 +180,7 @@ def _def_render_html(get_template_fn, element, render_ctx, render_self=False):
     return output
 
 
-class Template(sillyorm.model.Model):
+class Template(model.Model):
     _name = "template"
 
     xml = sillyorm.fields.Text()

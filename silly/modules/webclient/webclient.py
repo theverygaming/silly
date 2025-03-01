@@ -6,6 +6,7 @@ import silly.modload
 
 from silly import http
 
+
 class WebclientRoutes(http.Router):
     @http.route("/webclient")
     def webclient(self):
@@ -30,7 +31,6 @@ class WebclientRoutes(http.Router):
         # TODO: error page
         finally:
             env_lock.release()
-
 
     @http.route("/webclient/jsonrpc", methods=["POST"])
     def jsonrpc(self):

@@ -16,16 +16,17 @@ def static_serve(subpath):
         return flask.send_file(modload.staticfiles[subpath])
     return "404"
 
+
 class CustomEnvironment(sillyorm.Environment):
     def xmlid_lookup(self, model, xmlid):
         return self["xmlid"].lookup(model, xmlid)
+
 
 def init(sql_connection):
     global env
     env = CustomEnvironment(sql_connection.cursor())
     env.register_model(renderer.Template)
     env.register_model(xmlids.XMLId)
-    env["template"]._table_init()  # a little cursed but does work i guess
 
 
 def run():

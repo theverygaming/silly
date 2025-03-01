@@ -1,7 +1,8 @@
 import sillyorm
+from . import model
 
 
-class XMLId(sillyorm.model.Model):
+class XMLId(model.Model):
     _name = "xmlid"
 
     xmlid = sillyorm.fields.String(length=255)
@@ -28,8 +29,10 @@ class XMLId(sillyorm.model.Model):
             existing.model_id = record.id
             existing.model_name = record._name
         else:
-            self.create({
-                "xmlid": xmlid,
-                "model_id": record.id,
-                "model_name": record._name,
-            })
+            self.create(
+                {
+                    "xmlid": xmlid,
+                    "model_id": record.id,
+                    "model_name": record._name,
+                }
+            )

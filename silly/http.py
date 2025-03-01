@@ -5,6 +5,7 @@ import flask
 
 _logger = logging.getLogger(__name__)
 
+
 def route(*args, **kwargs):
     def decorator(function):
         if len(args) > 1:
@@ -22,9 +23,11 @@ def route(*args, **kwargs):
 
     return decorator
 
+
 # TODO: maybe it would be good if the routers got initialized in module load order
 
-class Router():
+
+class Router:
     direct_children = []
 
     @classmethod
@@ -33,6 +36,7 @@ class Router():
         if Router in cls.__bases__:
             Router.direct_children.append(cls)
 
+
 def _unique(it):
     visited = set()
     for x in it:
@@ -40,6 +44,7 @@ def _unique(it):
             continue
         visited.add(x)
         yield x
+
 
 def init_routers(flask_app):
     # Given a class, goes through all it's subclasses and
@@ -61,7 +66,11 @@ def init_routers(flask_app):
         final_classes = list(_unique(get_final_classes(cls)))
         router_ext_strs = [f"{x.__module__}.{x.__name__}" for x in final_classes if x is not cls]
         if len(router_ext_strs) > 0:
-            _logger.info("Router %s.%s getting extended by: " + ", ".join(router_ext_strs), cls.__module__, cls.__name__)
+            _logger.info(
+                "Router %s.%s getting extended by: " + ", ".join(router_ext_strs),
+                cls.__module__,
+                cls.__name__,
+            )
 
         # Build a final Router class that inherits all the other ones
         # Also create an instance of it
@@ -69,7 +78,12 @@ def init_routers(flask_app):
 
         for fn_name, fn in inspect.getmembers(final_cls, inspect.ismethod):
             # Skip all functions that don't have a route decorator anywhere in the class hierachy
-            if not any(map(lambda cls: hasattr(getattr(cls, fn_name, None), "original_function"), type(final_cls).mro())):
+            if not any(
+                map(
+                    lambda cls: hasattr(getattr(cls, fn_name, None), "original_function"),
+                    type(final_cls).mro(),
+                )
+            ):
                 continue
 
             route_url = None
@@ -82,7 +96,7 @@ def init_routers(flask_app):
                     continue
                 sub_fn = getattr(cls2, fn_name)
                 if sub_fn.route_url is not None:
-                    route_url = sub_fn.route_url 
+                    route_url = sub_fn.route_url
                 route_kwargs.update(sub_fn.route_kwargs)
 
             if route_url is None:

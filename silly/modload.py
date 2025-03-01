@@ -8,6 +8,7 @@ import silly
 
 _logger = logging.getLogger(__name__)
 
+
 def _import_py_module(name, path):
     spec = importlib.util.spec_from_file_location(name, path)
     module = importlib.util.module_from_spec(spec)
@@ -60,14 +61,14 @@ def load_datafile(env, fname):
                     vals[name] = int(x.text)
                 case _:
                     raise Exception(f"unknown type {x.attrib['t']}")
-        
+
         if isinstance(id, int):
             rec = env[model].browse(id)
         else:
             rec = env.xmlid_lookup(model, id)
             if rec and rec._name != model:
                 # In case of model mismatch: overwrite the old xmlid and create a new record
-                rec = env[model] # empty recordset
+                rec = env[model]  # empty recordset
         if not rec:
             rec = env[model].create(vals)
             if not isinstance(id, int):
@@ -95,6 +96,7 @@ def add_module_paths(paths):
 _data_to_load = []
 
 _loaded_modules = []
+
 
 def _load_module(name, env):
     if name in _loaded_modules:

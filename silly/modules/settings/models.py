@@ -1,7 +1,8 @@
 import sillyorm
+import silly
 
 
-class Setting(sillyorm.model.Model):
+class Setting(silly.model.Model):
     _name = "settings_setting"
 
     key = sillyorm.fields.String(length=255)
@@ -30,16 +31,20 @@ class Setting(sillyorm.model.Model):
         if len(res) > 1:
             raise Exception(f"duplicate settings key {key}")
         if len(res) == 0:
-            self.create({
-                "key": key,
-                "value": value,
-            })
+            self.create(
+                {
+                    "key": key,
+                    "value": value,
+                }
+            )
         res.value = value
 
     def get_value(self, key, default=None, error=False):
         res = self.search([("key", "=", key)])
         if len(res) > 1:
-            raise Exception(f"duplicate settings key {key}")  # this should technically be impossible
+            raise Exception(
+                f"duplicate settings key {key}"
+            )  # this should technically be impossible
         if len(res) == 0:
             if error:
                 raise Exception(f"settings key {key} not found")
