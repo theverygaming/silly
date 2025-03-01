@@ -20,17 +20,13 @@ def _import_py_module(name, path):
 def _validate_manifest(mdict):
     if not isinstance(mdict, dict):
         return False
-    if "dependencies" not in mdict:
+    if not isinstance(mdict.get("dependencies"), list):
         return False
-    if not isinstance(mdict["dependencies"], list):
+    if not isinstance(mdict.get("staticfiles"), dict):
         return False
-    if "staticfiles" not in mdict:
+    if not isinstance(mdict.get("data"), list):
         return False
-    if not isinstance(mdict["staticfiles"], dict):
-        return False
-    if "data" not in mdict:
-        return False
-    if not isinstance(mdict["data"], list):
+    if not isinstance(mdict.get("version"), str) or len(mdict["version"]) == 0:
         return False
     return True
 
