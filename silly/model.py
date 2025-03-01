@@ -12,7 +12,7 @@ class Model(sillyorm.model.Model):
         super().__init_subclass__()
         # we don't register that
         if not cls._name:
-            _logger.info(
+            _logger.debug(
                 "not registering model class '%s' (missing _name)",
                 repr(cls),
             )
@@ -25,7 +25,7 @@ class Model(sillyorm.model.Model):
         if cls._inherits:
             log_msg += " -- _inherits: %s"
             log_args.append(", ".join(cls._inherits))
-        _logger.info(
+        _logger.debug(
             log_msg,
             *log_args,
         )

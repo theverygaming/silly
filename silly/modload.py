@@ -172,7 +172,7 @@ def unload_all():
     for mod in sys.modules.copy():
         if not mod.startswith("silly.modules."):
             continue
-        _logger.info("removing %s from sys.modules", mod)
+        _logger.debug("removing %s from sys.modules", mod)
         del sys.modules[mod]
 
     # TODO: routes
