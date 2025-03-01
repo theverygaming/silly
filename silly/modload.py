@@ -130,8 +130,6 @@ def _load_module(name, env):
 
     mod = _import_py_module(f"silly.modules.{name}", str(modpath / "__init__.py"))
 
-    mod.module_onload(env)
-
     for d in manifest["data"]:
         _data_to_load.append(modpath / d)
 
@@ -150,9 +148,31 @@ def load_module(name):
 def load_all(env):
     for name in _modules_to_load:
         _load_module(name, env)
+    for mod in silly.model.models_to_register:
+        env.register_model(mod)
 
 
 def load_all_data(env):
     for f in _data_to_load:
         _logger.info("loading data file %s", f)
         load_datafile(env, f)
+
+
+def unload_all():
+    # models
+    silly.model.models_to_register = []
+
+    # modules
+    global _modules_to_load
+    global _data_to_load
+    global _loaded_modules
+    _modules_to_load = []
+    _data_to_load = []
+    _loaded_modules = []
+    for mod in sys.modules.copy():
+        if not mod.startswith("silly.modules."):
+            continue
+        _logger.info("removing %s from sys.modules", mod)
+        del sys.modules[mod]
+
+    # TODO: routes

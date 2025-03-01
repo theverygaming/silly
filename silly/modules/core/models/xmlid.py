@@ -1,8 +1,8 @@
 import sillyorm
-from . import model
+import silly
 
 
-class XMLId(model.Model):
+class XMLId(silly.model.Model):
     _name = "xmlid"
 
     xmlid = sillyorm.fields.String(length=255)

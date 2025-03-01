@@ -1,0 +1,5 @@
+{
+    "dependencies": [],
+    "staticfiles": {},
+    "data": [],
+}

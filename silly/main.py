@@ -1,8 +1,10 @@
 import threading
-import sqlite3
+import logging
 import sillyorm
 import flask
-from . import renderer, modload, xmlids, http
+from . import modload, http, model
+
+_logger = logging.getLogger(__name__)
 
 
 env = None
@@ -22,16 +24,33 @@ class CustomEnvironment(sillyorm.Environment):
         return self["xmlid"].lookup(model, xmlid)
 
 
-def init(sql_connection):
+def reload(cursor, modules_to_load):
     global env
-    env = CustomEnvironment(sql_connection.cursor())
-    env.register_model(renderer.Template)
-    env.register_model(xmlids.XMLId)
+    _logger.info("silly init stage 1 (load core module)")
+    env_initial = CustomEnvironment(cursor)
+    modload.add_module_paths(["silly/modules/"])
+    modload.load_module("core")
+    modload.load_all(env_initial)
+    env_initial.init_tables()
+    modload.load_all_data(env_initial)
 
+    # TODO: figure out which modules to load
 
-def run():
+    _logger.info("silly init stage 2 (load core and everything else)")
+    modload.unload_all()
+    env = CustomEnvironment(cursor)
+    modload.load_module("core")
+    for mod in modules_to_load:
+        modload.load_module(mod)
     modload.load_all(env)
     env.init_tables()
     modload.load_all_data(env)
+
+
+def init(sql_connection, modules_to_load):
+    reload(sql_connection.cursor(), modules_to_load)
+
+
+def run():
     http.init_routers(flask_app)
     flask_app.run(host="0.0.0.0")

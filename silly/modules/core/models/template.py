@@ -3,7 +3,7 @@ import ast
 import copy
 from lxml import etree
 import sillyorm
-from . import model
+import silly
 
 _logger = logging.getLogger(__name__)
 
@@ -180,7 +180,7 @@ def _def_render_html(get_template_fn, element, render_ctx, render_self=False):
     return output
 
 
-class Template(model.Model):
+class Template(silly.model.Model):
     _name = "template"
 
     xml = sillyorm.fields.Text()
