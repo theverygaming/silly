@@ -25,8 +25,8 @@ class CustomEnvironment(sillyorm.Environment):
 
 
 def reload(cursor, modules_to_load):
-    global env
     _logger.info("silly init stage 1 (load core module)")
+    modload.unload_all()
     env_initial = CustomEnvironment(cursor)
     modload.add_module_paths(["silly/modules/"])
     modload.load_module("core")
@@ -36,8 +36,11 @@ def reload(cursor, modules_to_load):
 
     # TODO: figure out which modules to load
 
-    _logger.info("silly init stage 2 (load core and everything else)")
+    _logger.info("unloading to prepare for init stage 2")
     modload.unload_all()
+    
+    _logger.info("silly init stage 2 (load core and everything else)")
+    global env
     env = CustomEnvironment(cursor)
     modload.load_module("core")
     for mod in modules_to_load:
