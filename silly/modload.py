@@ -2,6 +2,8 @@ import logging
 import importlib.util
 import sys
 import ast
+import re
+import glob
 from pathlib import Path
 from lxml import etree
 import silly
@@ -15,20 +17,6 @@ def _import_py_module(name, path):
     sys.modules[name] = module
     spec.loader.exec_module(module)
     return module
-
-
-def _validate_manifest(mdict):
-    if not isinstance(mdict, dict):
-        return False
-    if not isinstance(mdict.get("dependencies"), list):
-        return False
-    if not isinstance(mdict.get("staticfiles"), dict):
-        return False
-    if not isinstance(mdict.get("data"), list):
-        return False
-    if not isinstance(mdict.get("version"), str) or len(mdict["version"]) == 0:
-        return False
-    return True
 
 
 def _load_datafile(env, fname):
@@ -172,13 +160,55 @@ def unload_all():
 
 
 def get_manifest(name):
+    def _validate_manifest(mdict):
+        if not isinstance(mdict, dict):
+            return False
+        if not isinstance(mdict.get("dependencies"), list):
+            return False
+        if not isinstance(mdict.get("staticfiles"), dict):
+            return False
+        if not isinstance(mdict.get("data"), list):
+            return False
+        if not isinstance(mdict.get("version"), str) or len(mdict["version"]) == 0:
+            return False
+        return True
+
+    def _manifest_defaults(mdict):
+        defaults = {}
+        for k, v in defaults:
+            if k not in mdict:
+                mdict[k] = v
+        return mdict
+
     modpath = _find_module(name)
 
     with open(modpath / "__manifest__.py", encoding="utf-8") as f:
         manifest = ast.literal_eval(f.read())
         if not _validate_manifest(manifest):
             raise Exception(f"manifest of {name} is invalid")
-    return manifest
+    return _manifest_defaults(manifest)
+
+
+def run_migrations(cr, name, mtype, current_version, to_version):
+    if mtype not in ["pre", "post"]:
+        raise Exception(f"unknown migration type {mtype}")
+    modpath = _find_module(name)
+
+    scripts = glob.glob(str(modpath / "migrations" / to_version) + f"/{mtype}-*.py")
+
+    for script in scripts:
+        path = Path(script)
+        _logger.info("running %s %s-migration %s to version %s", name, mtype, path.stem, to_version)
+        spec = importlib.util.spec_from_file_location(
+            f"silly.modules.{name}.migrations.{to_version}.{re.sub(r'\W+', '_', path.stem)}",
+            str(path),
+        )
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[name] = module
+        spec.loader.exec_module(module)
+        fn = getattr(module, "run", None)
+        if fn is not None:
+            fn(cr, current_version)
 
 
 def resolve_dependencies(modules, resolved=None, seen=None):

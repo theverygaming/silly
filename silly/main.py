@@ -49,18 +49,35 @@ def _update(to_install):
     modload.unload_all()
     to_install = modload.resolve_dependencies(to_install + list(installed_versions))
 
-    # TODO: check installed versions and run migrations to the new versions
-    # For this to happen the following needs to be done:
-    # - get all depedencies for installed versions and stuff to install
-    # - loop through all, run version migrations if exist
-    # ... do sillyORM automigration
-    # - do the same as above except for post-migrations
+    # TODO: uninstall modules
 
+    # pre-migrations
+    for modname in to_install:
+        manifest = modload.get_manifest(modname)
+        # installed, getting an upgrade
+        if modname in installed_versions and manifest["version"] != installed_versions[modname]:
+            modload.run_migrations(
+                cursor, modname, "pre", installed_versions[modname], manifest["version"]
+            )
+            cursor.commit()
+
+    # sillyORM automatic upgrade
     env_update = CustomEnvironment(cursor, update_tables=True)
     modload.load(env_update, to_install)
     env_update.init_tables()
     modload.load_all_data(env_update)
 
+    # post-migrations
+    for modname in to_install:
+        manifest = modload.get_manifest(modname)
+        # installed, getting an upgrade
+        if modname in installed_versions and manifest["version"] != installed_versions[modname]:
+            modload.run_migrations(
+                cursor, modname, "post", installed_versions[modname], manifest["version"]
+            )
+            cursor.commit()
+
+    # update module tables
     for modname in to_install:
         manifest = modload.get_manifest(modname)
         rec = env_update["module"].search([("name", "=", modname)])
