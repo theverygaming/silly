@@ -3,7 +3,7 @@ import re
 import json
 from pathlib import PurePath
 from flask import request
-from silly.main import env, env_lock
+from silly.globalvars import env, env_lock
 import silly.modload
 from silly import http
 

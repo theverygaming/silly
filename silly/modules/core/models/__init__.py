@@ -1,1 +1,1 @@
-from . import template, xmlid
+from . import template, xmlid, module

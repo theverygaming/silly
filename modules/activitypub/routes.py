@@ -1,4 +1,4 @@
-from silly.main import env, env_lock
+from silly.globalvars import env, env_lock
 from silly import http
 
 class ActivityPubRoutes(http.Router):

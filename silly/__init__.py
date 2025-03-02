@@ -1,1 +1,1 @@
-from . import main, modules, modload, http, model
+from . import main, modules, modload, http, model, globalvars

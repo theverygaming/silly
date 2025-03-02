@@ -109,8 +109,7 @@ def _find_module(name):
 
 def _load_module(name, env):
     if name in _loaded_modules:
-        _logger.debug("will not load module %s again because it has already been loaded", name)
-        return
+        raise Exception(f"attempted to load module '{name}' twice")
     _loaded_modules.append(name)
     _logger.info("loading module %s", name)
     modpath = _find_module(name)
@@ -120,8 +119,11 @@ def _load_module(name, env):
     manifest = get_manifest(name)
 
     for dep in manifest["dependencies"]:
-        _logger.debug("loading dependency %s of module %s", dep, name)
-        _load_module(dep, env)
+        if dep not in _loaded_modules:
+            raise Exception(
+                f"attempted to load module '{name}' without loading the dependency '{dep}'"
+                " beforehand"
+            )
 
     for k, v in manifest["staticfiles"].items():
         staticfiles[k] = modpath / "static" / v
@@ -136,23 +138,19 @@ def _load_module(name, env):
     return mod
 
 
-_modules_to_load = []
-
-
-def load_module(name):
-    _modules_to_load.append(name)
-
-
-def load_all(env):
-    for name in _modules_to_load:
+def load(env, modules):
+    resolved = resolve_dependencies(modules)
+    for i, name in enumerate(resolved):
+        _logger.info("loading module %s (%d/%d)", name, i, len(resolved))
         _load_module(name, env)
+
     for mod in silly.model.models_to_register:
         env.register_model(mod)
 
 
 def load_all_data(env):
-    for f in _data_to_load:
-        _logger.info("loading data file %s", f)
+    for i, f in enumerate(_data_to_load):
+        _logger.info("loading data file %s (%d/%d)", f, i, len(_data_to_load))
         _load_datafile(env, f)
 
 
@@ -161,10 +159,10 @@ def unload_all():
     silly.model.models_to_register = []
 
     # modules
-    global _modules_to_load
+    global staticfiles
     global _data_to_load
     global _loaded_modules
-    _modules_to_load = []
+    staticfiles = {}
     _data_to_load = []
     _loaded_modules = []
     for mod in sys.modules.copy():
@@ -173,7 +171,7 @@ def unload_all():
         _logger.debug("removing %s from sys.modules", mod)
         del sys.modules[mod]
 
-    # TODO: routes
+    silly.http.Router.direct_children = []
 
 
 def get_manifest(name):
