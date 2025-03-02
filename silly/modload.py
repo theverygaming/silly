@@ -79,7 +79,7 @@ def add_module_paths(paths):
 
 _data_to_load = []
 
-_loaded_modules = []
+loaded_modules = []
 
 
 def _find_module(name):
@@ -96,9 +96,9 @@ def _find_module(name):
 
 
 def _load_module(name, env):
-    if name in _loaded_modules:
+    if name in loaded_modules:
         raise Exception(f"attempted to load module '{name}' twice")
-    _loaded_modules.append(name)
+    loaded_modules.append(name)
     modpath = _find_module(name)
 
     _logger.debug("module %s from path %s", name, modpath)
@@ -106,7 +106,7 @@ def _load_module(name, env):
     manifest = get_manifest(name)
 
     for dep in manifest["dependencies"]:
-        if dep not in _loaded_modules:
+        if dep not in loaded_modules:
             raise Exception(
                 f"attempted to load module '{name}' without loading the dependency '{dep}'"
                 " beforehand"
@@ -146,10 +146,10 @@ def unload_all():
     # modules
     global staticfiles
     global _data_to_load
-    global _loaded_modules
+    global loaded_modules
     staticfiles = {}
     _data_to_load = []
-    _loaded_modules = []
+    loaded_modules = []
     for mod in sys.modules.copy():
         if not mod.startswith("silly.modules."):
             continue
@@ -249,3 +249,28 @@ def resolve_dependencies(modules, resolved=None, seen=None):
             all_loaded.append(mod)
 
     return resolved
+
+
+def resolve_dependents(all_modules, modules):
+    depends_on = {}
+    for modname in set(all_modules):
+        manifest = get_manifest(modname)
+        depends_on[modname] = manifest["dependencies"]
+
+    def find_direct_dependents(module):
+        return set([name for name, deps in depends_on.items() if module in deps])
+
+    def find_dependents(modules_find, dependents=None):
+        if dependents is None:
+            dependents = set()
+        dependents |= set(modules_find)
+
+        new_dependents = set()
+        for modname in modules_find:
+            new_dependents |= find_direct_dependents(modname)
+        dependents |= new_dependents
+        if len(new_dependents) == 0:
+            return dependents
+        return find_dependents(new_dependents, dependents)
+
+    return list(find_dependents(modules))
