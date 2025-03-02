@@ -31,7 +31,7 @@ def _validate_manifest(mdict):
     return True
 
 
-def load_datafile(env, fname):
+def _load_datafile(env, fname):
     def load_record(el):
         model = el.attrib.get("model")
         id = int(el.attrib.get("id")) if el.attrib.get("id") else el.attrib.get("xmlid")
@@ -94,12 +94,7 @@ _data_to_load = []
 _loaded_modules = []
 
 
-def _load_module(name, env):
-    if name in _loaded_modules:
-        _logger.debug("will not load module %s again because it has already been loaded", name)
-        return
-    _loaded_modules.append(name)
-    _logger.info("loading module %s", name)
+def _find_module(name):
     modpath = None
     for dir in silly.modules.__path__:
         p = Path(dir) / name
@@ -109,13 +104,20 @@ def _load_module(name, env):
 
     if modpath is None:
         raise Exception(f"could not find module {name}")
+    return modpath
+
+
+def _load_module(name, env):
+    if name in _loaded_modules:
+        _logger.debug("will not load module %s again because it has already been loaded", name)
+        return
+    _loaded_modules.append(name)
+    _logger.info("loading module %s", name)
+    modpath = _find_module(name)
 
     _logger.debug("module %s from path %s", name, modpath)
 
-    with open(modpath / "__manifest__.py", encoding="utf-8") as f:
-        manifest = ast.literal_eval(f.read())
-        if not _validate_manifest(manifest):
-            raise Exception(f"manifest of {name} is invalid")
+    manifest = get_manifest(name)
 
     for dep in manifest["dependencies"]:
         _logger.debug("loading dependency %s of module %s", dep, name)
@@ -151,7 +153,7 @@ def load_all(env):
 def load_all_data(env):
     for f in _data_to_load:
         _logger.info("loading data file %s", f)
-        load_datafile(env, f)
+        _load_datafile(env, f)
 
 
 def unload_all():
@@ -172,3 +174,53 @@ def unload_all():
         del sys.modules[mod]
 
     # TODO: routes
+
+
+def get_manifest(name):
+    modpath = _find_module(name)
+
+    with open(modpath / "__manifest__.py", encoding="utf-8") as f:
+        manifest = ast.literal_eval(f.read())
+        if not _validate_manifest(manifest):
+            raise Exception(f"manifest of {name} is invalid")
+    return manifest
+
+
+def resolve_dependencies(modules, resolved=None, seen=None):
+    """
+    Returns all modules that need to be loaded for the specified list of modules to get loaded
+    """
+    is_first_call = resolved is None and seen is None
+
+    if is_first_call:
+        resolved = []
+
+    for name in sorted(set(modules)):
+        if is_first_call:
+            seen = set()
+
+        if name not in resolved and name in seen:
+            raise Exception(f"circular dependency detected: {name}")
+
+        seen.add(name)
+        manifest = get_manifest(name)
+
+        for dep in manifest["dependencies"]:
+            resolve_dependencies([dep], resolved, seen)
+
+        if name not in resolved:
+            resolved.append(name)
+
+    # this is simply a sanity check for the above code, it can be removed sometime:tm:
+    if is_first_call:
+        all_loaded = []
+        for mod in resolved:
+            if mod in all_loaded:
+                raise Exception(f"module {mod} loaded twice")
+            deps = get_manifest(mod)["dependencies"]
+            for dep in deps:
+                if dep not in all_loaded:
+                    raise Exception(f"module {mod} missing dependency {dep}")
+            all_loaded.append(mod)
+
+    return resolved
