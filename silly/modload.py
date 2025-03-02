@@ -111,7 +111,6 @@ def _load_module(name, env):
     if name in _loaded_modules:
         raise Exception(f"attempted to load module '{name}' twice")
     _loaded_modules.append(name)
-    _logger.info("loading module %s", name)
     modpath = _find_module(name)
 
     _logger.debug("module %s from path %s", name, modpath)
@@ -133,15 +132,13 @@ def _load_module(name, env):
     for d in manifest["data"]:
         _data_to_load.append(modpath / d)
 
-    _logger.info("loaded module %s", name)
-
     return mod
 
 
 def load(env, modules):
     resolved = resolve_dependencies(modules)
     for i, name in enumerate(resolved):
-        _logger.info("loading module %s (%d/%d)", name, i, len(resolved))
+        _logger.info("loading module %s (%d/%d)", name, i + 1, len(resolved))
         _load_module(name, env)
 
     for mod in silly.model.models_to_register:
@@ -150,7 +147,7 @@ def load(env, modules):
 
 def load_all_data(env):
     for i, f in enumerate(_data_to_load):
-        _logger.info("loading data file %s (%d/%d)", f, i, len(_data_to_load))
+        _logger.info("loading data file %s (%d/%d)", f, i + 1, len(_data_to_load))
         _load_datafile(env, f)
 
 

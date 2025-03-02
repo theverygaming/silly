@@ -61,7 +61,6 @@ def _update(to_install):
     env_update.init_tables()
     modload.load_all_data(env_update)
 
-    # TODO: create module entries / update existing ones
     for modname in to_install:
         manifest = modload.get_manifest(modname)
         rec = env_update["module"].search([("name", "=", modname)])
