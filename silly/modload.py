@@ -46,7 +46,7 @@ def _load_datafile(env, fname, modname):
                 case _:
                     raise Exception(f"unknown type {x.attrib['t']}")
 
-        rec = env["xmlid"].lookup(model, xmlid)
+        rec = env["xmlid"].lookup(xmlid)
         if rec and rec._name != model:
             # In case of model mismatch: overwrite the old xmlid and create a new record
             rec = env[model]  # empty recordset

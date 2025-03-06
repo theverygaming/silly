@@ -15,10 +15,12 @@ class XMLId(silly.model.Model):
             return False
         return record.xmlid
 
-    def lookup(self, model, xmlid):
+    def lookup(self, xmlid, model=None):
         record = self.search([("xmlid", "=", xmlid)])
         if not record:
             return False
+        if model is not None and model != record.model_name:
+            raise Exception(f"xmlid: expected model {model} but got {record.model_name} (id: {xmlid})")
         return self.env[record.model_name].browse(record.model_id)
 
     def assign(self, xmlid, record, overwrite=False):

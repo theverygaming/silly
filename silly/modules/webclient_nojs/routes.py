@@ -24,7 +24,7 @@ class Webclient(Router):
     def webclient2_render_view(self, view_id):
         env_lock.acquire()
         try:
-            xml_view = env["xmlid"].lookup("webclient_nojs_view", view_id)
+            xml_view = env["xmlid"].lookup(view_id, model="webclient_nojs_view")
             match request.method:
                 case "GET":
                     if xml_view:

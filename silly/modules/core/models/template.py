@@ -187,7 +187,7 @@ class Template(silly.model.Model):
 
     def render(self, xmlid, vals):
         def get_template(xmlid):
-            template = self.env["xmlid"].lookup("template", xmlid)
+            template = self.env["xmlid"].lookup(xmlid, model="template")
             if not template:
                 raise Exception(f"template with xmlid '{xmlid}' not found in database")
             return etree.fromstring(template.xml)
