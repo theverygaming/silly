@@ -19,7 +19,7 @@ def init(sql_connection, modules_to_install=[], modules_to_uninstall=[], update=
             mod.update(modules_to_install, False)
         elif modules_to_uninstall:
             mod.load_all(cursor)
-            mod.update(modules_to_uninstall, False)
+            mod.update(modules_to_uninstall, True)
     else:
         mod.load_all(cursor)
 

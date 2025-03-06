@@ -57,7 +57,7 @@ def _load_datafile(env, fname, modname):
         if not rec:
             rec = env[model].create(vals)
             if not isinstance(xmlid, int):
-                env["xmlid"].assign(xmlid, rec, overwrite=True)
+                env["xmlid"].assign(xmlid, rec, overwrite=True, source_module=modname)
         elif not noupdate:
             rec.write(vals)
 

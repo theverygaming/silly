@@ -37,7 +37,14 @@ def update(to_change, uninstall):
             raise Exception("tf?")
         if any(x not in modload.loaded_modules for x in to_change):
             raise Exception("attempted uninstalling something that isn't loaded")
-        # TODO: delete records created via data files
+        # delete records associated with the module
+        for modname in to_uninstall:
+            for record in globalvars.env["xmlid"].search([("source_module", "=", modname)]):
+                _logger.info("uninstall: deleting record with xmlid '%s' (%s ID %s) because it belongs to module '%s'", record.xmlid, record.model_name, record.model_id, modname)
+                original_record = record.get()
+                if original_record:
+                    original_record.delete()
+                record.delete()
     else:
         to_uninstall = []
         to_install = modload.resolve_dependencies(to_change + list(installed_versions))
