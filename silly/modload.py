@@ -21,9 +21,9 @@ def _import_py_module(name, path):
 
 def _load_datafile(env, fname, modname):
     def load_record(el):
-        model = el.attrib.get("model")
-        id = int(el.attrib.get("id")) if el.attrib.get("id") else el.attrib.get("xmlid")
-        noupdate = el.attrib["noupdate"] == "1" if "noupdate" in el.attrib else False
+        model = el.attrib["model"]
+        xmlid = el.attrib["xmlid"]
+        noupdate = el.attrib.get("noupdate") == "1"
 
         vals = {}
 
@@ -46,17 +46,14 @@ def _load_datafile(env, fname, modname):
                 case _:
                     raise Exception(f"unknown type {x.attrib['t']}")
 
-        if isinstance(id, int):
-            rec = env[model].browse(id)
-        else:
-            rec = env.xmlid_lookup(model, id)
-            if rec and rec._name != model:
-                # In case of model mismatch: overwrite the old xmlid and create a new record
-                rec = env[model]  # empty recordset
+        rec = env["xmlid"].lookup(model, xmlid)
+        if rec and rec._name != model:
+            # In case of model mismatch: overwrite the old xmlid and create a new record
+            rec = env[model]  # empty recordset
         if not rec:
             rec = env[model].create(vals)
-            if not isinstance(id, int):
-                env["xmlid"].assign(id, rec, overwrite=True)
+            if not isinstance(xmlid, int):
+                env["xmlid"].assign(xmlid, rec, overwrite=True)
         elif not noupdate:
             rec.write(vals)
 

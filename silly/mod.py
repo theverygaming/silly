@@ -10,8 +10,7 @@ class SillyRestartException(Exception):
 
 
 class CustomEnvironment(sillyorm.Environment):
-    def xmlid_lookup(self, model, xmlid):
-        return self["xmlid"].lookup(model, xmlid)
+    pass
 
 def load_all(cursor):
     modules_to_load = [m.name for m in globalvars.env["module"].search([])]
