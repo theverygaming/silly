@@ -94,10 +94,12 @@ def update(to_change, uninstall):
     raise SillyRestartException("update finished")
 
 
-def load_core(cursor):
+def load_core(cursor, allow_update):
     _logger.info("silly load stage 1 (load core module)")
     # the core module is essential for installing other modules, so we **always** install it, no matter what
     if not cursor._table_exists("module"):
+        if not allow_update:
+            raise Exception("Core module not installed, cannot install due to update being disabled")
         _logger.info("core module is not installed, installing automatically...")
         modload.unload_all()
         env_initial = CustomEnvironment(cursor, update_tables=True)
@@ -114,7 +116,7 @@ def load_core(cursor):
         modload.unload_all()
         _logger.info("core module has been installed")
     modload.unload_all()
-    env_initial = CustomEnvironment(cursor, update_tables=False)
+    env_initial = CustomEnvironment(cursor, update_tables=allow_update)
     modload.load(env_initial, ["core"])
     env_initial.init_tables()
     modload.load_all_data(env_initial)

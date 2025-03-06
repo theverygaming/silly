@@ -11,7 +11,7 @@ def init(sql_connection, modules_to_install=[], modules_to_uninstall=[], update=
     _logger.info("silly version [...] starting")
     modload.add_module_paths([str(pathlib.Path(__file__).parent / "modules")])
     cursor = sql_connection.cursor()
-    mod.load_core(cursor)
+    mod.load_core(cursor, update)
     if update:
         if not modules_to_install and not modules_to_uninstall:
             mod.update([], False)
