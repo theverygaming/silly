@@ -43,6 +43,8 @@ def _load_datafile(env, fname, modname):
                     vals[name] = eltext
                 case "int":
                     vals[name] = int(x.text)
+                case "None":
+                    vals[name] = None
                 case _:
                     raise Exception(f"unknown type {x.attrib['t']}")
 
