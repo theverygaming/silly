@@ -42,9 +42,11 @@ def _load_datafile(env, fname, modname):
                 case "str":
                     vals[name] = eltext
                 case "int":
-                    vals[name] = int(x.text)
+                    vals[name] = int(eltext)
                 case "None":
                     vals[name] = None
+                case "xmlid_ref":
+                    vals[name] = env["xmlid"].lookup(eltext).id
                 case _:
                     raise Exception(f"unknown type {x.attrib['t']}")
 

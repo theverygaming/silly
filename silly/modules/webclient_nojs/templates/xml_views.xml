@@ -10,6 +10,9 @@
                 </form>
             </template>
         </field>
+        <field name="inherit_id" t="None"/>
+        <field name="inherit_mode" t="str">root</field>
+        <field name="inherit_sequence" t="int">100</field>
     </record>
 
     <record model="template" xmlid="webclient_nojs.view_xml_form_widget">
@@ -36,6 +39,9 @@
                 </t>
             </template>
         </field>
+        <field name="inherit_id" t="None"/>
+        <field name="inherit_mode" t="str">root</field>
+        <field name="inherit_sequence" t="int">100</field>
     </record>
 
     <record model="template" xmlid="webclient_nojs.view_xml_form">
@@ -63,5 +69,8 @@
                 </t>
             </template>
         </field>
+        <field name="inherit_id" t="None"/>
+        <field name="inherit_mode" t="str">root</field>
+        <field name="inherit_sequence" t="int">100</field>
     </record>
 </root>

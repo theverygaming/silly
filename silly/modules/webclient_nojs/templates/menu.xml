@@ -14,5 +14,8 @@
                 </t>
             </template>
         </field>
+        <field name="inherit_id" t="None"/>
+        <field name="inherit_mode" t="str">root</field>
+        <field name="inherit_sequence" t="int">100</field>
     </record>
 </root>

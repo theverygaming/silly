@@ -4,5 +4,6 @@
     "staticfiles": {},
     "data": [
         "views/views.xml",
+        "templates/inherit_test.xml",
     ],
 }

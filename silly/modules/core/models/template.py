@@ -184,12 +184,39 @@ class Template(silly.model.Model):
     _name = "template"
 
     xml = sillyorm.fields.Text()
+    inherit_id = sillyorm.fields.Many2one("template")
+    inherit_mode = sillyorm.fields.Selection(["root", "extension"])
+    inherit_sequence = sillyorm.fields.Integer()
 
     def render(self, xmlid, vals):
         def get_template(xmlid):
             template = self.env["xmlid"].lookup(xmlid, model="template")
             if not template:
                 raise Exception(f"template with xmlid '{xmlid}' not found in database")
-            return etree.fromstring(template.xml)
+            return etree.fromstring(template.get_xml())
 
         return _render_html(get_template, get_template(xmlid), vals)
+
+    def get_xml(self):
+        self.ensure_one()
+        if self.inherit_mode != "root":
+            raise Exception("cannot process XML tree for a non-root view")
+        elif self.inherit_mode == "root" and self.inherit_id:
+            raise Exception("cannot have root templates with inherit_id set just yet")
+        root_tree = etree.fromstring(self.xml)
+        extending_views = self.search([("inherit_mode", "=", "extension"), "&", ("inherit_id", "=", self.id)], order_by="inherit_sequence")
+        for view in extending_views:
+            tree = etree.fromstring(view.xml)
+            for xpath_el in tree.xpath("//xpath"):
+                for elem in root_tree.xpath(xpath_el.attrib["expr"]):
+                    match xpath_el.attrib["type"]:
+                        case "after":
+                            parent = elem.getparent()
+                            idx = parent.index(elem)
+                            for i, el in enumerate(xpath_el):
+                                parent.insert(idx + 1 + i, el)
+                            # TODO: what about text?
+                        case _:
+                            raise Exception(f"xpath: unknown type '{xpath_el.attrib['type']}'")
+            print(f"{self} extended by {view}")
+        return etree.tostring(root_tree, encoding="utf-8").decode("utf-8")

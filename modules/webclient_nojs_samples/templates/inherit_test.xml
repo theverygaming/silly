@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <record model="template" xmlid="webclient_nojs_samples.base_layout_purple">
+        <field name="xml" t="str">
+            <template>
+                <xpath expr="//t[@t-raw='head']" type="after">
+                    <style>
+                        body {
+                            background-color: purple;
+                        }
+                    </style>
+                </xpath>
+            </template>
+        </field>
+        <field name="inherit_id" t="xmlid_ref">webclient_nojs.base_layout</field>
+        <field name="inherit_mode" t="str">extension</field>
+        <field name="inherit_sequence" t="int">100</field>
+    </record>
+</root>
