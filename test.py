@@ -25,9 +25,10 @@ if __name__ == "__main__":
                 "settings",
                 "settings_views",
             ],
+            [],
             "no_update" not in sys.argv,
         )
-    except silly.main.SillyRestartException as e:
+    except silly.mod.SillyRestartException as e:
         argv = sys.argv
         if str(e) == "update finished":
             argv.append("no_update")
