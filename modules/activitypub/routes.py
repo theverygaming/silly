@@ -6,7 +6,7 @@ class ActivityPubRoutes(http.Router):
     def index(self):
         env_lock.acquire()
         try:
-            return env["template"].render("template_index", {})
+            return env["template"].render("activitypub.template_index", {})
         finally:
             env_lock.release()
 
@@ -17,7 +17,7 @@ class ActivityPubRoutes(http.Router):
         try:
             actors = env["activitypub_actor"].search([])
             return env["template"].render(
-                "template_users",
+                "activitypub.template_users",
                 {
                     "userlist": [
                         {

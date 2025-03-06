@@ -23,7 +23,7 @@ class WebclientRoutes(http.Router):
         env_lock.acquire()
         try:
             return env["template"].render(
-                "template_test2",
+                "webclient.template_test2",
                 {
                     "importmap": json.dumps(importmap),
                 },

@@ -46,10 +46,14 @@ def _load_datafile(env, fname, modname):
                 case _:
                     raise Exception(f"unknown type {x.attrib['t']}")
 
+        if not xmlid.startswith(f"{modname}."):
+            raise Exception(f"while loading data file {fname}: record xmlid '{xmlid}' is missing correct module name prefix")
+
         rec = env["xmlid"].lookup(xmlid)
         if rec and rec._name != model:
-            # In case of model mismatch: overwrite the old xmlid and create a new record
-            rec = env[model]  # empty recordset
+            # In case of model mismatch: delete the old record, overwrite the old xmlid and create a new record
+            rec.delete()
+            rec = False
         if not rec:
             rec = env[model].create(vals)
             if not isinstance(xmlid, int):
