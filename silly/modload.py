@@ -19,7 +19,7 @@ def _import_py_module(name, path):
     return module
 
 
-def _load_datafile(env, fname):
+def _load_datafile(env, fname, modname):
     def load_record(el):
         model = el.attrib.get("model")
         id = int(el.attrib.get("id")) if el.attrib.get("id") else el.attrib.get("xmlid")
@@ -118,7 +118,7 @@ def _load_module(name, env):
     mod = _import_py_module(f"silly.modules.{name}", str(modpath / "__init__.py"))
 
     for d in manifest["data"]:
-        _data_to_load.append(modpath / d)
+        _data_to_load.append((modpath / d, name))
 
     return mod
 
@@ -134,9 +134,9 @@ def load(env, modules):
 
 
 def load_all_data(env):
-    for i, f in enumerate(_data_to_load):
-        _logger.info("loading data file %s (%d/%d)", f, i + 1, len(_data_to_load))
-        _load_datafile(env, f)
+    for i, (fname, mname) in enumerate(_data_to_load):
+        _logger.info("loading data file %s from module %s (%d/%d)", fname, mname, i + 1, len(_data_to_load))
+        _load_datafile(env, fname, mname)
 
 
 def unload_all():
