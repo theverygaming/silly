@@ -8,10 +8,10 @@ from silly import http
 
 
 class WebclientRoutes(http.Router):
-    @http.route("/webclient")
+    @http.route("/webclient/")
     def webclient(self):
 
-        importmap = {"imports": {"@odoo/owl": "https://unpkg.com/@odoo/owl@2.3.0/dist/owl.es.js"}}
+        importmap = {"imports": {"@preact": "https://esm.sh/preact@10.26.4"}}
 
         for file in silly.modload.staticfiles:
             if not file.startswith("js/"):
