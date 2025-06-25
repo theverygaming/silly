@@ -29,6 +29,7 @@ JSONRPC_ERROR_STD = {
     },
 }
 
+
 class JSONRPCRoutes(http.Router):
     def jsonrpc_error(self, code, message, req_id=None):
         return {
@@ -82,14 +83,18 @@ class JSONRPCRoutes(http.Router):
             res = None
             match rpc_method:
                 case "env_exec":
-                    res = getattr(env[rpc_params["model"]], rpc_params["fn"])(*rpc_params.get("args", []), **rpc_params.get("kwargs", {}))
+                    res = getattr(env[rpc_params["model"]], rpc_params["fn"])(
+                        *rpc_params.get("args", []), **rpc_params.get("kwargs", {})
+                    )
                 case "env_exec_ids":
-                    if not (
-                        isinstance(rpc_params.get("ids", []), list)
-                    ):
-                        return self.jsonrpc_error(**JSONRPC_ERROR_STD["invalidParams"], req_id=rpc_id)
-                    res = getattr(env[rpc_params["model"]].browse(rpc_params["ids"]), rpc_params["fn"])(*rpc_params.get("args", []), **rpc_params.get("kwargs", {}))
-            
+                    if not (isinstance(rpc_params.get("ids", []), list)):
+                        return self.jsonrpc_error(
+                            **JSONRPC_ERROR_STD["invalidParams"], req_id=rpc_id
+                        )
+                    res = getattr(
+                        env[rpc_params["model"]].browse(rpc_params["ids"]), rpc_params["fn"]
+                    )(*rpc_params.get("args", []), **rpc_params.get("kwargs", {}))
+
             if isinstance(res, sillyorm.model.Model):
                 res = {
                     "objtype": "sillyModel",
@@ -97,7 +102,7 @@ class JSONRPCRoutes(http.Router):
                     "ids": res._ids,
                 }
 
-            # output JSON serializable? No? repr! 
+            # output JSON serializable? No? repr!
             try:
                 json.dumps(res)
             except:

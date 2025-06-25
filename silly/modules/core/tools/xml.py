@@ -1,5 +1,6 @@
 from lxml import etree
 
+
 def process_xml_inheritance(root: str, extensions: list[str]):
     root_tree = etree.fromstring(root)
     for ext in extensions:

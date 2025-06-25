@@ -51,7 +51,10 @@ def _load_datafile(env, fname, modname):
                     raise Exception(f"unknown type {x.attrib['t']}")
 
         if not xmlid.startswith(f"{modname}."):
-            raise Exception(f"while loading data file {fname}: record xmlid '{xmlid}' is missing correct module name prefix")
+            raise Exception(
+                f"while loading data file {fname}: record xmlid '{xmlid}' is missing correct module"
+                " name prefix"
+            )
 
         rec = env["xmlid"].lookup(xmlid)
         if rec and rec._name != model:
@@ -140,7 +143,9 @@ def load(env, modules):
 
 def load_all_data(env):
     for i, (fname, mname) in enumerate(_data_to_load):
-        _logger.info("loading data file %s from module %s (%d/%d)", fname, mname, i + 1, len(_data_to_load))
+        _logger.info(
+            "loading data file %s from module %s (%d/%d)", fname, mname, i + 1, len(_data_to_load)
+        )
         _load_datafile(env, fname, mname)
 
 

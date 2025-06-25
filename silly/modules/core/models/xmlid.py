@@ -25,7 +25,9 @@ class XMLId(silly.model.Model):
         if not record:
             return False
         if model is not None and model != record.model_name:
-            raise Exception(f"xmlid: expected model {model} but got {record.model_name} (id: {xmlid})")
+            raise Exception(
+                f"xmlid: expected model {model} but got {record.model_name} (id: {xmlid})"
+            )
         return record.get()
 
     def assign(self, xmlid, record, overwrite=False, source_module=None):

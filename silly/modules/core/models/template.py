@@ -204,5 +204,8 @@ class Template(silly.model.Model):
             raise Exception("cannot process XML tree for a non-root view")
         elif self.inherit_mode == "root" and self.inherit_id:
             raise Exception("cannot have root templates with inherit_id set just yet")
-        extending_views = self.search([("inherit_mode", "=", "extension"), "&", ("inherit_id", "=", self.id)], order_by="inherit_sequence")
+        extending_views = self.search(
+            [("inherit_mode", "=", "extension"), "&", ("inherit_id", "=", self.id)],
+            order_by="inherit_sequence",
+        )
         return xmltools.process_xml_inheritance(self.xml, [view.xml for view in extending_views])

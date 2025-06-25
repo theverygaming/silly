@@ -39,8 +39,14 @@ def update(to_change, uninstall):
             raise Exception("attempted uninstalling something that isn't loaded")
         # delete records associated with the module
         for modname in to_uninstall:
-            for record in globalvars.env["xmlid"].search([("source_module", "=", modname)]):
-                _logger.info("uninstall: deleting record with xmlid '%s' (%s ID %s) because it belongs to module '%s'", record.xmlid, record.model_name, record.model_id, modname)
+                _logger.info(
+                    "uninstall: deleting record with xmlid '%s' (%s ID %s) because it belongs to"
+                    " module '%s'",
+                    record.xmlid,
+                    record.model_name,
+                    record.model_id,
+                    modname,
+                )
                 original_record = record.get()
                 if original_record:
                     original_record.delete()
