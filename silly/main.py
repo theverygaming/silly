@@ -3,6 +3,9 @@ import flask
 import sillyorm
 import re
 import pathlib
+import hypercorn
+import hypercorn.asyncio
+import asyncio
 from . import modload, mod, http, globalvars
 
 _logger = logging.getLogger(__name__)
@@ -35,4 +38,10 @@ def init(connstr, modules_to_install=[], modules_to_uninstall=[], update=False):
 
 def run():
     http.init_routers(globalvars.flask_app)
-    globalvars.flask_app.run(host="0.0.0.0")
+    # globalvars.flask_app.run(host="0.0.0.0")
+    # return
+    config = hypercorn.Config()
+    config.bind = "0.0.0.0:5000"
+    config.accesslog = "-"
+    config.errorlog = "-"
+    asyncio.run(hypercorn.asyncio.serve(globalvars.flask_app, config))

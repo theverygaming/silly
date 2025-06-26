@@ -51,6 +51,7 @@ stdenv.mkDerivation {
 
     # deps
     python313Packages.flask
+    python313Packages.hypercorn
 
     # postgres
     python313Packages.psycopg2
