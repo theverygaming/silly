@@ -3,7 +3,7 @@ from silly import http, modload
 
 
 class CoreRoutes(http.Router):
-    @http.route("/static/<path:subpath>")
+    @http.route("/static/<path:subpath>", with_env=False)
     def static_serve(self, subpath):
         if subpath in modload.staticfiles:
             return flask.send_file(modload.staticfiles[subpath])

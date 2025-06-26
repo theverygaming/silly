@@ -9,6 +9,11 @@ let
       python312Packages.setuptools
     ];
 
+    propagatedBuildInputs = [
+      python312Packages.alembic
+      python312Packages.sqlalchemy
+    ];
+
     # FIXME: release new sillyORM soon:tm:
     /*
     src = fetchPypi {
@@ -18,8 +23,8 @@ let
     */
     src = fetchgit {
       url = "https://github.com/theverygaming/sillyORM.git";
-      rev = "8d9c0a02f147aba58ccfba9b193f18e0574b6394";
-      hash = "sha256-/4Az5oNjs/07pHo6DhHkD6GJVGYV1SjEGYou+I4lHGY=";
+      rev = "77a8c31fc44de527ba6934f0e90e13c066adb80f";
+      hash = "sha256-26RkyS5YFYwX4XdkB8oTVyTzqKCQxrvLZUaHOc7TxYs=";
     };
   };
 in

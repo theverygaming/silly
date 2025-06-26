@@ -2,7 +2,6 @@ import json
 import traceback
 import sillyorm
 from flask import request
-from silly.globalvars import env, env_lock
 from silly import http
 
 # Standard JSON-RPC errros
@@ -41,7 +40,7 @@ class JSONRPCRoutes(http.Router):
             "id": req_id,
         }
 
-    def jsonrpc_run(self, req):
+    def jsonrpc_run(self, env, req):
         # Verify JSON
         if not (
             # req should be a dict
@@ -71,7 +70,6 @@ class JSONRPCRoutes(http.Router):
         if not isinstance(rpc_params, dict):
             return self.jsonrpc_error(**JSONRPC_ERROR_STD["invalidParams"], req_id=rpc_id)
 
-        env_lock.acquire()
         try:
             if not (
                 isinstance(rpc_params.get("model"), str)
@@ -115,8 +113,6 @@ class JSONRPCRoutes(http.Router):
             }
         except Exception as e:
             return self.jsonrpc_error(code=-32000, message=traceback.format_exc(), req_id=rpc_id)
-        finally:
-            env_lock.release()
 
     @http.route("/api/jsonrpc", methods=["POST"])
     def jsonrpc(self):
@@ -126,11 +122,11 @@ class JSONRPCRoutes(http.Router):
             return self.jsonrpc_error(**JSONRPC_ERROR_STD["parseError"])
 
         if isinstance(rdata, dict):
-            return self.jsonrpc_run(rdata)
+            return self.jsonrpc_run(env, rdata)
         elif isinstance(rdata, list) and len(rdata) != 0:
             ret = []
             for req in rdata:
-                res = self.jsonrpc_run(req)
+                res = self.jsonrpc_run(env, req)
                 if res is not None:
                     ret.append(res)
             return ret

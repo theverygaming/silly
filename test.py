@@ -9,14 +9,11 @@ if __name__ == "__main__":
         format="%(asctime)s %(levelname)s %(name)s: %(message)s", level=logging.INFO
     )
     logging.getLogger("silly").setLevel(logging.DEBUG)
-    # conn = sillyorm.dbms.postgresql.PostgreSQLConnection(
-    #     "host=127.0.0.1 dbname=test user=postgres password=postgres"
-    # )
-    conn = sillyorm.dbms.sqlite.SQLiteConnection("test.db", check_same_thread=False)
+    connstr = "sqlite:///test.db"
     silly.modload.add_module_paths(["modules/"])
     try:
         silly.main.init(
-            conn,
+            connstr,
             [
                 "webclient",
                 "activitypub",
@@ -24,6 +21,7 @@ if __name__ == "__main__":
                 "webclient_nojs_samples",
                 "settings",
                 "settings_views",
+                "jsonrpc",
             ],
             [],
             "no_update" not in sys.argv,

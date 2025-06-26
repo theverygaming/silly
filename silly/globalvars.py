@@ -1,6 +1,4 @@
-import threading
 import flask
 
-env = None
-env_lock = threading.Lock()
+registry = None
 flask_app = flask.Flask("silly", static_folder=None)

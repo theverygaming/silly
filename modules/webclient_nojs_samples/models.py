@@ -1,6 +1,7 @@
 import sillyorm
 import silly
 
+
 class TestModel(silly.model.Model):
     _name = "test_model"
 

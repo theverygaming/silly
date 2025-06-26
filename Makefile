@@ -28,7 +28,8 @@ psql:
 
 .PHONY: format
 format: 
-	black silly tests \
+	black silly tests modules \
     --line-length 100 \
     --preview \
-    --enable-unstable-feature string_processing
+    --enable-unstable-feature string_processing \
+    --exclude '/migrations/versions/.*\.py'

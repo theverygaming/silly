@@ -1,19 +1,28 @@
 import logging
 import functools
 import inspect
-import flask
+import flask  # TODO: maybe FastAPI??
+from . import globalvars
 
 _logger = logging.getLogger(__name__)
 
 
-def route(*args, **kwargs):
+def route(*args, with_env: bool = True, **kwargs):
     def decorator(function):
         if len(args) > 1:
             raise Exception("Route expects maximum 1 argument, which is the URL")
 
         @functools.wraps(function)
         def wrap(*w_args, **w_kwargs):
-            return function(*w_args, **w_kwargs)
+            if with_env:
+                with globalvars.registry.environment(autocommit=True) as env:
+                    with env.transaction():
+                        if "env" not in w_kwargs:
+                            w_kwargs["env"] = env
+                        ret = function(*w_args, **w_kwargs)
+            else:
+                ret = function(*w_args, **w_kwargs)
+            return ret
 
         wrap.original_function = function
         wrap.route_url = args[0] if len(args) == 1 else None
