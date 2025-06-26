@@ -133,15 +133,17 @@ def _render_view_list(env, view, view_name, params):
         {
             "view": view,
             "fields": view["fields"],
-            "rows": env[view["model"]]
-            .search(
-                domain,
-                offset=offset_start - 1,
-                limit=offset_end - (offset_start - 1),
-                order_by=view["fields"][order_by]["field"] if order_by is not None else None,
-                order_asc=order_asc,
-            )
-            .read(read_vals),
+            "rows": (
+                env[view["model"]]
+                .search(
+                    domain,
+                    offset=offset_start - 1,
+                    limit=offset_end - (offset_start - 1),
+                    order_by=view["fields"][order_by]["field"] if order_by is not None else None,
+                    order_asc=order_asc,
+                )
+                .read(read_vals)
+            ),
             "pagination": {
                 "offset_start": offset_start,
                 "offset_end": offset_end,

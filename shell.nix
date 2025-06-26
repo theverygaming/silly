@@ -1,17 +1,17 @@
-with import (fetchTarball https://github.com/NixOS/nixpkgs/archive/107d5ef05c0b1119749e381451389eded30fb0d5.tar.gz) { };
+with import (fetchTarball https://github.com/NixOS/nixpkgs/archive/61c0f513911459945e2cb8bf333dc849f1b976ff.tar.gz) { };
 let
-  sillyORMPackage = pkgs.python312Packages.buildPythonPackage rec {
+  sillyORMPackage = pkgs.python313Packages.buildPythonPackage rec {
     pname = "sillyorm";
     version = "0.9.0";
     pyproject = true;
 
     build-system = [
-      python312Packages.setuptools
+      python313Packages.setuptools
     ];
 
     propagatedBuildInputs = [
-      python312Packages.alembic
-      python312Packages.sqlalchemy
+      python313Packages.alembic
+      python313Packages.sqlalchemy
     ];
 
     # FIXME: release new sillyORM soon:tm:
@@ -23,42 +23,42 @@ let
     */
     src = fetchgit {
       url = "https://github.com/theverygaming/sillyORM.git";
-      rev = "77a8c31fc44de527ba6934f0e90e13c066adb80f";
-      hash = "sha256-26RkyS5YFYwX4XdkB8oTVyTzqKCQxrvLZUaHOc7TxYs=";
+      rev = "3a96f7a7a943e6aa54cfaa5f509cca292b025c7b";
+      hash = "sha256-XdGWi4JU86gRaaMQkI3tJxD7TIkk+N+jXHREaCJ5KwU=";
     };
   };
 in
 stdenv.mkDerivation {
   name = "silly";
   buildInputs = [
-    python312
+    python313
 
     sillyORMPackage
 
     # lint, fmt, type, docs
-    python312Packages.pylint
-    python312Packages.mypy
-    python312Packages.black
+    python313Packages.pylint
+    python313Packages.mypy
+    python313Packages.black
     sphinx
     gnumake
 
     # test
-    python312Packages.coverage
-    python312Packages.pytest
+    python313Packages.coverage
+    python313Packages.pytest
 
     # build
-    python312Packages.build
+    python313Packages.build
 
     # deps
-    python312Packages.flask
+    python313Packages.flask
 
     # postgres
-    python312Packages.psycopg2
-    python312Packages.types-psycopg2
+    python313Packages.psycopg2
+    python313Packages.types-psycopg2
     postgresql_16
 
     # xml & web experiments
-    python312Packages.lxml
+    python313Packages.lxml
 
     # for convenience
     sqlitebrowser
