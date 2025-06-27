@@ -152,7 +152,7 @@ def load_all_data(env):
 
 def unload_all():
     # models
-    silly.model.models_to_register = []
+    silly.model.reset_models_to_register()
 
     # modules
     global staticfiles
