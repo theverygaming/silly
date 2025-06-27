@@ -1,6 +1,9 @@
 {
     "version": "0.0.1",
-    "dependencies": ["html_base"],
+    "dependencies": [
+        "html_base",
+        "jsonrpc",
+    ],
     "staticfiles": {
         "js/counter/counter.js": "counter/counter.js",
         "xml/counter/counter.xml": "counter/counter.xml",
@@ -15,6 +18,7 @@
         "css/webclient.css": "webclient.css",
         "js/viewHelper.js": "viewHelper.js",
         "js/jsonrpc.js": "jsonrpc.js",
+        "js/orm.js": "orm.js",
     },
     "data": [
         "templates/index.xml",

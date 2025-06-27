@@ -1,15 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <record model="view_type" xmlid="webclient.view_type_1">
-        <field name="component_name" t="str">somecomp</field>
+    <record model="view_type" xmlid="webclient.view_list">
+        <field name="component_name" t="str">ViewList</field>
     </record>
 
     <record model="view" xmlid="webclient.view_1">
         <field name="model_name" t="str">some_model</field>
-        <field name="type_id" t="int">1</field>
+        <field name="type_id" t="xmlid_ref">webclient.view_list</field>
         <field name="xml" t="str">
-            <field name="id"/>
-            <field name="xml"/>
+            <view type="list">
+                <properties>
+                </properties>
+                <definition>
+                    <head>
+                        <headCell>ID</headCell>
+                        <headCell>Name</headCell>
+                        <headCell>ID (red)</headCell>
+                    </head>
+                    <row>
+                        <cell><field name="id"/></cell>
+                        <cell><field name="name"/></cell>
+                        <cell>
+                            <div style="color: red;">
+                                <field name="id">
+                                    <p style="color: purple;">balls!</p>
+                                    <cell>uwu</cell>
+                                </field>
+                            </div>
+                        </cell>
+                    </row>
+                </definition>
+            </view>
         </field>
     </record>
 </root>
