@@ -21,7 +21,7 @@ class SillyAbstractBase(silly.model.AbstractModel):
         def get_rel_field_model(record, name):
             field = record._fields[name]
             if not isinstance(field, sillyorm.fields.Many2one):
-                raise Exception("only many2one supported")
+                return None
             return field._foreign_model
 
         def read_subfields(record, subfields):
@@ -31,7 +31,26 @@ class SillyAbstractBase(silly.model.AbstractModel):
 
             for i, rec in enumerate(base_data):
                 for field in rec:
-                    base_data[i][field] = {"value": rec[field]} | get_field_info(record, field)
+                    rel_model = get_rel_field_model(record, field)
+                    if rel_model is not None:
+                        base_data[i][field] = {
+                            "value": {
+                                "objtype": "sillyRecordset",
+                                "model": rel_model,
+                                "records": [
+                                    {
+                                        "id": {
+                                            "objtype": "sillyFieldValue",
+                                            "type": "Id",
+                                            "rel_model": None,
+                                            "value": rec[field],
+                                        },
+                                    },
+                                ],
+                            }
+                        } | get_field_info(record, field)
+                    else:
+                        base_data[i][field] = {"value": rec[field]} | get_field_info(record, field)
 
             # group subfields by their related model
             subfields_by_field = {}
@@ -41,14 +60,18 @@ class SillyAbstractBase(silly.model.AbstractModel):
             # for each many2one field, gather IDs and do a bulk read
             for field_name, deeper_subfields in subfields_by_field.items():
                 submodel_name = get_rel_field_model(record, field_name)
-                related_ids = set(rec[field_name]["value"] for rec in base_data if rec[field_name])
+                related_ids = set(
+                    rec[field_name]["value"]["records"][0]["id"]["value"]
+                    for rec in base_data
+                    if rec[field_name]
+                )
                 related_records = record.env[submodel_name].browse(list(related_ids))
                 related_data = read_subfields(related_records, deeper_subfields)
 
                 # map related_data back to base_data
                 related_data_by_id = {rec["id"]["value"]: rec for rec in related_data}
                 for rec in base_data:
-                    rel_id = rec[field_name]["value"]
+                    rel_id = rec[field_name]["value"]["records"][0]["id"]["value"]
                     if rel_id:
                         rec[field_name]["value"] = {
                             "objtype": "sillyRecordset",
