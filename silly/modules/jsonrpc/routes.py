@@ -98,9 +98,19 @@ class JSONRPCRoutes(http.Router):
 
             if isinstance(res, sillyorm.model.Model):
                 res = {
-                    "objtype": "sillyModel",
+                    "objtype": "sillyRecordset",
                     "model": res._name,
-                    "ids": res._ids,
+                    "records": [
+                        {
+                            "id": {
+                                "objtype": "sillyFieldValue",
+                                "type": "Id",
+                                "rel_model": None,
+                                "value": x,
+                            },
+                        }
+                        for x in res._ids
+                    ],
                 }
 
             # output JSON serializable? No? repr!
