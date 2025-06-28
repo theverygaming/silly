@@ -17,26 +17,39 @@ class ListViewComponent extends Component {
     };
 
 	render(props, state) {
+        const onRowClick = (e) => {
+            console.log(e.target.closest("tr").dataset.recid);
+            this.setState(prev => ({ records: prev.records.concat([{id: 123, name: "This is a dynamically added record"}]) }));
+        };
+
         let headNode = toChildArray(props.children).find(child => child.type === "head");
         let rowNode = toChildArray(props.children).find(child => child.type === "row");
 
         // table head
-        let thead = createElement("thead", {}, createElement("tr", {}, toChildArray(headNode.props.children).map(child => {
+        let thead = createElement("thead", {}, createElement("tr", { }, toChildArray(headNode.props.children).map(child => {
             return this.transformTableElements(child, null);
         })));
 
         // rows
         const rowTemplate = rowNode;
         const rows = state.records.map(record => {
-            return this.transformTableElements(rowTemplate, record);
+            return this.transformTableElements(rowTemplate, record, (node) => {
+                if (node.type == "row") {
+                    return { 
+                        onClick: onRowClick,
+                        "data-recid": record.id,
+                    };
+                }
+                return null;
+            });
         });
-        return createElement("table", { border: 1, onClick: () => {console.log("click");this.setState(prev => ({ records: prev.records.concat([{id: 123, name: "This is a dynamically added record"}]) }));} },
+        return createElement("table", { class: "table-nice" },
             thead,
             createElement("tbody", {}, rows),
         );
     }
 
-    transformTableElements(node, record) {
+    transformTableElements(node, record, extraPropsFn = null) {
         if (!node) {
             return null;
         }
@@ -46,11 +59,13 @@ class ListViewComponent extends Component {
             return node;
         }
 
-        const children = node.props?.children ? toChildArray(node.props.children).map(c => this.transformTableElements(c, record)) : null;
+        let extraProps = extraPropsFn?.(node) || {};
+
+        const children = node.props?.children ? toChildArray(node.props.children).map(c => this.transformTableElements(c, record, extraPropsFn)) : null;
 
         // add our props to fields
         if (node.type === FieldComponent) {
-            return cloneElement(node, { ...node.props, record }, children);
+            return cloneElement(node, { ...extraProps, ...node.props, record }, children);
         }
 
         // transform some tags
@@ -61,10 +76,10 @@ class ListViewComponent extends Component {
         };
         if (node.type in tagMap) {
             // transform tag according to the map
-            return createElement(tagMap[node.type] , {}, children);
+            return createElement(tagMap[node.type] , { ...extraProps }, children);
         } else {
             // just add the transformed children
-            return cloneElement(node, node.props, children);
+            return cloneElement(node, {...extraProps, ...node.props}, children);
         }
     }
 }

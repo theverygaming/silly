@@ -22,10 +22,7 @@
                         <cell><field name="name"/></cell>
                         <cell>
                             <div style="color: red;">
-                                <field name="id">
-                                    <p style="color: purple;">balls!</p>
-                                    <cell>uwu</cell>
-                                </field>
+                                <field name="id"/>
                             </div>
                         </cell>
                     </row>
