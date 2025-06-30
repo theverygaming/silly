@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <record model="template" xmlid="profiler.speedscope">
+        <field name="xml" t="str">
+            <template t-strip-text=" &#10;">
+                <t t-if="profile_url" t-call="html_base.base">
+                    <t t-set="lang">en-US</t>
+                    <t t-set="title">speedscope</t>
+                    <t t-set="head">
+                        <link rel="stylesheet" href="https://esm.sh/speedscope@1.22.2/dist/release/speedscope-GHPHNKXC.css"/>
+                        <script>window.location.hash="#profileURL=<t t-raw="profile_url"/>"</script>
+                    </t>
+                    <t t-set="body">
+                        <script type="module" src="https://esm.sh/speedscope@1.22.2/dist/release/speedscope-VHEG2FVF.js"/>
+                    </t>
+                </t>
+                <t t-if="not profile_url" t-call="html_base.base">
+                    <t t-set="lang">en-US</t>
+                    <t t-set="title">speedscope</t>
+                    <t t-set="head"/>
+                    <t t-set="body">
+                        <t t-foreach="profiles" t-as="profile">
+                            <a t-raw="profile[0]" t-att-href="profile[1]"/>
+                            <br/>
+                        </t>
+                    </t>
+                </t>
+            </template>
+        </field>
+        <field name="inherit_id" t="None"/>
+        <field name="inherit_mode" t="str">root</field>
+        <field name="inherit_sequence" t="int">100</field>
+    </record>
+</root>

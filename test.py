@@ -22,6 +22,7 @@ if __name__ == "__main__":
                 "settings",
                 "settings_views",
                 "jsonrpc",
+                "profiler",
             ],
             [],
             "no_update" not in sys.argv,

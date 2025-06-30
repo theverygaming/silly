@@ -6,6 +6,9 @@ from . import globalvars
 
 _logger = logging.getLogger(__name__)
 
+_profile_start_hook = lambda _: None
+_profile_end_hook = lambda _: None
+
 
 def route(*args, with_env: bool = True, **kwargs):
     def decorator(function):
@@ -14,6 +17,7 @@ def route(*args, with_env: bool = True, **kwargs):
 
         @functools.wraps(function)
         def wrap(*w_args, **w_kwargs):
+            _profile_start_hook(wrap)
             if with_env:
                 with globalvars.registry.environment(autocommit=True) as env:
                     with env.transaction():
@@ -22,6 +26,7 @@ def route(*args, with_env: bool = True, **kwargs):
                         ret = function(*w_args, **w_kwargs)
             else:
                 ret = function(*w_args, **w_kwargs)
+            _profile_end_hook(wrap)
             return ret
 
         wrap.original_function = function
