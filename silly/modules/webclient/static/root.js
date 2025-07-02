@@ -1,7 +1,7 @@
 import { createElement, cloneElement, render, Component, toChildArray, Fragment } from "@preact";
 import { env } from "@orm";
 
-let view = await (await env.model("view").call("search", [[]], {limit: 1})).call("web_read", [["model_name", "type_id.component_name", "xml"]]);
+let view = await (await env.model("view").call("search", [[]], {limit: 1})).call("webclient_read", [["model_name", "type_id.component_name", "xml"]]);
 console.log(view);
 console.log(view.xml);
 
@@ -16,10 +16,15 @@ class ListViewComponent extends Component {
         records: [{id: 1, name: "this is record 1"}, {id: 2, name: "this is record 2"}],
     };
 
+    onRowClick(e) {
+        const recid = parseInt(e.target.closest("tr").dataset.recid);
+        console.log(recid);
+        this.setState(prev => ({ records: prev.records.concat([{id: recid + 1, name: "This is a dynamically added record"}]) }));
+    }
+
 	render(props, state) {
         const onRowClick = (e) => {
-            console.log(e.target.closest("tr").dataset.recid);
-            this.setState(prev => ({ records: prev.records.concat([{id: 123, name: "This is a dynamically added record"}]) }));
+            this.onRowClick(e);
         };
 
         let headNode = toChildArray(props.children).find(child => child.type === "head");

@@ -6,7 +6,18 @@ class SillyAbstractBase(silly.model.AbstractModel):
     _name = "__silly_abstract_base"
     _extends = "__silly_abstract_base"
 
-    def web_read(self, field_names):
+    def webclient_model_info(self):
+        field_info = {}
+        for name, field in self._fields.items():
+            field_info[name] = {
+                "type": type(field).__name__,
+                "rel_model": getattr(field, "_foreign_model", None),
+            }
+        return {
+            "field_info": field_info,
+        }
+
+    def webclient_read(self, field_names):
         field_name_parts = [x.split(".") for x in field_names]
 
         def get_field_info(record, name):

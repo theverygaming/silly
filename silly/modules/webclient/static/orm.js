@@ -9,14 +9,16 @@ function convORMJsonrpcType(environment, obj) {
     const isSillyFieldValue = (obj) => typeof obj === "object" && obj !== null && obj.objtype === "sillyFieldValue" && typeof obj.type === "string";
     // TODO: actually convert field value types!
     if (isSillyFieldValue(obj)) {
-        return convORMJsonrpcType(environment, obj.value);
+        const vals = obj;
+        vals.value = convORMJsonrpcType(environment, vals.value);
+        return vals;
     }
     if (isSillyRecordset(obj)) {
         const ids = [];
         const fields = [];
         // accumulate ids and field values for the recordset, recurse into all field values and convert them
         for (const rec of obj.records) {
-            ids.push(convORMJsonrpcType(environment, rec["id"]));
+            ids.push(convORMJsonrpcType(environment, rec["id"].value));
             delete rec["id"];
             const fields_obj = {};
             for (const [key, value] of Object.entries(rec)) {
@@ -30,10 +32,10 @@ function convORMJsonrpcType(environment, obj) {
 }
 
 class Recordset {
-    constructor(model, ids, field_values) {
+    constructor(model, ids, fields) {
         this.model = model;
         this.ids = ids;
-        this.field_values = field_values;
+        this.fields = fields;
     }
 
     async call(method, args = [], kwargs = {}) {
@@ -62,14 +64,18 @@ class Recordset {
 
     getField(name) {
         this.ensureOne();
-        return this.field_values[0][name];
+        return this.fields[0][name];
+    }
+
+    getFieldValue(name) {
+        return this.getField(name).value;
     }
 
     asProxy() {
         return new Proxy(this, {
             get(target, prop, receiver) {
-                if (!(prop in target) &&target.ids.length == 1 && prop in target.field_values[0]) {
-                    return target.getField(prop);
+                if (!(prop in target) &&target.ids.length == 1 && prop in target.fields[0]) {
+                    return target.getFieldValue(prop);
                 }
                 return Reflect.get(...arguments);
             },
@@ -80,13 +86,13 @@ class Recordset {
         let idx = 0;
         const model = this.model;
         const ids = this.ids;
-        const field_values = this.field_values;
+        const fields = this.fields;
 
         return {
             next: () => {
                 if (idx < ids.length) {
                     let c_idx = idx++;
-                    return { value: new Recordset(model, [ids[c_idx]], field_values[c_idx]).asProxy(), done: false };
+                    return { value: new Recordset(model, [ids[c_idx]], fields[c_idx]).asProxy(), done: false };
                 } else {
                     return { done: true };
                 }
