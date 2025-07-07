@@ -1,1 +1,1 @@
-from . import activitypub, models, webfinger, get_user, routes
+from . import models, webfinger, get_user, routes

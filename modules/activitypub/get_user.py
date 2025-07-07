@@ -25,18 +25,14 @@ class ActivityPubUser(http.Router):
 
     @http.route("/users/<username>/inbox", methods=["GET", "POST"])
     def get_profile_inbox(self, env, username):
-        if request.accept_mimetypes["text/html"]:
-            _logger.info("requested inbox page (HTML) for: %s", username)
-            return "no HTML inbox display for u :3c"
-        else:
-            _logger.info("requested inbox (JSON) for: %s", username)
-            _logger.info("request data: %s", repr(request.data))
-            rjson = request.get_json()
-            _logger.info("request JSON: %s", repr(rjson))
-            if rjson["type"] == "Delete":
-                _logger.info("cache invalidation request for %s", repr(rjson["object"]))
-                return Response(
-                    "404 not found", status=404
-                )  # spec says if it doesn't exist we return 404
-            if rjson["type"] == "Create":
-                _logger.info("creation request for %s", repr(rjson["object"]))
+        _logger.info("requested inbox (JSON) for: %s", username)
+        _logger.info("request data: %s", repr(request.data))
+        rjson = request.get_json()
+        _logger.info("request JSON: %s", repr(rjson))
+        if rjson["type"] == "Delete":
+            _logger.info("cache invalidation request for %s", repr(rjson["object"]))
+            return Response(
+                "404 not found", status=404
+            )  # spec says if it doesn't exist we return 404
+        if rjson["type"] == "Create":
+            _logger.info("creation request for %s", repr(rjson["object"]))

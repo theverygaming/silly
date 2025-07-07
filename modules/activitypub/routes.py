@@ -15,7 +15,9 @@ class ActivityPubRoutes(http.Router):
                 "userlist": [
                     {
                         "username": a.username,
-                        "url": f"https://fedi.theverygaming.furrypri.de/users/{a.username}",
+                        "url": (
+                            f"https://vps-old.infra.theverygaming.furrypri.de/users/{a.username}"
+                        ),
                     }
                     for a in actors
                 ]

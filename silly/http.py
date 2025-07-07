@@ -1,13 +1,30 @@
 import logging
 import functools
 import inspect
-import flask  # TODO: maybe FastAPI??
+import flask
 from . import globalvars
 
 _logger = logging.getLogger(__name__)
 
 _profile_start_hook = lambda _: None
 _profile_end_hook = lambda _: None
+
+
+class Response:
+    def __init__(self, data=None, code=200):
+        self.data = data
+        self.code = code
+        if self.data is None:
+            default_ret = {
+                400: "400 Bad Request",
+                404: "404 Not Found",
+            }
+            if self.code not in default_ret:
+                raise Exception("created response without data that does not have a default_ret")
+            self.data = default_ret[self.code]
+
+    def get_framework_response(self):
+        return flask.make_response(self.data, self.code)
 
 
 def route(*args, with_env: bool = True, **kwargs):
@@ -18,15 +35,28 @@ def route(*args, with_env: bool = True, **kwargs):
         @functools.wraps(function)
         def wrap(*w_args, **w_kwargs):
             _profile_start_hook(wrap)
-            if with_env:
-                with globalvars.registry.environment(autocommit=True) as env:
-                    with env.transaction():
-                        if "env" not in w_kwargs:
+            try:
+
+                def _do_call(w_args, w_kwargs):
+                    fnsig = inspect.signature(function)
+                    for name in fnsig.parameters:
+                        if name not in w_kwargs and name in flask.request.args:
+                            w_kwargs[name] = flask.request.args[name]
+                    return function(*w_args, **w_kwargs)
+
+                if with_env:
+                    with globalvars.registry.environment() as env:
+                        with env.transaction():
                             w_kwargs["env"] = env
-                        ret = function(*w_args, **w_kwargs)
-            else:
-                ret = function(*w_args, **w_kwargs)
-            _profile_end_hook(wrap)
+                            ret = _do_call(w_args, w_kwargs)
+                else:
+                    ret = _do_call(w_args, w_kwargs)
+                if isinstance(ret, Response):
+                    ret = ret.get_framework_response()
+                if ret is None:
+                    raise Exception("route function returned None")
+            finally:
+                _profile_end_hook(wrap)
             return ret
 
         wrap.original_function = function

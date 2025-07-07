@@ -21,13 +21,15 @@ class Actor(silly.model.Model):
 
     def gen_webfinger_json(self):
         return {
-            "subject": f"acct:{self.username}@fedi.theverygaming.furrypri.de",
+            "subject": f"acct:{self.username}@vps-old.infra.theverygaming.furrypri.de",
             "aliases": [],
             "links": [
                 {
                     "rel": "self",
                     "type": "application/activity+json",
-                    "href": f"https://fedi.theverygaming.furrypri.de/users/{self.username}",
+                    "href": (
+                        f"https://vps-old.infra.theverygaming.furrypri.de/users/{self.username}"
+                    ),
                 }
             ],
         }
@@ -38,13 +40,13 @@ class Actor(silly.model.Model):
                 "https://www.w3.org/ns/activitystreams",
                 "https://w3id.org/security/v1",
             ],
-            "id": f"https://fedi.theverygaming.furrypri.de/users/{self.username}",
+            "id": f"https://vps-old.infra.theverygaming.furrypri.de/users/{self.username}",
             "type": "Person",
             "preferredUsername": self.username,
-            "inbox": f"https://fedi.theverygaming.furrypri.de/users/{self.username}/inbox",
+            "inbox": f"https://vps-old.infra.theverygaming.furrypri.de/users/{self.username}/inbox",
             "publicKey": {
-                "id": f"https://fedi.theverygaming.furrypri.de/users/{self.username}#key",
-                "owner": f"https://fedi.theverygaming.furrypri.de/users/{self.username}",
+                "id": f"https://vps-old.infra.theverygaming.furrypri.de/users/{self.username}#key",
+                "owner": f"https://vps-old.infra.theverygaming.furrypri.de/users/{self.username}",
                 "publicKeyPem": self.publickey,
             },
             # optional
