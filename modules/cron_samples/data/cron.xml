@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <record model="cron" xmlid="cron_samples.test_cron">
+        <field name="code" t="str">
+            _logger.info("cron run!")
+        </field>
+    </record>
+</root>
