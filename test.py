@@ -17,8 +17,6 @@ if __name__ == "__main__":
             [
                 "webclient",
                 "activitypub",
-                "webclient_nojs",
-                "webclient_nojs_samples",
                 "settings",
                 "settings_views",
                 "jsonrpc",
