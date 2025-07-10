@@ -2,6 +2,7 @@ import logging
 import ast
 import copy
 from lxml import etree
+import starlette.responses
 import sillyorm
 import silly
 from ..tools import xml as xmltools
@@ -197,6 +198,9 @@ class Template(silly.model.Model):
             return etree.fromstring(template.get_xml())
 
         return _render_html(get_template, get_template(xmlid), vals)
+
+    def render_html_resp(self, xmlid, vals):
+        return starlette.responses.HTMLResponse(self.render(xmlid, vals))
 
     def get_xml(self):
         self.ensure_one()

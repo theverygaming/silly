@@ -2,7 +2,6 @@ import logging
 import json
 import traceback
 import sillyorm
-from flask import request
 from silly import http
 
 _logger = logging.getLogger(__name__)
@@ -129,18 +128,16 @@ class JSONRPCRoutes(http.Router):
             return self.jsonrpc_error(code=-32000, message=traceback.format_exc(), req_id=rpc_id)
 
     @http.route("/api/jsonrpc", methods=["POST"])
-    def jsonrpc(self, env):
-        try:
-            rdata = json.loads(request.data)
-        except (json.JSONDecodeError, UnicodeDecodeError):
-            return self.jsonrpc_error(**JSONRPC_ERROR_STD["parseError"])
+    async def jsonrpc(self, request):
+        rdata = await request.json()
+        print(rdata)
 
         if isinstance(rdata, dict):
-            return self.jsonrpc_run(env, rdata)
+            return self.jsonrpc_run(request.env, rdata)
         elif isinstance(rdata, list) and len(rdata) != 0:
             ret = []
             for req in rdata:
-                res = self.jsonrpc_run(env, req)
+                res = self.jsonrpc_run(request.env, req)
                 if res is not None:
                     ret.append(res)
             return ret

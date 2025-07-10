@@ -48,20 +48,22 @@ def _http_profile_end(wrap):
 
 class Routes(http.Router):
     @http.route("/debug/profiler/start", with_env=False)
-    def start(self):
+    def start(self, request):
         _profile_data.clear()
         http._profile_start_hook = _http_profile_start
         http._profile_end_hook = _http_profile_end
         return "started"
 
     @http.route("/debug/profiler/stop", with_env=False)
-    def stop(self):
+    def stop(self, request):
         http._profile_start_hook = lambda _: None
         http._profile_end_hook = lambda _: None
         return "stopped"
 
-    @http.route("/debug/profiler/speedscope/data/<idx>", with_env=False)
-    def speedscope_data(self, idx):
+    @http.route("/debug/profiler/speedscope/data/{idx:int}", with_env=False)
+    def speedscope_data(self, request):
+        idx = request.path_params["idx"]
+
         def _get_data_for(key):
             events = []
             frames = []
@@ -101,17 +103,18 @@ class Routes(http.Router):
 
         return _get_data_for(list(sorted(_profile_data.keys()))[int(idx)])
 
-    @http.route("/debug/profiler/speedscope/<idx>")
-    def speedscope_idx(self, env, idx):
+    @http.route("/debug/profiler/speedscope/{idx:int}")
+    def speedscope_idx(self, request):
+        idx = request.path_params["idx"]
         [[x, i] for i, x in enumerate(sorted(_profile_data.keys()))]
-        return env["template"].render(
+        return request.env["template"].render_html_resp(
             "profiler.speedscope",
             {"profile_url": f"/debug/profiler/speedscope/data/{idx}"},
         )
 
     @http.route("/debug/profiler/speedscope/")
-    def speedscope(self, env):
-        return env["template"].render(
+    def speedscope(self, request):
+        return request.env["template"].render_html_resp(
             "profiler.speedscope",
             {
                 "profile_url": None,

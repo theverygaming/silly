@@ -1,7 +1,8 @@
 import logging
 import functools
 import inspect
-import flask
+import starlette.routing
+import starlette.responses
 from . import globalvars
 
 _logger = logging.getLogger(__name__)
@@ -10,21 +11,22 @@ _profile_start_hook = lambda _: None
 _profile_end_hook = lambda _: None
 
 
-class Response:
-    def __init__(self, data=None, code=200):
-        self.data = data
-        self.code = code
-        if self.data is None:
-            default_ret = {
-                400: "400 Bad Request",
-                404: "404 Not Found",
-            }
-            if self.code not in default_ret:
-                raise Exception("created response without data that does not have a default_ret")
-            self.data = default_ret[self.code]
-
-    def get_framework_response(self):
-        return flask.make_response(self.data, self.code)
+def _process_route_ret(ret):
+    if isinstance(ret, starlette.responses.Response):
+        return ret
+    if isinstance(ret, str):
+        return starlette.responses.PlainTextResponse(ret)
+    if isinstance(ret, (dict, list)):
+        return starlette.responses.JSONResponse(ret)
+    if isinstance(ret, int):
+        default_err = {
+            400: "400 Bad Request",
+            404: "404 Not Found",
+        }
+        if ret not in default_err:
+            raise Exception("could not process response code: no default error page")
+        return starlette.responses.PlainTextResponse(default_err[ret], status_code=ret)
+    raise Exception(f"cannot process route return value {repr(ret)}")
 
 
 def route(*args, with_env: bool = True, **kwargs):
@@ -32,29 +34,29 @@ def route(*args, with_env: bool = True, **kwargs):
         if len(args) > 1:
             raise Exception("Route expects maximum 1 argument, which is the URL")
 
+        if inspect.iscoroutinefunction(function):
+
+            async def _call_route_fn(*w_args, **w_kwargs):
+                return await function(*w_args, **w_kwargs)
+
+        else:
+
+            async def _call_route_fn(*w_args, **w_kwargs):
+                return function(*w_args, **w_kwargs)
+
         @functools.wraps(function)
-        def wrap(*w_args, **w_kwargs):
+        async def wrap(*w_args, **w_kwargs):
             _profile_start_hook(wrap)
             try:
-
-                def _do_call(w_args, w_kwargs):
-                    fnsig = inspect.signature(function)
-                    for name in fnsig.parameters:
-                        if name not in w_kwargs and name in flask.request.args:
-                            w_kwargs[name] = flask.request.args[name]
-                    return function(*w_args, **w_kwargs)
-
                 if with_env:
                     with globalvars.registry.environment() as env:
                         with env.transaction():
-                            w_kwargs["env"] = env
-                            ret = _do_call(w_args, w_kwargs)
+                            setattr(w_args[1], "env", env)
+                            ret = await _call_route_fn(*w_args, **w_kwargs)
                 else:
-                    ret = _do_call(w_args, w_kwargs)
-                if isinstance(ret, Response):
-                    ret = ret.get_framework_response()
-                if ret is None:
-                    raise Exception("route function returned None")
+                    ret = await _call_route_fn(*w_args, **w_kwargs)
+
+                ret = _process_route_ret(ret)
             finally:
                 _profile_end_hook(wrap)
             return ret
@@ -90,7 +92,9 @@ def _unique(it):
         yield x
 
 
-def init_routers(flask_app):
+def init_routers():
+    routes = []
+
     # Given a class, goes through all it's subclasses and
     # then returns only the classes that don't have any more children
     # This is used to make our inheritance mechanism work,
@@ -146,11 +150,13 @@ def init_routers(flask_app):
             if route_url is None:
                 raise Exception("No URL set anywhere in the route hierachy, problem!")
 
-            if "endpoint" not in route_kwargs:
-                route_kwargs["endpoint"] = f"{cls.__module__}.{cls.__name__}.{fn_name}"
+            if "name" not in route_kwargs:
+                route_kwargs["name"] = f"{cls.__module__}.{cls.__name__}.{fn_name}"
 
-            # Allow the endpoint to be accessed by the user
-            setattr(getattr(cls, fn_name), "endpoint", route_kwargs["endpoint"])
+            # Allow the name to be accessed by the user
+            setattr(getattr(cls, fn_name), "name", route_kwargs["name"])
 
-            # decorate the function
-            flask_app.route(route_url, **route_kwargs)(fn)
+            # create the actual route
+            routes.append(starlette.routing.Route(route_url, fn, **route_kwargs))
+
+    return routes

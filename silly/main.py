@@ -1,5 +1,5 @@
 import logging
-import flask
+import starlette.applications
 import sillyorm
 import re
 import pathlib
@@ -37,11 +37,15 @@ def init(connstr, modules_to_install=[], modules_to_uninstall=[], update=False):
 
 
 def run():
-    http.init_routers(globalvars.flask_app)
-    # globalvars.flask_app.run(host="0.0.0.0")
-    # return
+    routes = http.init_routers()
+
+    starlette_app = starlette.applications.Starlette(
+        debug=True,
+        routes=routes,
+    )
+
     config = hypercorn.Config()
     config.bind = "0.0.0.0:5000"
     config.accesslog = "-"
     config.errorlog = "-"
-    asyncio.run(hypercorn.asyncio.serve(globalvars.flask_app, config))
+    asyncio.run(hypercorn.asyncio.serve(starlette_app, config))

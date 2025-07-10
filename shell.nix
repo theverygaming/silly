@@ -50,7 +50,7 @@ stdenv.mkDerivation {
     python313Packages.build
 
     # deps
-    python313Packages.flask
+    python313Packages.starlette
     python313Packages.hypercorn
 
     # postgres

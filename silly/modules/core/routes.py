@@ -1,10 +1,11 @@
-import flask
+import starlette.responses
 from silly import http, modload
 
 
 class CoreRoutes(http.Router):
-    @http.route("/static/<path:subpath>", with_env=False)
-    def static_serve(self, subpath):
+    @http.route("/static/{subpath:path}", with_env=False)
+    def static_serve(self, request):
+        subpath = request.path_params["subpath"]
         if subpath in modload.staticfiles:
-            return flask.send_file(modload.staticfiles[subpath])
-        return "404"
+            return starlette.responses.FileResponse(modload.staticfiles[subpath])
+        return 404
