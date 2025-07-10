@@ -40,7 +40,7 @@ def run():
     routes = http.init_routers()
 
     starlette_app = starlette.applications.Starlette(
-        debug=True,
+        debug=True,  # FIXME: careful!
         routes=routes,
     )
 

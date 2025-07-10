@@ -20,9 +20,6 @@ def load_all():
     modload.load(globalvars.registry, ["core"] + modules_to_load)
     globalvars.registry.resolve_tables()
     globalvars.registry.init_db_tables(automigrate="none")
-    # TODO: i don't think we should be loading data on normal loads? Only on update...
-    with globalvars.registry.environment(autocommit=True) as env:
-        modload.load_all_data(env)
     _logger.info("silly load stage 2 finished")
 
 
@@ -160,6 +157,3 @@ def load_core(allow_update):
     modload.load(globalvars.registry, ["core"])
     globalvars.registry.resolve_tables()
     globalvars.registry.init_db_tables(automigrate="ignore")
-    # TODO: i don't think we should be loading data on normal loads? Only on update...
-    with globalvars.registry.environment(autocommit=True) as env:
-        modload.load_all_data(env)
