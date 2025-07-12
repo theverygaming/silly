@@ -1,0 +1,25 @@
+name: Python Test
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Nix
+        uses: nixbuild/nix-quick-install-action@v28
+      - name: Restore and cache Nix store
+        uses: nix-community/cache-nix-action@v5
+        with:
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', 'flake.lock') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+          purge-prefixes: cache-${{ runner.os }}
+      - name: Build development environment
+        run: nix develop . --print-build-logs --command bash -c "ls -lah"
+      - name: Run tests
+        run: |
+          nix develop . --command bash -c 'make test'
+      - name: Report coverage
+        run: |
+          nix develop . --command bash -c 'coverage report -m'
+          echo "# Coverage" >> $GITHUB_STEP_SUMMARY
+          nix develop . --command bash -c 'coverage report -m --format=markdown' >> $GITHUB_STEP_SUMMARY
