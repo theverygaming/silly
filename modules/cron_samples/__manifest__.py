@@ -3,6 +3,6 @@
     "dependencies": ["cron"],
     "staticfiles": {},
     "data": [
-        "data/cron.xml",
+        # "data/cron.xml",
     ],
 }
