@@ -20,9 +20,9 @@ jobs:
           nix develop . --command bash -c 'make test'
       - name: Report coverage
         run: |
-          nix develop . --command bash -c 'coverage report -m --omit="*/tests/test_*.py"'
+          nix develop . --command bash -c 'coverage report -m --omit="*/tests/test_*.py,__manifest__.py"'
           echo "# Coverage" >> $GITHUB_STEP_SUMMARY
-          nix develop . --command bash -c 'coverage report -m --omit="*/tests/test_*.py" --format=markdown' >> $GITHUB_STEP_SUMMARY
+          nix develop . --command bash -c 'coverage report -m --omit="*/tests/test_*.py,__manifest__.py" --format=markdown' >> $GITHUB_STEP_SUMMARY
   build-pkg:
     runs-on: ubuntu-latest
     steps:
