@@ -14,6 +14,7 @@ class Setting(silly.model.Model):
 
     def write(self, vals):
         # there so no option to have unique fields, so we need to check manually for now
+        # TODO: there is one now, fix this shit
         if "key" in vals and self.key != vals["key"] and self._check_key_exists(vals["key"]):
             raise Exception(f"settings key {vals['key']} already exists")
         return super().write(vals)
