@@ -91,7 +91,7 @@ _data_to_load = []
 loaded_modules = []
 
 
-def _find_module(name):
+def find_module(name):
     modpath = None
     for dir in silly.modules.__path__:
         p = Path(dir) / name
@@ -108,7 +108,7 @@ def _load_module(name, registry):
     if name in loaded_modules:
         raise Exception(f"attempted to load module '{name}' twice")
     loaded_modules.append(name)
-    modpath = _find_module(name)
+    modpath = find_module(name)
 
     _logger.debug("module %s from path %s", name, modpath)
 
@@ -191,7 +191,7 @@ def get_manifest(name):
                 mdict[k] = v
         return mdict
 
-    modpath = _find_module(name)
+    modpath = find_module(name)
 
     with open(modpath / "__manifest__.py", encoding="utf-8") as f:
         manifest = ast.literal_eval(f.read())
@@ -201,7 +201,7 @@ def get_manifest(name):
 
 
 def run_migrations(registry, name, current_version, to_version, downgrade=False):
-    modpath = _find_module(name)
+    modpath = find_module(name)
 
     migration_dir = modpath / "migrations"
     if not migration_dir.exists() or not any(p.is_file() for p in migration_dir.rglob("*.py")):
@@ -222,7 +222,7 @@ def generate_migrations(registry, name=None, to_version=None):
 
     if not name:
         name = input("DB schema changed! Enter module to genrate migrations for: ")
-    modpath = _find_module(name)
+    modpath = find_module(name)
 
     migration_dir = modpath / "migrations"
     migration_dir_exists = migration_dir.exists()

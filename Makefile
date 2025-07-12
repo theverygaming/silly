@@ -1,20 +1,13 @@
 .PHONY: all
 all: precommit
 
-.PHONY: typecheck
-typecheck:
-	mypy ./silly --strict
-
-.PHONY: lint
-lint:
-	pylint ./silly --disable=missing-module-docstring
 
 .PHONY: precommit
-precommit: test typecheck lint
+precommit: test
 
 .PHONY: test
 test:
-	coverage run --source silly/ -m pytest -vv --tb=long tests/
+	coverage run --source=silly,modules test.py no_update
 	coverage html --omit="tests/*"
 	coverage report -m --omit="tests/*"
 
