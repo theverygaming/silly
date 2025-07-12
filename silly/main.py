@@ -17,14 +17,18 @@ class CustomRegistry(sillyorm.Registry):
         return not (type_ == "table" and re.match(r"__silly_alembic_version_.+", name) is not None)
 
 
+_routes = None
+
+
 def init(connstr, modules_to_install=[], modules_to_uninstall=[], update=False):
-    if modules_to_install and modules_to_uninstall:
-        raise Exception("can't install and uninstall stuff at the same time")
+    global _routes
     _logger.info("silly version [...] starting")
     modload.add_module_paths([str(pathlib.Path(__file__).parent / "modules")])
     globalvars.registry = CustomRegistry(connstr)
-    mod.load_core(update)
+    mod.load_core(update and not modules_to_uninstall)
     if update:
+        if modules_to_install and modules_to_uninstall:
+            raise Exception("can't install and uninstall stuff at the same time")
         if not modules_to_install and not modules_to_uninstall:
             mod.update([], False)
         elif modules_to_install:
@@ -34,14 +38,13 @@ def init(connstr, modules_to_install=[], modules_to_uninstall=[], update=False):
             mod.update(modules_to_uninstall, True)
     else:
         mod.load_all()
+    _routes = http.init_routers()
 
 
 def run():
-    routes = http.init_routers()
-
     starlette_app = starlette.applications.Starlette(
         debug=True,  # FIXME: careful!
-        routes=routes,
+        routes=_routes,
     )
 
     config = hypercorn.Config()

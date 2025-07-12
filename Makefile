@@ -7,7 +7,8 @@ precommit: test
 
 .PHONY: test
 test:
-	coverage run --source=silly,modules test.py no_update
+	./silly-entry --connstr "sqlite:///silly_test_run.db" update --modules $$(find . -name "__manifest__.py" | xargs -n1 dirname | xargs -n1 basename)
+	coverage run --source=silly,modules ./silly-entry --connstr "sqlite:///silly_test_run.db" test
 	coverage html --omit="tests/*"
 	coverage report -m --omit="tests/*"
 

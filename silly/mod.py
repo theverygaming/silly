@@ -103,33 +103,35 @@ def update(to_change, uninstall):
         modload.load_all_data(env)
 
     # update module tables
-    with globalvars.registry.environment(autocommit=True) as env:
-        for modname in to_install:
-            manifest = modload.get_manifest(modname)
-            rec = env["module"].search([("name", "=", modname)])
-            if rec:
-                rec.version = manifest["version"]
-            else:
-                env["module"].create(
-                    {
-                        "name": modname,
-                        "version": manifest["version"],
-                    }
-                )
-        for modname in to_uninstall:
-            rec = env["module"].search([("name", "=", modname)])
-            rec.delete()
+    # if we uninstalle core, there are no tables to update..
+    if "core" not in to_uninstall:
+        with globalvars.registry.environment(autocommit=True) as env:
+            for modname in to_install:
+                manifest = modload.get_manifest(modname)
+                rec = env["module"].search([("name", "=", modname)])
+                if rec:
+                    rec.version = manifest["version"]
+                else:
+                    env["module"].create(
+                        {
+                            "name": modname,
+                            "version": manifest["version"],
+                        }
+                    )
+            for modname in to_uninstall:
+                rec = env["module"].search([("name", "=", modname)])
+                rec.delete()
 
     # restart entirely, shits far too fcked otherwise
     # (imagine some module did monkeypatches! We want to make sure everything is in a sane state!)
     raise SillyRestartException("update finished")
 
 
-def load_core(allow_update):
+def load_core(allow_core_init):
     _logger.info("silly load stage 1 (load core module)")
     # the core module is essential for installing other modules, so we **always** install it, no matter what
     if not sqlalchemy.inspect(globalvars.registry.engine).has_table("module"):
-        if not allow_update:
+        if not allow_core_init:
             raise Exception(
                 "Core module not installed, cannot install due to update being disabled"
             )

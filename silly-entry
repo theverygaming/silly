@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+import sys
+import silly
+
+if __name__ == "__main__":
+    silly.cli.entry(sys.argv)
