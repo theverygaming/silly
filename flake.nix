@@ -22,7 +22,7 @@
         # FIXME: sillyORM should provide a nix flake!
         sillyORMPackage = pkgs.python313Packages.buildPythonPackage rec {
           pname = "sillyorm";
-          version = "0.9.0";
+          version = "1.0.0";
           pyproject = true;
 
           build-system = [
@@ -34,17 +34,9 @@
             pkgs.python313Packages.sqlalchemy
           ];
 
-          # FIXME: release new sillyORM soon:tm:
-          /*
-            src = fetchPypi {
-              inherit pname version;
-              hash = "sha256-NRX+4IT+Wif3X5qlnShN+FT/kN4+gq7earT44mgxCVI=";
-            };
-          */
-          src = pkgs.fetchgit {
-            url = "https://github.com/theverygaming/sillyORM.git";
-            rev = "ae738f493a95b6b6ab4f7b920cfa9e43003aa81b";
-            hash = "sha256-snKL/GFJIDLrY5QbW19Crbx9ytSZgctTUk9BMzP1ga4=";
+          src = pkgs.fetchPypi {
+            inherit pname version;
+            hash = "sha256-SGIPqNWhL7YINTpELkJ5WSh4abRoE8IozGC6uW6Z4aQ=";
           };
         };
       in
