@@ -8,7 +8,7 @@ _logger = logging.getLogger(__name__)
 
 
 class SillyConfig:
-    _LOGLEVEL_MAP = {
+    LOGLEVEL_MAP = {
         "debug": logging.DEBUG,
         "info": logging.INFO,
         "warning": logging.WARNING,
@@ -17,7 +17,7 @@ class SillyConfig:
     _DEFAULTS = {
         "connstr": None,
         "module_path": ["modules/"],
-        "loglevel": _LOGLEVEL_MAP["debug"],
+        "loglevel": LOGLEVEL_MAP["debug"],
     }
 
     def __init__(self):
@@ -35,7 +35,7 @@ class SillyConfig:
     def process_argparser_args(self, namespace):
         self.connstr = namespace.connstr or self.connstr
         self.module_path = namespace.module_path or self.module_path
-        self.loglevel = self._LOGLEVEL_MAP[namespace.loglevel]
+        self.loglevel = self.LOGLEVEL_MAP[namespace.loglevel]
         self.process_args()
 
     def process_args(self):
