@@ -9,8 +9,8 @@ precommit: test
 test:
 	./silly-entry --connstr "sqlite:///silly_test_run.db" --loglevel DEBUG update --modules $$(find . -name "__manifest__.py" | xargs -n1 dirname | xargs -n1 basename)
 	coverage run --source=silly,modules ./silly-entry --connstr "sqlite:///silly_test_run.db" --loglevel DEBUG test
-	coverage html
-	coverage report -m
+	coverage html --omit="*/tests/test_*.py"
+	coverage report -m --omit="*/tests/test_*.py"
 
 .PHONY: postgrescontainer
 postgrescontainer:
