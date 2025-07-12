@@ -11,8 +11,9 @@ requires-python = ">=3.11"
 license = {file = "LICENSE"}
 dependencies = [
     "sillyorm==1.0.0",
-    "starlette",
     "lxml",
+    "starlette",
+    "hypercorn",
 ]
 
 [project.optional-dependencies]

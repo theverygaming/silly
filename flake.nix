@@ -40,44 +40,47 @@
           };
         };
       in
-      {
-        # TODO: provide a packages.default silly package
-        devShells.default = pkgs.stdenv.mkDerivation {
-          name = "silly";
-          buildInputs = with pkgs; [
-            python313
+      rec {
+        packages.default = pkgs.python313Packages.buildPythonPackage rec {
+          pname = "silly";
+          version = "0.0.1";
+          pyproject = true;
 
+          build-system = [
+            pkgs.python313Packages.setuptools
+          ];
+
+          propagatedBuildInputs = with pkgs; [
             sillyORMPackage
-
-            # lint, fmt, type, docs
-            python313Packages.pylint
-            python313Packages.mypy
-            python313Packages.black
-            sphinx
-            gnumake
-
-            # test
-            python313Packages.coverage
-            python313Packages.pytest
-
-            # build
-            python313Packages.build
-
-            # deps
+            python313Packages.lxml
             python313Packages.starlette
             python313Packages.hypercorn
-
-            # postgres
-            python313Packages.psycopg2
-            python313Packages.types-psycopg2
-            postgresql_17
-
-            # xml & web experiments
-            python313Packages.lxml
-
-            # for convenience
-            sqlitebrowser
           ];
+
+          src = ./.;
+        };
+        devShells.default = pkgs.stdenv.mkDerivation {
+          name = "silly";
+          buildInputs =
+            with pkgs;
+            [
+              python313
+
+              # lint, fmt, type, docs
+              python313Packages.pylint
+              python313Packages.mypy
+              python313Packages.black
+              sphinx
+              gnumake
+
+              # test
+              python313Packages.coverage
+              python313Packages.pytest
+
+              # for convenience
+              sqlitebrowser
+            ]
+            ++ packages.default.propagatedBuildInputs;
         };
       }
     );
