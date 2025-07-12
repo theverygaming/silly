@@ -17,11 +17,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-postgres = ["psycopg2"]
 dev = [
-    "psycopg2", "types-psycopg2",
-    "pytest", "coverage", "pylint", "mypy", "black", "Sphinx",
+    "coverage", "pylint", "mypy", "black", "Sphinx",
 ]
+
+[project.scripts]
+silly = "silly.cli:entry_noargs"
 
 [tool.setuptools]
 packages = ["silly", "silly.modules"]

@@ -180,3 +180,7 @@ def entry(args):
             cmd_update(config, parsed_args.modules)
         case "uninstall":
             cmd_uninstall(config, parsed_args.modules)
+
+
+def entry_noargs():
+    entry(sys.argv)
