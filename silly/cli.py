@@ -129,7 +129,9 @@ def cmd_run(config: SillyConfig, do_reexec=True):
 
 def cmd_test(config: SillyConfig):
     main.init(config["connstr"])
-    tests.run_all_tests()
+    result = tests.run_all_tests()
+    if not result.wasSuccessful():
+        raise Exception(f"Tests failed!")
 
 
 def cmd_update(config: SillyConfig, modules: list[str], throw_exc=False):
