@@ -1,36 +1,37 @@
 import sys
-import os
 import logging
 import silly
-import sillyorm
+
 
 if __name__ == "__main__":
-    logging.basicConfig(
-        format="%(asctime)s %(levelname)s %(name)s: %(message)s", level=logging.INFO
-    )
-    logging.getLogger("silly").setLevel(logging.DEBUG)
-    connstr = "sqlite:///test.db"
-    silly.modload.add_module_paths(["modules/"])
+    config = silly.cli.SillyConfig()
+    config.set_cmdline_args({
+        "loglevel": "INFO",
+        "connstr": "sqlite:///test.db",
+    })
+    config.apply_cfg()
+
     try:
-        silly.main.init(
-            connstr,
-            [
-                "webclient",
-                "activitypub",
-                "settings",
-                "jsonrpc",
-                "profiler",
-            ],
-            [],
-            "no_update" not in sys.argv,
-        )
+        if "no_update" not in sys.argv:
+            silly.cli.cmd_update(
+                config,
+                [
+                    "webclient",
+                    "activitypub",
+                    "settings",
+                    "jsonrpc",
+                    "profiler",
+                ],
+                throw_exc=True,
+            )
+        else:
+            silly.cli.cmd_run(
+                config,
+                do_reexec=False,
+            )
     except silly.mod.SillyRestartException as e:
         argv = sys.argv
         if str(e) == "update finished":
             argv.append("no_update")
-
-        executable = sys.executable
-        if not argv or argv[0] != executable:
-            argv.insert(0, executable)
-        os.execve(sys.executable, argv, os.environ)
+        silly.cli.reexec(argv=argv)
     silly.main.run()

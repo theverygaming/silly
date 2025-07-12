@@ -2,48 +2,107 @@ import argparse
 import os
 import sys
 import logging
+import collections
 from . import main, tests, modload, mod
 
 _logger = logging.getLogger(__name__)
 
 
 class SillyConfig:
-    LOGLEVEL_MAP = {
-        "debug": logging.DEBUG,
-        "info": logging.INFO,
-        "warning": logging.WARNING,
-    }
-
-    _DEFAULTS = {
-        "connstr": None,
-        "module_path": ["modules/"],
-        "loglevel": LOGLEVEL_MAP["debug"],
+    # dict of option tuples
+    # each option tuple is:
+    # (
+    #     default value
+    #     required - Falsy value for not required or a function that returns True if the required
+    #                thing is fulfilled - this function will be called prior to the type conversion!
+    #     type conversion function/constructor or None
+    # )
+    _CONFIG_OPTIONS = {
+        "connstr": (None, lambda x: bool(x), str),
+        "module_path": (["modules/"], False, list),
+        "loglevel": ("INFO", False, lambda x: logging.getLevelNamesMapping()[x]),
     }
 
     def __init__(self):
-        self.connstr = self._DEFAULTS["connstr"]
-        self.module_path = self._DEFAULTS["module_path"]
-        self.loglevel = self._DEFAULTS["loglevel"]
+        # array of dicts, first one in the array has highest priority
+        self._raw_cfg = [
+            {},  # command-line arguments
+            {},  # environent variables
+            {},  # configuration file
+            {k: v[0] for k, v in self._CONFIG_OPTIONS.items()},
+        ]
+        self._cfg_processed = None
 
-    def init_arg_parser(self, parser):
-        parser.add_argument("--connstr", type=str, required=True)
+    def __getitem__(self, key: str):
+        if self._cfg_processed is None:
+            raise Exception("arguments have never been processed!")
+        if key not in self._cfg_processed:
+            raise Exception(f"configuration is missing '{key}'")
+        return self._cfg_processed[key]
+
+    def argparse_init(self, parser):
+        parser.add_argument("--connstr", type=str)
         parser.add_argument("--module_path", nargs="+", type=str)
         parser.add_argument(
-            "--loglevel", type=str, choices=("debug", "info", "warning"), default="info"
+            "--loglevel",
+            type=str,
+            choices=("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"),
+            default=self._CONFIG_OPTIONS["loglevel"][0],
         )
 
-    def process_argparser_args(self, namespace):
-        self.connstr = namespace.connstr or self.connstr
-        self.module_path = namespace.module_path or self.module_path
-        self.loglevel = self.LOGLEVEL_MAP[namespace.loglevel]
-        self.process_args()
+    def argparse_process(self, namespace):
+        args = {
+            "connstr": namespace.connstr,
+            "module_path": namespace.module_path,
+            "loglevel": namespace.loglevel,
+        }
+        self.set_cmdline_args(args)
 
-    def process_args(self):
-        modload.add_module_paths(self.module_path)
+    def set_cmdline_args(self, args):
+        self._raw_cfg[0] = args
+
+    def _parse_cfg(self):
+        # get rid of unset args
+        for i, args in enumerate(self._raw_cfg):
+            # we don't get rid of stuff in the default config
+            if i == len(self._raw_cfg) - 1:
+                continue
+            for key, value in list(args.items()):
+                if not value:
+                    del self._raw_cfg[i][key]
+
+        cfg = collections.ChainMap(*self._raw_cfg)
+
+        final_cfg = {}
+
+        # handle required args
+        for k, v in self._CONFIG_OPTIONS.items():
+            if not v[1]:  # v[1] -> required function
+                continue
+            if not v[1](cfg[k]):
+                raise Exception(f"required argument '{k}' missing")
+
+        # convert arg types
+        for k, v in self._CONFIG_OPTIONS.items():
+            if v[2]:  # v[2] -> type conversion function
+                final_cfg[k] = v[2](cfg[k])
+            else:
+                final_cfg[k] = cfg[k]
+
+        self._cfg_processed = final_cfg
+
+    def apply_cfg(self):
+        self._parse_cfg()
+        modload.add_module_paths(self["module_path"])
         logging.basicConfig(
-            format="%(asctime)s %(levelname)s %(name)s: %(message)s", level=logging.INFO
+            format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+            level=(
+                logging.INFO
+                if logging.getLevelName(logging.INFO) >= logging.getLevelName(self["loglevel"])
+                else self["loglevel"]
+            ),
         )
-        logging.getLogger("silly").setLevel(self.loglevel)
+        logging.getLogger("silly").setLevel(self["loglevel"])
 
 
 def reexec(executable=None, argv=None):
@@ -58,7 +117,7 @@ def reexec(executable=None, argv=None):
 
 
 def cmd_run(config: SillyConfig, do_reexec=True):
-    main.init(config.connstr)
+    main.init(config["connstr"])
     try:
         main.run()
     except mod.SillyRestartException:
@@ -69,14 +128,14 @@ def cmd_run(config: SillyConfig, do_reexec=True):
 
 
 def cmd_test(config: SillyConfig):
-    main.init(config.connstr)
+    main.init(config["connstr"])
     tests.run_all_tests()
 
 
 def cmd_update(config: SillyConfig, modules: list[str], throw_exc=False):
     _logger.info("updating/installing modules: %s", ", ".join(modules))
     try:
-        main.init(config.connstr, modules_to_install=modules, update=True)
+        main.init(config["connstr"], modules_to_install=modules, update=True)
     except mod.SillyRestartException:
         if throw_exc:
             raise
@@ -86,7 +145,7 @@ def cmd_update(config: SillyConfig, modules: list[str], throw_exc=False):
 def cmd_uninstall(config: SillyConfig, modules: list[str], throw_exc=False):
     _logger.info("uninstalling modules: %s", ", ".join(modules))
     try:
-        main.init(config.connstr, modules_to_uninstall=modules, update=True)
+        main.init(config["connstr"], modules_to_uninstall=modules, update=True)
     except mod.SillyRestartException:
         if throw_exc:
             raise
@@ -100,7 +159,7 @@ def entry(args):
         epilog=":3",
         prog=args[0],
     )
-    config.init_arg_parser(parser)
+    config.argparse_init(parser)
 
     # operations
     subparsers = parser.add_subparsers(dest="operation", required=True)
@@ -110,7 +169,8 @@ def entry(args):
     subparsers.add_parser("uninstall").add_argument("--modules", nargs="+", type=str, required=True)
 
     parsed_args = parser.parse_args(args[1:])
-    config.process_argparser_args(parsed_args)
+    config.argparse_process(parsed_args)
+    config.apply_cfg()
     match parsed_args.operation:
         case "run":
             cmd_run(config)
