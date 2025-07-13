@@ -1,6 +1,10 @@
 import logging
 import starlette.applications
 import sillyorm
+import signal
+import functools
+import multiprocessing
+import time
 import re
 import pathlib
 import hypercorn
@@ -41,14 +45,97 @@ def init(connstr, modules_to_install=[], modules_to_uninstall=[], update=False):
     _routes = http.init_routers()
 
 
+def _worker(worker_type, shutdown_event, main_process_queue, **kwargs):
+    globalvars.threadlocal.main_process_queue = main_process_queue
+    match worker_type:
+        case "web":
+            app = kwargs["starlette_app"]
+            config = kwargs["hypercorn_config"]
+            sockets = kwargs["hypercorn_sockets"]
+            # .. the hypercorn.asyncio.serve function does not pass through the sockets
+            # argument, so we need to do the things it does ourselves
+            asyncio.run(
+                hypercorn.asyncio.worker_serve(
+                    hypercorn.utils.wrap_app(app, config.wsgi_max_body_size, None),
+                    config,
+                    shutdown_trigger=functools.partial(
+                        hypercorn.utils.check_multiprocess_shutdown_event,
+                        shutdown_event,
+                        asyncio.sleep,
+                    ),
+                    sockets=sockets,
+                )
+            )
+
+
 def run():
     starlette_app = starlette.applications.Starlette(
         debug=True,  # FIXME: careful!
         routes=_routes,
     )
+    hypercorn_config = hypercorn.Config()
+    hypercorn_config.bind = "0.0.0.0:5000"
+    hypercorn_config.accesslog = "-"
+    hypercorn_config.errorlog = "-"
+    hypercorn_config.use_reuse_port = True
+    # we want the sockets shared between the workers
+    hypercorn_sockets = hypercorn_config.create_sockets()
 
-    config = hypercorn.Config()
-    config.bind = "0.0.0.0:5000"
-    config.accesslog = "-"
-    config.errorlog = "-"
-    asyncio.run(hypercorn.asyncio.serve(starlette_app, config))
+    # only fork will work for us at the moment
+    multiprocessing.set_start_method("fork")
+
+    shutdown_event = multiprocessing.Event()
+    main_process_queue = multiprocessing.Queue()
+
+    running = True
+
+    def stop_workers(*args):
+        nonlocal running
+        running = False
+        shutdown_event.set()
+
+    # prior to forking, we ignore SIGINT so the child processes will also ignore it
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+
+    processes = []
+    for _ in range(3):
+        p = multiprocessing.Process(
+            target=_worker,
+            args=("web", shutdown_event, main_process_queue),
+            kwargs={
+                "starlette_app": starlette_app,
+                "hypercorn_config": hypercorn_config,
+                "hypercorn_sockets": hypercorn_sockets,
+            },
+        )
+        p.start()
+        processes.append(p)
+
+    # now we handle SIGINT (and more) again
+    for signal_name in ["SIGINT", "SIGTERM"]:
+        signal.signal(getattr(signal, signal_name), stop_workers)
+
+    def join_all():
+        for p in processes:
+            p.join()
+
+        # close all the hypercorn sockets, otherwise when we reexec they'll still be open and we get an address in use error...
+        for sl in [
+            hypercorn_sockets.secure_sockets,
+            hypercorn_sockets.insecure_sockets,
+            hypercorn_sockets.quic_sockets,
+        ]:
+            for socket in sl:
+                socket.close()
+
+    while running:
+        if not main_process_queue.empty():
+            task = main_process_queue.get()
+            if isinstance(task, list) and len(task) >= 1 and task[0] == "mod.update":
+                stop_workers()
+                join_all()
+                mod.update(*task[1:])
+                break
+        time.sleep(1)
+
+    join_all()

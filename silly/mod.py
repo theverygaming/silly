@@ -43,7 +43,19 @@ def update(to_change, uninstall):
                 )
         if any(x not in modload.loaded_modules for x in to_change):
             raise Exception("attempted uninstalling something that isn't loaded")
-        # delete records associated with the modules we want to uninstall
+    else:
+        to_uninstall = []
+        to_install = modload.resolve_dependencies(to_change + list(installed_versions))
+
+    ### CHECKS END HERE, DANGER STARTS HERE
+
+    # if we are in a worker we signal the main process to shut down the workers and do the update, then just return
+    if hasattr(globalvars.threadlocal, "main_process_queue"):
+        globalvars.threadlocal.main_process_queue.put(["mod.update", to_change, uninstall])
+        return
+
+    # delete records associated with the modules we want to uninstall
+    if uninstall:
         with globalvars.registry.environment(autocommit=True) as env:
             for modname in to_uninstall:
                 for record in env["xmlid"].search([("source_module", "=", modname)]):
@@ -59,9 +71,6 @@ def update(to_change, uninstall):
                     if original_record:
                         original_record.delete()
                     record.delete()
-    else:
-        to_uninstall = []
-        to_install = modload.resolve_dependencies(to_change + list(installed_versions))
 
     globalvars.registry.reset_full()
     _logger.info("silly update - unloading all modules")

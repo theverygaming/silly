@@ -21,6 +21,8 @@ if __name__ == "__main__":
                     "settings",
                     "jsonrpc",
                     "profiler",
+                    "cron",
+                    "cron_samples",
                 ],
                 throw_exc=True,
             )
@@ -34,4 +36,3 @@ if __name__ == "__main__":
         if str(e) == "update finished":
             argv.append("no_update")
         silly.cli.reexec(argv=argv)
-    silly.main.run()
