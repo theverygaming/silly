@@ -23,6 +23,7 @@ if __name__ == "__main__":
                     "profiler",
                     "cron",
                     "cron_samples",
+                    "modulemanager",
                 ],
                 throw_exc=True,
             )
