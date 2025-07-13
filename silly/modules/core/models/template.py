@@ -6,18 +6,9 @@ import starlette.responses
 import sillyorm
 import silly
 from ..tools import xml as xmltools
+from ..tools.eval import horribly_unsafe_eval
 
 _logger = logging.getLogger(__name__)
-
-
-# FIXME: we do kinda want a safer eval
-def horribly_unsafe_eval(expr, vars):
-    try:
-        ret = eval(expr, {}, vars)
-    except Exception as e:
-        _logger.error("Error evalutating %s - available vars: %s", repr(expr), repr(vars))
-        raise e
-    return ret
 
 
 _HTML_SELFCLOSING_TAGS = [
