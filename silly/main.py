@@ -114,7 +114,7 @@ def _mp_spawn_worker(config, worker_type, shutdown_event, main_process_queue):
 
 def run(config):
     # Windows doesn't support shit
-    use_fork = os.name != "nt" and False
+    use_fork = os.name != "nt"
 
     if use_fork:
         multiprocessing.set_start_method("fork")
