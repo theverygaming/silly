@@ -4,12 +4,11 @@ import silly
 
 
 if __name__ == "__main__":
-    config = silly.cli.SillyConfig()
+    config = silly.config.SillyConfig()
     config.set_cmdline_args({
         "loglevel": "INFO",
         "connstr": "sqlite:///test.db",
     })
-    config.apply_cfg()
 
     try:
         if "no_update" not in sys.argv:

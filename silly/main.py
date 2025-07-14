@@ -5,6 +5,7 @@ import signal
 import functools
 import multiprocessing
 import time
+import os
 import re
 import pathlib
 import hypercorn
@@ -24,11 +25,12 @@ class CustomRegistry(sillyorm.Registry):
 _routes = None
 
 
-def init(connstr, modules_to_install=[], modules_to_uninstall=[], update=False):
+def init(config, modules_to_install=[], modules_to_uninstall=[], update=False):
     global _routes
+    config.apply_cfg()
     _logger.info("silly version [...] starting")
     modload.add_module_paths([str(pathlib.Path(__file__).parent / "modules")])
-    globalvars.registry = CustomRegistry(connstr)
+    globalvars.registry = CustomRegistry(config["connstr"])
     mod.load_core(update and not modules_to_uninstall)
     if update:
         if modules_to_install and modules_to_uninstall:
@@ -46,7 +48,8 @@ def init(connstr, modules_to_install=[], modules_to_uninstall=[], update=False):
 
 
 def _worker(worker_type, shutdown_event, main_process_queue, **kwargs):
-    globalvars.threadlocal.main_process_queue = main_process_queue
+    if main_process_queue is not None:
+        globalvars.threadlocal.main_process_queue = main_process_queue
     match worker_type:
         case "web":
             app = kwargs["starlette_app"]
@@ -54,21 +57,24 @@ def _worker(worker_type, shutdown_event, main_process_queue, **kwargs):
             sockets = kwargs["hypercorn_sockets"]
             # .. the hypercorn.asyncio.serve function does not pass through the sockets
             # argument, so we need to do the things it does ourselves
+            shutdown_trigger = None
+            if shutdown_event is not None:
+                shutdown_trigger = functools.partial(
+                    hypercorn.utils.check_multiprocess_shutdown_event,
+                    shutdown_event,
+                    asyncio.sleep,
+                )
             asyncio.run(
                 hypercorn.asyncio.worker_serve(
                     hypercorn.utils.wrap_app(app, config.wsgi_max_body_size, None),
                     config,
-                    shutdown_trigger=functools.partial(
-                        hypercorn.utils.check_multiprocess_shutdown_event,
-                        shutdown_event,
-                        asyncio.sleep,
-                    ),
+                    shutdown_trigger=shutdown_trigger,
                     sockets=sockets,
                 )
             )
 
 
-def run():
+def run(config):
     starlette_app = starlette.applications.Starlette(
         debug=True,  # FIXME: careful!
         routes=_routes,
@@ -80,6 +86,15 @@ def run():
     hypercorn_config.use_reuse_port = True
     # we want the sockets shared between the workers
     hypercorn_sockets = hypercorn_config.create_sockets()
+
+    def _close_hypercorn_sockets():
+        for sl in [
+            hypercorn_sockets.secure_sockets,
+            hypercorn_sockets.insecure_sockets,
+            hypercorn_sockets.quic_sockets,
+        ]:
+            for socket in sl:
+                socket.close()
 
     # only fork will work for us at the moment
     multiprocessing.set_start_method("fork")
@@ -120,13 +135,7 @@ def run():
             p.join()
 
         # close all the hypercorn sockets, otherwise when we reexec they'll still be open and we get an address in use error...
-        for sl in [
-            hypercorn_sockets.secure_sockets,
-            hypercorn_sockets.insecure_sockets,
-            hypercorn_sockets.quic_sockets,
-        ]:
-            for socket in sl:
-                socket.close()
+        _close_hypercorn_sockets()
 
     while running:
         if not main_process_queue.empty():
