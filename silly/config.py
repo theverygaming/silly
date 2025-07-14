@@ -16,6 +16,8 @@ class SillyConfig:
         "connstr": (None, lambda x: bool(x), str),
         "module_path": (["modules/"], False, list),
         "loglevel": ("INFO", False, lambda x: logging.getLevelNamesMapping()[x]),
+        "workers-web": (1, False, int),
+        "workers-cron": (1, False, int),
     }
 
     def __init__(self):
@@ -63,7 +65,7 @@ class SillyConfig:
             if i == len(self._raw_cfg) - 1:
                 continue
             for key, value in list(args.items()):
-                if not value:
+                if value is None or value == "":
                     del self._raw_cfg[i][key]
 
         cfg = collections.ChainMap(*self._raw_cfg)

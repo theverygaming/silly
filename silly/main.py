@@ -48,6 +48,7 @@ def init(config, modules_to_install=[], modules_to_uninstall=[], update=False):
 
 
 def _worker(worker_type, shutdown_event, main_process_queue, **kwargs):
+    _logger.info("worker of type '%s' with PID %s starting", worker_type, os.getpid())
     if main_process_queue is not None:
         globalvars.threadlocal.main_process_queue = main_process_queue
     match worker_type:
@@ -57,24 +58,21 @@ def _worker(worker_type, shutdown_event, main_process_queue, **kwargs):
             sockets = kwargs["hypercorn_sockets"]
             # .. the hypercorn.asyncio.serve function does not pass through the sockets
             # argument, so we need to do the things it does ourselves
-            shutdown_trigger = None
-            if shutdown_event is not None:
-                shutdown_trigger = functools.partial(
-                    hypercorn.utils.check_multiprocess_shutdown_event,
-                    shutdown_event,
-                    asyncio.sleep,
-                )
             asyncio.run(
                 hypercorn.asyncio.worker_serve(
                     hypercorn.utils.wrap_app(app, config.wsgi_max_body_size, None),
                     config,
-                    shutdown_trigger=shutdown_trigger,
+                    shutdown_trigger=functools.partial(
+                        hypercorn.utils.check_multiprocess_shutdown_event,
+                        shutdown_event,
+                        asyncio.sleep,
+                    ),
                     sockets=sockets,
                 )
             )
 
 
-def run(config):
+def _web_init():
     starlette_app = starlette.applications.Starlette(
         debug=True,  # FIXME: careful!
         routes=_routes,
@@ -86,18 +84,42 @@ def run(config):
     hypercorn_config.use_reuse_port = True
     # we want the sockets shared between the workers
     hypercorn_sockets = hypercorn_config.create_sockets()
+    return (starlette_app, hypercorn_config, hypercorn_sockets)
 
-    def _close_hypercorn_sockets():
-        for sl in [
-            hypercorn_sockets.secure_sockets,
-            hypercorn_sockets.insecure_sockets,
-            hypercorn_sockets.quic_sockets,
-        ]:
-            for socket in sl:
-                socket.close()
 
-    # only fork will work for us at the moment
-    multiprocessing.set_start_method("fork")
+def _close_hypercorn_sockets(hypercorn_sockets):
+    for sl in [
+        hypercorn_sockets.secure_sockets,
+        hypercorn_sockets.insecure_sockets,
+        hypercorn_sockets.quic_sockets,
+    ]:
+        for socket in sl:
+            socket.close()
+
+
+def _mp_spawn_worker(config, worker_type, shutdown_event, main_process_queue):
+    init(config)
+    w_kwargs = {}
+    if worker_type == "web":
+        w_kwargs["starlette_app"], w_kwargs["hypercorn_config"], w_kwargs["hypercorn_sockets"] = (
+            _web_init()
+        )
+    _worker(
+        worker_type,
+        shutdown_event,
+        main_process_queue,
+        **w_kwargs,
+    )
+
+
+def run(config):
+    # Windows doesn't support shit
+    use_fork = os.name != "nt" and False
+
+    if use_fork:
+        multiprocessing.set_start_method("fork")
+    else:
+        multiprocessing.set_start_method("spawn")
 
     shutdown_event = multiprocessing.Event()
     main_process_queue = multiprocessing.Queue()
@@ -109,20 +131,33 @@ def run(config):
         running = False
         shutdown_event.set()
 
+    if use_fork:
+        starlette_app, hypercorn_config, hypercorn_sockets = _web_init()
+
+    # without fork, only one web worker is supported
+    if not use_fork and config["workers-web"] > 1:
+        raise Exception("without fork, only a single web worker is supported")
+
     # prior to forking, we ignore SIGINT so the child processes will also ignore it
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
     processes = []
-    for _ in range(3):
-        p = multiprocessing.Process(
-            target=_worker,
-            args=("web", shutdown_event, main_process_queue),
-            kwargs={
-                "starlette_app": starlette_app,
-                "hypercorn_config": hypercorn_config,
-                "hypercorn_sockets": hypercorn_sockets,
-            },
-        )
+    for wktype in ["web"] * config["workers-web"] + ["cron"] * config["workers-cron"]:
+        if use_fork:
+            p = multiprocessing.Process(
+                target=_worker,
+                args=(wktype, shutdown_event, main_process_queue),
+                kwargs={
+                    "starlette_app": starlette_app,
+                    "hypercorn_config": hypercorn_config,
+                    "hypercorn_sockets": hypercorn_sockets,
+                },
+            )
+        else:
+            p = multiprocessing.Process(
+                target=_mp_spawn_worker,
+                args=(config, wktype, shutdown_event, main_process_queue),
+            )
         p.start()
         processes.append(p)
 
@@ -135,7 +170,8 @@ def run(config):
             p.join()
 
         # close all the hypercorn sockets, otherwise when we reexec they'll still be open and we get an address in use error...
-        _close_hypercorn_sockets()
+        if use_fork:
+            _close_hypercorn_sockets(hypercorn_sockets)
 
     while running:
         if not main_process_queue.empty():
@@ -145,6 +181,6 @@ def run(config):
                 join_all()
                 mod.update(*task[1:])
                 break
-        time.sleep(1)
+        time.sleep(0.25)
 
     join_all()
