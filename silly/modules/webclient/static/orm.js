@@ -1,4 +1,4 @@
-import { jsonrpc } from "@jsonrpc";
+import { jsonrpc } from "@tools/jsonrpc";
 
 function jsonrpc_id() {
     return Math.floor(Math.random() * 0xFFFFFFFF);
