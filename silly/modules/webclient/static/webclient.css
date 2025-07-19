@@ -1,21 +1,6 @@
-.table-nice {
-    border-collapse: collapse;
-    width: 100%;
-}
-
-.table-nice td,
-.table-nice th {
-    text-align: left;
-    border: 1px solid #000000;
-    padding: 10px;
-}
-
-.table-nice tr:nth-child(even) {
-    background-color: #bbbbbb;
-}
 
 body {
     /* https://gaydient.com/ */
     background: linear-gradient(135deg, #FFFFFF 0%, #FFFFFF 9%, #FFAFC8 9%, #FFAFC8 18%, #74D7EE 18%, #74D7EE 27%, #613915 27%, #613915 36%, #000000 36%, #000000 45%, #E40303 45%, #E40303 55%, #FF8C00 55%, #FF8C00 64%, #FFED00 64%, #FFED00 73%, #008026 73%, #008026 82%, #24408E 82%, #24408E 91%, #732982 91%, #732982 100%);
-    background-attachment: fixed;
+    height: 100vh;
 }

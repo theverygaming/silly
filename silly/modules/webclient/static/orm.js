@@ -19,7 +19,7 @@ function convORMJsonrpcType(environment, obj) {
         // accumulate ids and field values for the recordset, recurse into all field values and convert them
         for (const rec of obj.records) {
             ids.push(convORMJsonrpcType(environment, rec["id"].value));
-            delete rec["id"];
+            //delete rec["id"];
             const fields_obj = {};
             for (const [key, value] of Object.entries(rec)) {
                 fields_obj[key] = convORMJsonrpcType(environment, value);
@@ -92,7 +92,7 @@ class Recordset {
             next: () => {
                 if (idx < ids.length) {
                     let c_idx = idx++;
-                    return { value: new Recordset(model, [ids[c_idx]], fields[c_idx]).asProxy(), done: false };
+                    return { value: new Recordset(model, [ids[c_idx]], [fields[c_idx]]).asProxy(), done: false };
                 } else {
                     return { done: true };
                 }
