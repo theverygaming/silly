@@ -11,7 +11,7 @@ import pathlib
 import hypercorn
 import hypercorn.asyncio
 import asyncio
-from . import modload, mod, http, globalvars
+from . import modload, mod, http, globalvars, cron
 
 _logger = logging.getLogger(__name__)
 
@@ -70,6 +70,8 @@ def _worker(worker_type, shutdown_event, main_process_queue, **kwargs):
                     sockets=sockets,
                 )
             )
+        case "cron":
+            asyncio.run(cron.run_jobs(shutdown_event))
 
 
 def _web_init():

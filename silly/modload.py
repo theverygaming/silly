@@ -168,6 +168,7 @@ def unload_all():
         del sys.modules[mod]
 
     silly.http.Router.direct_children = []
+    silly.cron._all_jobs = []
 
 
 def get_manifest(name):
