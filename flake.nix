@@ -4,6 +4,10 @@
   inputs = {
     nixpkgs.url = "nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    sillyORM = {
+      url = "github:theverygaming/sillyORM/dev";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -11,6 +15,7 @@
       self,
       nixpkgs,
       flake-utils,
+      sillyORM,
     }:
     { }
     // flake-utils.lib.eachDefaultSystem (
@@ -18,26 +23,6 @@
       let
         pkgs = import nixpkgs {
           inherit system;
-        };
-        # FIXME: sillyORM should provide a nix flake!
-        sillyORMPackage = pkgs.python313Packages.buildPythonPackage rec {
-          pname = "sillyorm";
-          version = "1.0.0";
-          pyproject = true;
-
-          build-system = [
-            pkgs.python313Packages.setuptools
-          ];
-
-          propagatedBuildInputs = [
-            pkgs.python313Packages.alembic
-            pkgs.python313Packages.sqlalchemy
-          ];
-
-          src = pkgs.fetchPypi {
-            inherit pname version;
-            hash = "sha256-SGIPqNWhL7YINTpELkJ5WSh4abRoE8IozGC6uW6Z4aQ=";
-          };
         };
       in
       rec {
@@ -51,7 +36,7 @@
           ];
 
           propagatedBuildInputs = with pkgs; [
-            sillyORMPackage
+            sillyORM.packages.${system}.default
             python313Packages.lxml
             python313Packages.starlette
             python313Packages.hypercorn
