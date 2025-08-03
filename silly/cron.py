@@ -56,4 +56,12 @@ async def run_jobs(shutdown_event):
         # can we wait? if yes, how long?
         t_min_wait = min([j["interval"] - (time.time() - j["lastcall"]) for j in jobs])
         if t_min_wait > 0:
-            await asyncio.sleep(t_min_wait)
+            await _sleep_or_event(shutdown_event, t_min_wait, 1)
+
+
+async def _sleep_or_event(event, secs, interval):
+    while secs:
+        if event.is_set():
+            return
+        await asyncio.sleep(interval)
+        secs -= interval
