@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <record model="cron" xmlid="cron_samples.test_cron">
-        <field name="code" t="str">
-            _logger.info("cron run!")
-        </field>
+    <record model="cron.job" xmlid="cron_samples.test_cron">
+        <field name="name" t="str">Test Job 1</field>
+        <field name="interval" t="int">1</field>
+        <field name="code" t="str">_logger.info("this is cron 1")</field>
+    </record>
+
+    <record model="cron.job" xmlid="cron_samples.test_cron2">
+        <field name="name" t="str">Test Job 2</field>
+        <field name="interval" t="int">2</field>
+        <field name="code" t="str">_logger.info("this is cron 2")</field>
     </record>
 </root>
