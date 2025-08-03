@@ -74,6 +74,7 @@ def _worker(worker_type, shutdown_event, main_process_queue, **kwargs):
             )
         case "cron":
             asyncio.run(cron.run_jobs(shutdown_event))
+    _logger.info("worker of type '%s' with PID %s stopping", worker_type, os.getpid())
 
 
 def _web_init():
