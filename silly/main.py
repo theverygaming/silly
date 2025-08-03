@@ -51,6 +51,8 @@ def _worker(worker_type, shutdown_event, main_process_queue, **kwargs):
     _logger.info("worker of type '%s' with PID %s starting", worker_type, os.getpid())
     if main_process_queue is not None:
         globalvars.threadlocal.main_process_queue = main_process_queue
+    # clean up the connection pool, otherwise shit breaks
+    globalvars.registry.engine.pool.dispose()
     match worker_type:
         case "web":
             app = kwargs["starlette_app"]
@@ -142,6 +144,9 @@ def run(config):
 
     # prior to forking, we ignore SIGINT so the child processes will also ignore it
     signal.signal(signal.SIGINT, signal.SIG_IGN)
+
+    # clean up the connection pool, otherwise shit breaks
+    globalvars.registry.engine.pool.dispose()
 
     processes = []
     for wktype in ["web"] * config["workers-web"] + ["cron"] * config["workers-cron"]:
