@@ -60,7 +60,7 @@ async def run_jobs(shutdown_event):
 
 
 async def _sleep_or_event(event, secs, interval):
-    while secs:
+    while secs > 0:
         if event.is_set():
             return
         await asyncio.sleep(interval)
