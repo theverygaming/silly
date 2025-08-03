@@ -8,7 +8,10 @@ precommit: test
 .PHONY: test
 test:
 	./silly-entry --connstr "sqlite:///silly_test_run.db" --loglevel DEBUG update --modules $$(find . -name "__manifest__.py" | xargs -n1 dirname | xargs -n1 basename)
-	coverage run --source=silly,modules ./silly-entry --connstr "sqlite:///silly_test_run.db" --loglevel DEBUG test
+	./silly-entry --connstr "sqlite:///silly_test_run.db" --loglevel DEBUG test
+
+	./silly-entry --connstr "postgresql://postgres:postgres@localhost:5432/postgres" --loglevel DEBUG update --modules $$(find . -name "__manifest__.py" | xargs -n1 dirname | xargs -n1 basename)
+	coverage run --source=silly,modules ./silly-entry --connstr "postgresql://postgres:postgres@localhost:5432/postgres" --loglevel DEBUG test
 	coverage html --omit="*/tests/test_*.py,__manifest__.py"
 	coverage report -m --omit="*/tests/test_*.py,__manifest__.py"
 
