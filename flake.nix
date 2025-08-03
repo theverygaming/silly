@@ -40,6 +40,7 @@
             python313Packages.lxml
             python313Packages.starlette
             python313Packages.hypercorn
+            python313Packages.psycopg2
           ];
 
           src = ./.;
