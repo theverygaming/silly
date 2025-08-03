@@ -99,6 +99,13 @@ class SillyAbstractBase(silly.model.AbstractModel):
             "records": subfield_data,
         }
 
+    def webclient_search(self, domain, *args, **kwargs):
+        # fix up the domain - JS can only pass lists, not tuples
+        for i, op in enumerate(domain):
+            if isinstance(op, list):
+                domain[i] = tuple(op)
+        return super().search(domain, *args, **kwargs)
+
 
 class ViewType(silly.model.Model):
     _name = "view_type"
