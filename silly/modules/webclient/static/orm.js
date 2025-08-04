@@ -82,17 +82,25 @@ class Recordset {
         });
     }
 
+    getRecordAtIdx(idx) {
+        if (idx >= this.ids.length) {
+            throw new Error(`cannot get record at index ${idx}, there are only ${this.ids.length} records in this recordset`);
+        }
+        return new Recordset(this.model, [this.ids[idx]], [this.fields[idx]]).asProxy();
+    }
+
+    getNRecords() {
+        return this.ids.length;
+    }
+
     [Symbol.iterator]() {
         let idx = 0;
-        const model = this.model;
         const ids = this.ids;
-        const fields = this.fields;
 
         return {
             next: () => {
                 if (idx < ids.length) {
-                    let c_idx = idx++;
-                    return { value: new Recordset(model, [ids[c_idx]], [fields[c_idx]]).asProxy(), done: false };
+                    return { value: this.getRecordAtIdx(idx++), done: false };
                 } else {
                     return { done: true };
                 }
