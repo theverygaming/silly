@@ -30,7 +30,10 @@ function xmlToPreact(node, ctx = {}) {
         for (const attr of node.attributes) {
             // t-att
             if (attr.name.startsWith("t-att-")) {
-                out_attrs[attr.name.slice("t-att-".length)] = safeIshEval(attr.value, ctx);
+                const val = safeIshEval(attr.value, ctx);
+                if (val != undefined && val != null) {
+                    out_attrs[attr.name.slice("t-att-".length)] = val;
+                }
                 continue;
             }
             // t-if
@@ -59,6 +62,12 @@ function xmlToPreact(node, ctx = {}) {
             // t-out
             if (attr.name == "t-out") {
                 special_state = "out";
+                special_state_var = safeIshEval(attr.value, ctx);
+                continue
+            }
+            // t-component
+            if (attr.name == "t-component") {
+                special_state = "component";
                 special_state_var = safeIshEval(attr.value, ctx);
                 continue
             }
@@ -99,12 +108,13 @@ function xmlToPreact(node, ctx = {}) {
             case "out": {
                 return createElement(eltype, out_attrs, special_state_var);
             }
+            case "component": {
+                eltype = special_state_var;
+                break;
+            }
         }
 
-        // children
-        const children = render_children(node, ctx);
-
-        return createElement(eltype, out_attrs, ...children);
+        return createElement(eltype, out_attrs, ...render_children(node, ctx));
     }
 
     if (node.nodeType === Node.TEXT_NODE) {

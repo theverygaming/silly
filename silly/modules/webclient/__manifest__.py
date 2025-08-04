@@ -14,8 +14,10 @@
         "js/registry.js": "registry.js",
         "js/views/view.js": "views/view.js",
         "js/views/listView.js": "views/listView.js",
+        "js/views/formView.js": "views/formView.js",
         "js/views/field.js": "views/field.js",
         "js/error.js": "error.js",
+        "js/menu.js": "menu.js",
     },
     "data": [
         "templates/index.xml",

@@ -26,4 +26,26 @@
             </view>
         </field>
     </record>
+
+    <record model="view" xmlid="webclient.view_2">
+        <field name="model_name" t="str">some_model</field>
+        <field name="xml" t="str">
+            <view component="FormView">
+                <properties>
+                </properties>
+                <definition>
+                    <head>
+                        <h1>Hewwo!</h1>
+                    </head>
+                    <form>
+                        <field name="id" style="color: green;"/>
+                        <field name="xmlid"/>
+                        <div style="color: red;">
+                            <field name="id"/>
+                        </div>
+                    </form>
+                </definition>
+            </view>
+        </field>
+    </record>
 </root>

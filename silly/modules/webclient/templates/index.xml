@@ -12,6 +12,7 @@
                         <script type="importmap"><t t-raw="importmap"/></script>
                         <script type="module" src="/static/js/root.js"></script>
                         <link rel="stylesheet" href="https://esm.sh/bulma@1.0.4/css/bulma.min.css"/>
+                        <link rel="stylesheet" href="https://esm.sh/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"/>
                         <link rel="stylesheet" href="/static/css/webclient.css"/>
                     </t>
                     <t t-set="body"/>

@@ -1,4 +1,4 @@
-import { createElement, Component } from "@preact";
+import { Component } from "@preact";
 import { xml2preact } from "@tools/xml2preact";
 
 
