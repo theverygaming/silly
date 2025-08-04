@@ -17,7 +17,7 @@
         "js/views/formView.js": "views/formView.js",
         "js/views/field.js": "views/field.js",
         "js/error.js": "error.js",
-        "js/menu.js": "menu.js",
+        "js/mainNavigation.js": "mainNavigation.js",
     },
     "data": [
         "templates/index.xml",

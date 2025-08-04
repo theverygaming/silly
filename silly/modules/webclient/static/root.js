@@ -2,7 +2,7 @@ import { createElement, cloneElement, render, Component, toChildArray, Fragment 
 import { env } from "@orm";
 import { getView } from "@views/view";
 import { ErrorHandler } from "@error";
-import { Menu } from "@menu";
+import { MainNavigation } from "@mainNavigation";
 import { xml2preact } from "@tools/xml2preact";
 
 import "@views/listView"; // gotta import so the code runs.. // FIXME!!
@@ -27,7 +27,7 @@ class App extends Component {
         return xml2preact(`
 <template>
     <t t-component="ErrorHandler">
-        <t t-component="Menu">
+        <t t-component="MainNavigation">
             <t t-out="extraEl"/>
         </t>
     </t>
@@ -36,7 +36,7 @@ class App extends Component {
             {
                 ErrorHandler,
                 extraEl,
-                Menu,
+                MainNavigation,
             },
         );
     }

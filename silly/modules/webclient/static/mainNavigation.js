@@ -1,7 +1,7 @@
 import { Component } from "@preact";
 import { xml2preact } from "@tools/xml2preact";
 
-export class Menu extends Component {
+export class MainNavigation extends Component {
     state = {
         gridMenu: false,
         navHistory: ["something 1", "something 2", "something 3", "something 4"],
