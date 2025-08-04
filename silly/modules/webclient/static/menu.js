@@ -4,6 +4,7 @@ import { xml2preact } from "@tools/xml2preact";
 export class Menu extends Component {
     state = {
         gridMenu: false,
+        navHistory: ["something 1", "something 2", "something 3", "something 4"],
     };
 
     render() {
@@ -37,6 +38,15 @@ export class Menu extends Component {
                 </div>
             </div>
         </div>
+    </nav>
+    <nav class="breadcrumb">
+        <ul>
+            <t t-set="idx" t-value="0"/>
+            <t t-foreach="state.navHistory" t-as="item">
+                <li t-att-class="idx == (state.navHistory.length - 1) ? 'is-active' : null"><a href="#"><t t-out="item"/></a></li>
+                <t t-set="idx" t-value="idx + 1"/>
+            </t>
+        </ul>
     </nav>
     <t t-if="!state.gridMenu" t-out="props.children"/>
 </template>`,
