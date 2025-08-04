@@ -1,4 +1,4 @@
-import { createElement, cloneElement, toChildArray } from "@preact";
+import { createElement, cloneElement, toChildArray, Fragment } from "@preact";
 import { View } from "@views/view";
 import { registry } from "@registry";
 import { FieldComponent } from "@views/field";
@@ -23,31 +23,22 @@ export class FormView extends View {
         let headNode = toChildArray(props.children).find(child => child.type === "head");
         let formNode = toChildArray(props.children).find(child => child.type === "form");
 
-        // table head
-        let thead = createElement("thead", {}, createElement("tr", { }, toChildArray(headNode.props.children).map(child => {
-            return this.transformTableElements(child, null);
-        })));
+        // head
+        let head = createElement("div", {}, toChildArray(headNode.props.children).map(child => {
+            return this.transformElements(child, null);
+        }));
 
-        // rows
-        const rowTemplate = formNode;
-        const rows = Array.from(props.recordset).map(record => {
-            return this.transformTableElements(rowTemplate, record, (node) => {
-                if (node.type == "row") {
-                    return {
-                        onClick: onRowClick,
-                        "data-recid": record.id,
-                    };
-                }
-                return null;
-            });
-        });
-        return createElement("table", { class: "table" },
-            thead,
-            createElement("tbody", {}, rows),
+        // stuff
+        const record = props.recordset.getRecordAtIdx(0);
+        const body = this.transformElements(formNode, record);
+        return createElement("div", {},
+            head,
+            createElement("div", {}, body),
         );
     }
 
-    transformTableElements(node, record, extraPropsFn = null) {
+    // FIXME: this function is partly duplicated in listView, it should be abstracted and put into the base view class!
+    transformElements(node, record, extraPropsFn = null) {
         if (!node) {
             return null;
         }
@@ -59,7 +50,7 @@ export class FormView extends View {
 
         let extraProps = extraPropsFn?.(node) || {};
 
-        const children = node.props?.children ? toChildArray(node.props.children).map(c => this.transformTableElements(c, record, extraPropsFn)) : null;
+        const children = node.props?.children ? toChildArray(node.props.children).map(c => this.transformElements(c, record, extraPropsFn)) : null;
 
         // add our props to fields
         if (node.type === FieldComponent) {
@@ -68,9 +59,7 @@ export class FormView extends View {
 
         // transform some tags
         const tagMap = {
-            "headCell": "th",
-            "cell": "td",
-            "row": "tr",
+            "form": Fragment,
         };
         if (node.type in tagMap) {
             // transform tag according to the map
