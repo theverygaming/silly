@@ -31,7 +31,7 @@ export class Menu extends Component {
             </div>
             <div class="navbar-end">
                 <div class="navbar-item">
-                    <button class="button is-primary">
+                    <button class="button is-primary" t-att-onClick="meowButton">
                         meow
                     </button>
                 </div>
@@ -44,6 +44,16 @@ export class Menu extends Component {
                 props: this.props,
                 state: this.state,
                 toggleGridMenu: ((x) => { this.setState({gridMenu: !this.state.gridMenu}); }),
+                meowButton: () => {
+                    console.log("meow");
+                    const urls = [
+                        "https://upload.wikimedia.org/wikipedia/commons/7/74/2015-11-24.%CE%BD%CE%B9%CE%B1%CE%BF%CF%8D%CF%81%CE%B9%CF%83%CE%BC%CE%B1.%CE%9D%CE%B9%CE%AC%CE%BF%CF%85.noise_reduced.flac",
+                        "https://upload.wikimedia.org/wikipedia/commons/3/31/Felis_silvestris_catus.ogg",
+                        "https://upload.wikimedia.org/wikipedia/commons/0/0c/Meow_domestic_cat.ogg",
+                        "https://upload.wikimedia.org/wikipedia/commons/6/62/Meow.ogg",
+                    ];
+                    new Audio(urls[Math.floor(Math.random() * urls.length)]).play();
+                },
                 navs: [
                     {name: "test1", url: "#test1"},
                     {name: "test2", url: "#test2"},
