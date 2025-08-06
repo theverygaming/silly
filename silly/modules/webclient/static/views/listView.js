@@ -10,6 +10,7 @@ export class ListView extends View {
 
     onRowClick(e) {
         // TODO: work with index in recordset or smth instead maybe probably or idk
+        // (thinking of paging that's prolly also bad so should work by ID..)
         // fix it at least!
         const recid = parseInt(e.target.closest("tr").dataset.recid);
         console.log(recid);
