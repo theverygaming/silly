@@ -18,6 +18,8 @@
         "js/views/field.js": "views/field.js",
         "js/error.js": "error.js",
         "js/mainNavigation.js": "mainNavigation.js",
+        "js/bus.js": "bus.js",
+        "js/action.js": "action.js",
     },
     "data": [
         "templates/index.xml",

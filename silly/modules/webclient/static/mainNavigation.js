@@ -1,11 +1,29 @@
 import { Component } from "@preact";
 import { xml2preact } from "@tools/xml2preact";
+import { actionBus, Action } from "@action";
+import { getView } from "@views/view";
+import { env } from "@orm";
 
 export class MainNavigation extends Component {
     state = {
-        gridMenu: false,
-        navHistory: ["something 1", "something 2", "something 3", "something 4"],
+        gridMenu: true,
+        navHistory: [],
     };
+
+    async componentDidMount() {
+        actionBus.subscribe(async (act) => {
+            console.log(act);
+            let view = (await (await env.model("xmlid").call("lookup", [act.view], {model: "view"})).call("webclient_read", [["model_name", "xml"]]));
+            console.log(view);
+            console.log(view.xml);
+            const vc = getView(view.xml, act.recordset);
+            this.setState({navHistory: [...this.state.navHistory, {
+                name: "idk",
+                xml: view.xml,
+                recordset: act.recordset,
+            }]});
+        });
+    }
 
     render() {
         return xml2preact(`
@@ -43,17 +61,46 @@ export class MainNavigation extends Component {
         <ul>
             <t t-set="idx" t-value="0"/>
             <t t-foreach="state.navHistory" t-as="item">
-                <li t-att-class="idx == (state.navHistory.length - 1) ? 'is-active' : null"><a href="#"><t t-out="item"/></a></li>
+                <li t-att-class="idx == (state.navHistory.length - 1) ? 'is-active' : null"><a href="#"><t t-out="item.name"/></a></li>
                 <t t-set="idx" t-value="idx + 1"/>
             </t>
         </ul>
     </nav>
-    <t t-if="!state.gridMenu" t-out="props.children"/>
+    <div>
+        <!--
+            To preserve component state we hide them. This is cursed but otherwise
+            I got stupid errors when preact rendered components
+            that were missing their old references
+
+            It's past midnight and I don't want to deal with this shit
+        -->
+        <t t-set="idx" t-value="0"/>
+        <t t-foreach="state.navHistory" t-as="item">
+            <div t-att-style="idx == (state.navHistory.length - 1) &amp;&amp; !state.gridMenu ? null : 'display: none;'">
+                <t t-out="getView(item.xml, item.recordset)"/>
+            </div>
+            <t t-set="idx" t-value="idx + 1"/>
+        </t>
+    </div>
+    <t t-if="state.gridMenu">
+        <button class="button is-primary" t-att-onClick="testThingyButton">
+            test thingy
+        </button>
+    </t>
 </template>`,
             {
                 props: this.props,
                 state: this.state,
+                getView: getView,
                 toggleGridMenu: ((x) => { this.setState({gridMenu: !this.state.gridMenu}); }),
+                testThingyButton: () => {
+                    (async () => {
+                        return await (await env.model("xmlid").call("webclient_search", [[]], {})).call("webclient_read", [["id", "xmlid", "model_name", "model_id", "source_module"]]);
+                    })().then((rec) => {
+                        actionBus.publish(new Action({view: "webclient.view_1", recordset: rec}));
+                        this.setState({gridMenu: false});
+                    });
+                },
                 meowButton: () => {
                     console.log("meow");
                     const urls = [

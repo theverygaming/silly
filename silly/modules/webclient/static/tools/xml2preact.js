@@ -2,10 +2,10 @@ import { createElement, Fragment } from "@preact";
 import { saneXpath } from "@tools/xml";
 
 function safeIshEval(expr, ctx = {}) {
-  const keys = Object.keys(ctx);
-  const values = Object.values(ctx);
-  const code = `return (${expr});`;
-  return new Function(...keys, code)(...values);
+    const keys = Object.keys(ctx);
+    const values = Object.values(ctx);
+    const code = `return (${expr});`;
+    return new Function(...keys, code)(...values);
 }
 
 function xmlToPreact(node, ctx = {}) {
