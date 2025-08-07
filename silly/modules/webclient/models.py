@@ -3,8 +3,8 @@ import silly
 
 
 class SillyAbstractBase(silly.model.AbstractModel):
-    _name = "__silly_abstract_base"
-    _extends = "__silly_abstract_base"
+    _name = "core.__silly_abstract_base"
+    _extends = "core.__silly_abstract_base"
 
     def webclient_model_info(self):
         field_info = {}

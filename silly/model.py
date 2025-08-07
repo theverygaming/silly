@@ -22,14 +22,17 @@ class BaseModel(sillyorm.model.BaseModel):
                 repr(cls),
             )
             return
-        if cls._name != "__silly_abstract_base" and "__silly_abstract_base" not in cls._inherits:
-            cls._inherits = ["__silly_abstract_base"] + cls._inherits
+        if (
+            cls._name != "core.__silly_abstract_base"
+            and "core.__silly_abstract_base" not in cls._inherits
+        ):
+            cls._inherits = ["core.__silly_abstract_base"] + cls._inherits
         log_msg = "adding model to registration list: '%s'"
         log_args = [cls._name]
         if cls._extends:
             log_msg += " -- _extends: %s"
             log_args.append(cls._extends)
-        if cls._inherits and cls._inherits != ["__silly_abstract_base"]:
+        if cls._inherits and cls._inherits != ["core.__silly_abstract_base"]:
             log_msg += " -- _inherits: %s"
             log_args.append(", ".join(cls._inherits))
         _logger.debug(
@@ -51,4 +54,4 @@ class Model(sillyorm.model.Model, BaseModel):
 
 
 class _SillyAbstractBase(AbstractModel):
-    _name = "__silly_abstract_base"
+    _name = "core.__silly_abstract_base"
