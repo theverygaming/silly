@@ -16,7 +16,7 @@ class ActivityPubWebfinger(Webfinger):
         if server != "vps-old.infra.theverygaming.furrypri.de":
             return 404
         _logger.info("requested actor: @%s@%s", name, server)
-        actor = env["activitypub_actor"].search([("username", "=", name)])
+        actor = env["activitypub.actor"].search([("username", "=", name)])
         if not actor:
             return 404
         return actor.gen_webfinger_json()

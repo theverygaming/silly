@@ -7,7 +7,7 @@ class AObject(silly.model.Model):
 
 
 class Actor(silly.model.Model):
-    _name = "activitypub_actor"
+    _name = "activitypub.actor"
 
     # fields from activitypub Object
     isRemote = sillyorm.fields.Integer()  # TODO: boolean

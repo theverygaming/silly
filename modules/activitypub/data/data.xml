@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <record model="activitypub_actor" xmlid="activitypub.actor_meow4">
+    <record model="activitypub.actor" xmlid="activitypub.actor_meow4">
         <field name="username" t="str">meow4</field>
 
         <field name="publickey" t="str">-----BEGIN PUBLIC KEY-----

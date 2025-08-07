@@ -16,11 +16,11 @@ class ActivityPubUser(http.Router):
         accept = request.headers.get("accept", "")
         if "text/html" in accept:
             _logger.info("requested profile page (HTML) for: %s", username)
-            actor = request.env["activitypub_actor"].search([("username", "=", username)])
+            actor = request.env["activitypub.actor"].search([("username", "=", username)])
             return f"this would be a profile page for '{actor.username}'"
         elif "application/activity+json" in accept:
             _logger.info("requested profile (JSON) for: %s", username)
-            actor = request.env["activitypub_actor"].search([("username", "=", username)])
+            actor = request.env["activitypub.actor"].search([("username", "=", username)])
             return starlette.responses.JSONResponse(
                 json.dumps(actor.gen_actor_json()), media_type="application/activity+json"
             )

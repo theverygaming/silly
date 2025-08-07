@@ -8,7 +8,7 @@ class ActivityPubRoutes(http.Router):
 
     @http.route("/users")
     def users(self, request):
-        actors = request.env["activitypub_actor"].search([])
+        actors = request.env["activitypub.actor"].search([])
         return request.env["core.template"].render_html_resp(
             "activitypub.template_users",
             {

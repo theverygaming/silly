@@ -3,7 +3,7 @@ import silly
 
 
 class Setting(silly.model.Model):
-    _name = "settings_setting"
+    _name = "settings.setting"
 
     key = sillyorm.fields.String(length=255)
     value = sillyorm.fields.Text()
