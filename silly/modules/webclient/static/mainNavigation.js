@@ -26,7 +26,7 @@ export class MainNavigation extends Component {
     async componentDidMount() {
         actionBus.subscribe(async (act) => {
             console.log(act);
-            let view = (await (await env.model("xmlid").call("lookup", [act.view], {model: "view"})).call("webclient_read", [["model_name", "xml"]]));
+            let view = (await (await env.model("xmlid").call("lookup", [act.view], {model: "webclient.view"})).call("webclient_read", [["model_name", "xml"]]));
             console.log(view);
             console.log(view.xml);
             this.setState({

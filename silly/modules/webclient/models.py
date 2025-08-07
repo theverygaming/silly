@@ -107,15 +107,8 @@ class SillyAbstractBase(silly.model.AbstractModel):
         return super().search(domain, *args, **kwargs)
 
 
-class ViewType(silly.model.Model):
-    _name = "view_type"
-
-    component_name = sillyorm.fields.String(length=255)
-
-
 class View(silly.model.Model):
-    _name = "view"
+    _name = "webclient.view"
 
-    model_name = sillyorm.fields.String(length=255)
-    type_id = sillyorm.fields.Many2one("view_type")
+    model_name = sillyorm.fields.String()
     xml = sillyorm.fields.Text()
