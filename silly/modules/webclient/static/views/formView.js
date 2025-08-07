@@ -7,19 +7,7 @@ import { FieldComponent } from "@views/field";
 export class FormView extends View {
     state = {};
 
-    onRowClick(e) {
-        const recid = parseInt(e.target.closest("tr").dataset.recid);
-        console.log(recid);
-        if (recid == 1) {
-            throw new Error("test: record with ID 1 clicked");
-        }
-    }
-
     render(props, state) {
-        const onRowClick = (e) => {
-            this.onRowClick(e);
-        };
-
         let headNode = toChildArray(props.children).find(child => child.type === "head");
         let formNode = toChildArray(props.children).find(child => child.type === "form");
 

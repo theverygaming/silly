@@ -8,6 +8,19 @@ export class MainNavigation extends Component {
     state = {
         gridMenu: true,
         navHistory: [],
+        navHistoryActiveIdx: -1,
+        menubar: [
+            {name: "test1", url: "#test1"},
+            {name: "test2", url: "#test2"},
+            {
+                name: "more",
+                children: [
+                    {name: "test3", url: "#test3"},
+                    {name: "test4", url: "#test4"},
+                    {name: "test5", url: "#test5"},
+                ],
+            },
+        ]
     };
 
     async componentDidMount() {
@@ -16,12 +29,14 @@ export class MainNavigation extends Component {
             let view = (await (await env.model("xmlid").call("lookup", [act.view], {model: "view"})).call("webclient_read", [["model_name", "xml"]]));
             console.log(view);
             console.log(view.xml);
-            const vc = getView(view.xml, act.recordset);
-            this.setState({navHistory: [...this.state.navHistory, {
-                name: "idk",
-                xml: view.xml,
-                recordset: act.recordset,
-            }]});
+            this.setState({
+                navHistory: [...this.state.navHistory.slice(0, this.state.navHistoryActiveIdx+1), {
+                    name: "idk",
+                    xml: view.xml,
+                    recordset: act.recordset,
+                }],
+                navHistoryActiveIdx: this.state.navHistoryActiveIdx + 1
+            });
         });
     }
 
@@ -36,7 +51,7 @@ export class MainNavigation extends Component {
         </div>
         <div class="navbar-menu">
             <div t-if="!state.gridMenu" class="navbar-start">
-                <t t-foreach="navs" t-as="item">
+                <t t-foreach="state.menubar" t-as="item">
                     <a t-if="!('children' in item)" class="navbar-item" t-att-href="item.url" t-out="item.name"/>
                     <div t-if="'children' in item" class="navbar-item has-dropdown is-hoverable">
                         <a class="navbar-link" t-out="item.name"/>
@@ -61,7 +76,7 @@ export class MainNavigation extends Component {
         <ul>
             <t t-set="idx" t-value="0"/>
             <t t-foreach="state.navHistory" t-as="item">
-                <li t-att-class="idx == (state.navHistory.length - 1) ? 'is-active' : null"><a href="#"><t t-out="item.name"/></a></li>
+                <li t-att-class="idx == state.navHistoryActiveIdx ? 'is-active' : null"><a t-att-onClick="breadcrumbClick" t-att-data-idx="idx"><t t-out="item.name"/></a></li>
                 <t t-set="idx" t-value="idx + 1"/>
             </t>
         </ul>
@@ -76,7 +91,7 @@ export class MainNavigation extends Component {
         -->
         <t t-set="idx" t-value="0"/>
         <t t-foreach="state.navHistory" t-as="item">
-            <div t-att-style="idx == (state.navHistory.length - 1) &amp;&amp; !state.gridMenu ? null : 'display: none;'">
+            <div t-att-style="idx == state.navHistoryActiveIdx &amp;&amp; !state.gridMenu ? null : 'display: none;'">
                 <t t-out="getView(item.xml, item.recordset)"/>
             </div>
             <t t-set="idx" t-value="idx + 1"/>
@@ -93,6 +108,9 @@ export class MainNavigation extends Component {
                 state: this.state,
                 getView: getView,
                 toggleGridMenu: ((x) => { this.setState({gridMenu: !this.state.gridMenu}); }),
+                breadcrumbClick: (e) => {
+                    this.setState({navHistoryActiveIdx: parseInt(e.target.dataset.idx)});
+                },
                 testThingyButton: () => {
                     (async () => {
                         return await (await env.model("xmlid").call("webclient_search", [[]], {})).call("webclient_read", [["id", "xmlid", "model_name", "model_id", "source_module"]]);
@@ -111,18 +129,6 @@ export class MainNavigation extends Component {
                     ];
                     new Audio(urls[Math.floor(Math.random() * urls.length)]).play();
                 },
-                navs: [
-                    {name: "test1", url: "#test1"},
-                    {name: "test2", url: "#test2"},
-                    {
-                        name: "more",
-                        children: [
-                            {name: "test3", url: "#test3"},
-                            {name: "test4", url: "#test4"},
-                            {name: "test5", url: "#test5"},
-                        ],
-                    },
-                ],
             },
         );
     }
