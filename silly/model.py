@@ -39,6 +39,15 @@ class BaseModel(sillyorm.model.BaseModel):
             log_msg,
             *log_args,
         )
+
+        # warn if the model name conventions are violated
+        if cls._extends and cls._name:
+            l = cls._name.split(".", 1)
+            if len(l) == 1:
+                _logger.warning(
+                    "model '%s' does not comply with <module>.<model> name spec", cls._name
+                )
+
         # FIXME: should probably be removed? idk lol
         if cls in models_to_register:
             raise Exception("already registered")
