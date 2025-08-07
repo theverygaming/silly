@@ -318,4 +318,22 @@ def resolve_dependents(all_modules, modules):
             return dependents
         return find_dependents(new_dependents, dependents)
 
-    return list(find_dependents(modules))
+    # sort in install order (dependencies first, dependents last)
+    result = list(find_dependents(modules))
+    visited = set()
+    ordered = []
+
+    def visit(m):
+        if m in visited:
+            return
+        visited.add(m)
+        for dep in depends_on[m]:
+            if dep in result:
+                visit(dep)
+        ordered.append(m)
+
+    for m in result:
+        visit(m)
+
+    # reverse so we get uninstall order
+    return list(reversed(ordered))
