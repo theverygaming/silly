@@ -1,3 +1,4 @@
+import os
 import logging
 import collections
 from . import modload
@@ -91,12 +92,34 @@ class SillyConfig:
     def apply_cfg(self):
         self._parse_cfg()
         modload.add_module_paths(self["module_path"])
+
+        class SillyFormatter(logging.Formatter):
+            RESET = "\033[0m"
+            LEVEL_COLOR_MAP = {
+                logging.DEBUG: "\033[94m",  # blue
+                logging.INFO: "\033[92m",  # green
+                logging.WARNING: "\033[93m",  # yellow
+                logging.ERROR: "\033[91m",  # red
+                logging.CRITICAL: "\033[95m",  # magenta
+            }
+
+            def format(self, record):
+                record.pid = os.getpid()
+                record.levelname = (
+                    f"{self.LEVEL_COLOR_MAP[record.levelno]}{record.levelname}{self.RESET}"
+                )
+                return super().format(record)
+
+        logfmt = "%(asctime)s %(pid)s %(levelname)s %(name)s: %(message)s"
         logging.basicConfig(
-            format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+            format=logfmt,
             level=(
                 logging.INFO
                 if logging.getLevelName(logging.INFO) >= logging.getLevelName(self["loglevel"])
                 else self["loglevel"]
             ),
         )
+        handler = logging.StreamHandler()
+        handler.setFormatter(SillyFormatter(logfmt))
+        logging.getLogger().handlers = [handler]
         logging.getLogger("silly").setLevel(self["loglevel"])
