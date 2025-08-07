@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <record model="template" xmlid="activitypub.template_index">
+    <record model="core.template" xmlid="activitypub.template_index">
         <field name="xml" t="str">
             <template t-strip-text=" &#10;">
                 <t t-call="html_base.base">
@@ -21,7 +21,7 @@
         <field name="inherit_sequence" t="int">100</field>
     </record>
 
-    <record model="template" xmlid="activitypub.template_users">
+    <record model="core.template" xmlid="activitypub.template_users">
         <field name="xml" t="str">
             <template t-strip-text=" &#10;">
                 <t t-call="html_base.base">

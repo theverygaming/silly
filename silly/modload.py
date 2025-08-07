@@ -47,7 +47,7 @@ def _load_datafile(env, fname, modname):
                 case "None":
                     vals[name] = None
                 case "xmlid_ref":
-                    vals[name] = env["xmlid"].lookup(eltext).id
+                    vals[name] = env["core.xmlid"].lookup(eltext).id
                 case _:
                     raise Exception(f"unknown type {x.attrib['t']}")
 
@@ -57,7 +57,7 @@ def _load_datafile(env, fname, modname):
                 " name prefix"
             )
 
-        rec = env["xmlid"].lookup(xmlid)
+        rec = env["core.xmlid"].lookup(xmlid)
         if rec and rec._name != model:
             # In case of model mismatch: delete the old record, overwrite the old xmlid and create a new record
             rec.delete()
@@ -65,7 +65,7 @@ def _load_datafile(env, fname, modname):
         if not rec:
             rec = env[model].create(vals)
             if not isinstance(xmlid, int):
-                env["xmlid"].assign(xmlid, rec, overwrite=True, source_module=modname)
+                env["core.xmlid"].assign(xmlid, rec, overwrite=True, source_module=modname)
         elif not noupdate:
             rec.write(vals)
 

@@ -3,7 +3,7 @@ import silly
 
 
 class XMLId(silly.model.Model):
-    _name = "xmlid"
+    _name = "core.xmlid"
 
     xmlid = sillyorm.fields.String(length=255)
     model_name = sillyorm.fields.String(length=255)

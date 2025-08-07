@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <record model="template" xmlid="profiler.speedscope">
+    <record model="core.template" xmlid="profiler.speedscope">
         <field name="xml" t="str">
             <template t-strip-text=" &#10;">
                 <t t-if="profile_url" t-call="html_base.base">

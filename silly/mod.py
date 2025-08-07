@@ -12,7 +12,7 @@ class SillyRestartException(Exception):
 
 def load_all():
     with globalvars.registry.environment(autocommit=True) as env:
-        modules_to_load = [m.name for m in env["module"].search([])]
+        modules_to_load = [m.name for m in env["core.module"].search([])]
     globalvars.registry.reset_full()
     _logger.info("unloading to prepare for init stage 2")
     modload.unload_all()
@@ -25,7 +25,7 @@ def load_all():
 
 def update(to_change, uninstall):
     with globalvars.registry.environment(autocommit=True) as env:
-        installed_versions = {m.name: m.version for m in env["module"].search([])}
+        installed_versions = {m.name: m.version for m in env["core.module"].search([])}
 
     if uninstall:
         if any(x not in installed_versions for x in to_change):
@@ -58,7 +58,7 @@ def update(to_change, uninstall):
     if uninstall:
         with globalvars.registry.environment(autocommit=True) as env:
             for modname in to_uninstall:
-                for record in env["xmlid"].search([("source_module", "=", modname)]):
+                for record in env["core.xmlid"].search([("source_module", "=", modname)]):
                     _logger.info(
                         "uninstall: deleting record with xmlid '%s' (%s ID %s) because it belongs"
                         " to module '%s'",
@@ -117,18 +117,18 @@ def update(to_change, uninstall):
         with globalvars.registry.environment(autocommit=True) as env:
             for modname in to_install:
                 manifest = modload.get_manifest(modname)
-                rec = env["module"].search([("name", "=", modname)])
+                rec = env["core.module"].search([("name", "=", modname)])
                 if rec:
                     rec.version = manifest["version"]
                 else:
-                    env["module"].create(
+                    env["core.module"].create(
                         {
                             "name": modname,
                             "version": manifest["version"],
                         }
                     )
             for modname in to_uninstall:
-                rec = env["module"].search([("name", "=", modname)])
+                rec = env["core.module"].search([("name", "=", modname)])
                 rec.delete()
 
     # restart entirely, shits far too fcked otherwise
@@ -139,7 +139,7 @@ def update(to_change, uninstall):
 def load_core(allow_core_init):
     _logger.info("silly load stage 1 (load core module)")
     # the core module is essential for installing other modules, so we **always** install it, no matter what
-    if not sqlalchemy.inspect(globalvars.registry.engine).has_table("module"):
+    if not sqlalchemy.inspect(globalvars.registry.engine).has_table("core_module"):
         if not allow_core_init:
             raise Exception(
                 "Core module not installed, cannot install due to update being disabled"
@@ -151,11 +151,11 @@ def load_core(allow_core_init):
         manifest = modload.get_manifest("core")
         modload.run_migrations(globalvars.registry, "core", None, manifest["version"])
         # TODO: dev only...
-        modload.generate_migrations(globalvars.registry, "core", manifest["version"])
+        modload.generate_migrations(globalvars.registry, "core")
         globalvars.registry.init_db_tables(automigrate="none")
         with globalvars.registry.environment(autocommit=True) as env:
             modload.load_all_data(env)
-            env["module"].create(
+            env["core.module"].create(
                 {
                     "name": "core",
                     "version": manifest["version"],
@@ -167,4 +167,4 @@ def load_core(allow_core_init):
     globalvars.registry.reset_full()
     modload.load(globalvars.registry, ["core"])
     globalvars.registry.resolve_tables()
-    globalvars.registry.init_db_tables(automigrate="ignore")
+    globalvars.registry.init_db_tables(automigrate="ignore", auto_create=False)

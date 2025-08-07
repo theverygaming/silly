@@ -15,7 +15,7 @@ console.log(view.xml);
 
 class App extends Component {
     async componentDidMount() {
-        const recordset = await (await env.model("xmlid").call("webclient_search", [[]], {})).call("webclient_read", [["id", "xmlid", "model_name", "model_id", "source_module"]]);
+        const recordset = await (await env.model("core.xmlid").call("webclient_search", [[]], {})).call("webclient_read", [["id", "xmlid", "model_name", "model_id", "source_module"]]);
         this.setState({ recordset });
     }
 

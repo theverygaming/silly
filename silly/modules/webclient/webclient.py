@@ -18,7 +18,7 @@ class WebclientRoutes(http.Router):
             p = filep.parent.relative_to("js/") / filep.name
             importmap["imports"][f"@{str(p.with_suffix(''))}"] = "/static/js/" + str(p)
 
-        return request.env["template"].render_html_resp(
+        return request.env["core.template"].render_html_resp(
             "webclient.template_test2",
             {
                 "importmap": json.dumps(importmap),

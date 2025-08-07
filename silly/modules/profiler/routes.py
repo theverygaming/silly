@@ -107,14 +107,14 @@ class Routes(http.Router):
     def speedscope_idx(self, request):
         idx = request.path_params["idx"]
         [[x, i] for i, x in enumerate(sorted(_profile_data.keys()))]
-        return request.env["template"].render_html_resp(
+        return request.env["core.template"].render_html_resp(
             "profiler.speedscope",
             {"profile_url": f"/debug/profiler/speedscope/data/{idx}"},
         )
 
     @http.route("/debug/profiler/speedscope/")
     def speedscope(self, request):
-        return request.env["template"].render_html_resp(
+        return request.env["core.template"].render_html_resp(
             "profiler.speedscope",
             {
                 "profile_url": None,

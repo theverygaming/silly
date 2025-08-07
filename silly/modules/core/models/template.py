@@ -174,16 +174,16 @@ def _def_render_html(get_template_fn, element, render_ctx, render_self=False):
 
 
 class Template(silly.model.Model):
-    _name = "template"
+    _name = "core.template"
 
     xml = sillyorm.fields.Text()
-    inherit_id = sillyorm.fields.Many2one("template")
+    inherit_id = sillyorm.fields.Many2one("core.template")
     inherit_mode = sillyorm.fields.Selection(["root", "extension"])
     inherit_sequence = sillyorm.fields.Integer()
 
     def render(self, xmlid, vals):
         def get_template(xmlid):
-            template = self.env["xmlid"].lookup(xmlid, model="template")
+            template = self.env["core.xmlid"].lookup(xmlid, model="core.template")
             if not template:
                 raise Exception(f"template with xmlid '{xmlid}' not found in database")
             return etree.fromstring(template.get_xml())

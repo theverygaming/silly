@@ -26,7 +26,7 @@ export class MainNavigation extends Component {
     async componentDidMount() {
         actionBus.subscribe(async (act) => {
             console.log(act);
-            let view = (await (await env.model("xmlid").call("lookup", [act.view], {model: "webclient.view"})).call("webclient_read", [["model_name", "xml"]]));
+            let view = (await (await env.model("core.xmlid").call("lookup", [act.view], {model: "webclient.view"})).call("webclient_read", [["model_name", "xml"]]));
             console.log(view);
             console.log(view.xml);
             this.setState({
@@ -113,7 +113,7 @@ export class MainNavigation extends Component {
                 },
                 testThingyButton: () => {
                     (async () => {
-                        return await (await env.model("xmlid").call("webclient_search", [[]], {})).call("webclient_read", [["id", "xmlid", "model_name", "model_id", "source_module"]]);
+                        return await (await env.model("core.xmlid").call("webclient_search", [[]], {})).call("webclient_read", [["id", "xmlid", "model_name", "model_id", "source_module"]]);
                     })().then((rec) => {
                         actionBus.publish(new Action({view: "webclient.view_1", recordset: rec}));
                         this.setState({gridMenu: false});

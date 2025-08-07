@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <record model="template" xmlid="html_base.base">
+    <record model="core.template" xmlid="html_base.base">
         <field name="xml" t="str">
 <template t-strip-text=" &#10;">
 &lt;!DOCTYPE HTML&gt;
