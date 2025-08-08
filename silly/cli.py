@@ -37,6 +37,17 @@ def cmd_test(config: SillyConfig):
         raise Exception(f"Tests failed!")
 
 
+def cmd_repl(config: SillyConfig, do_reexec=True):
+    main.init(config)
+    try:
+        main.repl(config)
+    except mod.SillyRestartException:
+        if do_reexec:
+            reexec()
+        else:
+            raise
+
+
 def cmd_update(config: SillyConfig, modules: list[str], throw_exc=False):
     _logger.info("updating/installing modules: %s", ", ".join(modules))
     try:
@@ -70,6 +81,7 @@ def entry(args):
     subparsers = parser.add_subparsers(dest="operation", required=True)
     subparsers.add_parser("run")
     subparsers.add_parser("test")
+    subparsers.add_parser("repl")
     subparsers.add_parser("update").add_argument("--modules", nargs="+", type=str, required=True)
     subparsers.add_parser("uninstall").add_argument("--modules", nargs="+", type=str, required=True)
 
@@ -80,6 +92,8 @@ def entry(args):
             cmd_run(config)
         case "test":
             cmd_test(config)
+        case "repl":
+            cmd_repl(config)
         case "update":
             cmd_update(config, parsed_args.modules)
         case "uninstall":

@@ -192,3 +192,21 @@ def run(config):
         time.sleep(0.25)
 
     join_all()
+
+
+def repl(config):
+    import code
+    import readline
+
+    env = globalvars.registry.get_environment(autocommit=False)
+    repl = code.InteractiveConsole(
+        locals={
+            "__name__": "__console__",
+            "__doc__": None,
+            "env": env,
+        }
+    )
+    try:
+        repl.interact()
+    finally:
+        env.close()
