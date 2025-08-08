@@ -4,13 +4,13 @@ function jsonrpc_id() {
     return Math.floor(Math.random() * 0xFFFFFFFF);
 }
 
-function convORMJsonrpcType(environment, obj) {
+function convORMJsonrpcType(env, obj) {
     const isSillyRecordset = (obj) => typeof obj === "object" && obj !== null && obj.objtype === "sillyRecordset" && typeof obj.model === "string" && Array.isArray(obj.records);
     const isSillyFieldValue = (obj) => typeof obj === "object" && obj !== null && obj.objtype === "sillyFieldValue" && typeof obj.type === "string";
     // TODO: actually convert field value types!
     if (isSillyFieldValue(obj)) {
         const vals = obj;
-        vals.value = convORMJsonrpcType(environment, vals.value);
+        vals.value = convORMJsonrpcType(env, vals.value);
         return vals;
     }
     if (isSillyRecordset(obj)) {
@@ -18,48 +18,42 @@ function convORMJsonrpcType(environment, obj) {
         const fields = [];
         // accumulate ids and field values for the recordset, recurse into all field values and convert them
         for (const rec of obj.records) {
-            ids.push(convORMJsonrpcType(environment, rec["id"].value));
+            ids.push(convORMJsonrpcType(env, rec["id"].value));
             //delete rec["id"];
             const fields_obj = {};
             for (const [key, value] of Object.entries(rec)) {
-                fields_obj[key] = convORMJsonrpcType(environment, value);
+                fields_obj[key] = convORMJsonrpcType(env, value);
             }
             fields.push(fields_obj);
         }
-        return new Recordset(environment.model(obj.model), ids, fields).asProxy();
+        return new Recordset(env, obj.model, ids, fields).asProxy();
     }
     return obj;
 }
 
 class Recordset {
-    constructor(model, ids, fields) {
+    constructor(env, model, ids, fields) {
+        this.env = env;
         this.model = model;
-        this.ids = ids;
+        this._ids = ids;
         this.fields = fields;
     }
 
-    async call(method, args = [], kwargs = {}) {
-        const params = {
-            model: this.model.name,
-            fn: method,
-            args: args,
-            kwargs: kwargs,
-            ids: this.ids,
-        };
-        let ret = await jsonrpc(this.model.env.url, "env_exec_ids", jsonrpc_id(), params);
-        ret = convORMJsonrpcType(this.model.env, ret);
-        return ret;
-    }
+    // Recordset methods
 
     ensureOne() {
         if (this.ids.length != 1) {
-            throw new Error(`ensureOne found ${this.ids.length}`);
+            throw new Error(`ensureOne found ${this.ids.length} IDs in recordset`);
         }
     }
 
     get id() {
         this.ensureOne();
         return this.ids[0];
+    }
+
+    get ids() {
+        return this._ids;
     }
 
     getField(name) {
@@ -86,7 +80,7 @@ class Recordset {
         if (idx >= this.ids.length) {
             throw new Error(`cannot get record at index ${idx}, there are only ${this.ids.length} records in this recordset`);
         }
-        return new Recordset(this.model, [this.ids[idx]], [this.fields[idx]]).asProxy();
+        return new Recordset(this.env, this.model, [this.ids[idx]], [this.fields[idx]]).asProxy();
     }
 
     getNRecords() {
@@ -107,27 +101,26 @@ class Recordset {
             }
         };
     }
-}
 
-
-
-class Model {
-    constructor(env, name) {
-        this.env = env;
-        this.name = name;
-    }
+    // Core RPC methods
 
     async call(method, args = [], kwargs = {}) {
         const params = {
-            model: this.name,
+            model: this.model,
             fn: method,
             args: args,
             kwargs: kwargs,
         };
-        let ret = await jsonrpc(this.env.url, "env_exec", jsonrpc_id(), params);
+        const has_records = this.ids.length > 0;
+        if (has_records) {
+            params.ids = this.ids;
+        }
+        let ret = await jsonrpc(this.env.url, has_records ? "env_exec_ids" : "env_exec", jsonrpc_id(), params);
         ret = convORMJsonrpcType(this.env, ret);
         return ret;
     }
+
+    // Syntax sugar RPC methods
 }
 
 class Environment {
@@ -136,7 +129,11 @@ class Environment {
     }
 
     model(name) {
-        return new Model(this, name);
+        return new Recordset(this, name, [], []);
+    }
+
+    async lookupXMLId(xmlid, model = null) {
+        return await this.model("core.xmlid").call("lookup", [xmlid], {...(model && {model: model})})
     }
 }
 
