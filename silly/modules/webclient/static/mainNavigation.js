@@ -3,6 +3,7 @@ import { xml2preact } from "@tools/xml2preact";
 import { actionBus, Action } from "@action";
 import { getView } from "@views/view";
 import { env } from "@orm";
+import { loadingNotifPromise } from "@appBus";
 
 export class MainNavigation extends Component {
     state = {
@@ -26,7 +27,7 @@ export class MainNavigation extends Component {
     async componentDidMount() {
         actionBus.subscribe(async (act) => {
             console.log(act);
-            let view = (await (await env.lookupXMLId(act.view, "webclient.view")).call("webclient_read", [["model_name", "xml"]]));
+            let view = await loadingNotifPromise("View", (await env.lookupXMLId(act.view, "webclient.view")).call("webclient_read", [["model_name", "xml"]]));
             console.log(view);
             console.log(view.xml);
             this.setState({
@@ -113,7 +114,7 @@ export class MainNavigation extends Component {
                 },
                 testThingyButton: () => {
                     (async () => {
-                        return await (await env.model("core.xmlid").call("webclient_search", [[]], {})).call("webclient_read", [["id", "xmlid", "model_name", "model_id", "source_module"]]);
+                        return await loadingNotifPromise("Model Data", (await env.model("core.xmlid").call("webclient_search", [[]], {})).call("webclient_read", [["id", "xmlid", "model_name", "model_id", "source_module"]]));
                     })().then((rec) => {
                         actionBus.publish(new Action({view: "webclient.view_1", recordset: rec}));
                         this.setState({gridMenu: false});

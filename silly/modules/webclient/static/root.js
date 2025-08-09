@@ -3,6 +3,7 @@ import { env } from "@orm";
 import { getView } from "@views/view";
 import { ErrorHandler } from "@error";
 import { MainNavigation } from "@mainNavigation";
+import { LoadingOverlay } from "@loadingOverlay";
 import { xml2preact } from "@tools/xml2preact";
 
 import "@views/listView"; // gotta import so the code runs.. // FIXME!!
@@ -27,6 +28,7 @@ class App extends Component {
         return xml2preact(`
 <template>
     <t t-component="ErrorHandler">
+        <t t-component="LoadingOverlay"/>
         <t t-component="MainNavigation">
             <t t-out="extraEl"/>
         </t>
@@ -37,6 +39,7 @@ class App extends Component {
                 ErrorHandler,
                 extraEl,
                 MainNavigation,
+                LoadingOverlay,
             },
         );
     }

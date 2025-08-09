@@ -20,6 +20,8 @@
         "js/mainNavigation.js": "mainNavigation.js",
         "js/bus.js": "bus.js",
         "js/action.js": "action.js",
+        "js/appBus.js": "appBus.js",
+        "js/loadingOverlay.js": "loadingOverlay.js",
     },
     "data": [
         "templates/index.xml",
