@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
     <record model="webclient.view" xmlid="webclient.view_1">
-        <field name="model_name" t="str">some_model</field>
-        <!-- TODO: remove this maaaybe? <field name="type_id" t="xmlid_ref">webclient.view_list</field>-->
+        <field name="model_name" t="str">core.xmlid</field>
         <field name="xml" t="str">
             <view component="ListView">
                 <properties>
@@ -28,7 +27,7 @@
     </record>
 
     <record model="webclient.view" xmlid="webclient.view_2">
-        <field name="model_name" t="str">some_model</field>
+        <field name="model_name" t="str">core.xmlid</field>
         <field name="xml" t="str">
             <view component="FormView">
                 <properties>
@@ -47,5 +46,51 @@
                 </definition>
             </view>
         </field>
+    </record>
+
+    <record model="webclient.action" xmlid="webclient.xmlid_action">
+        <field name="view_id" t="xmlid_ref">webclient.view_1</field>
+        <field name="domain" t="str">[["xmlid", "ilike", "webclient."]]</field>
+    </record>
+
+    <record model="webclient.action" xmlid="webclient.xmlid_action2">
+        <field name="view_id" t="xmlid_ref">webclient.view_1</field>
+        <field name="domain" t="str">[]</field>
+    </record>
+
+    <record model="webclient.menuitem" xmlid="webclient.menuitem1">
+        <field name="name" t="str">xmlid test thingy :3</field>
+        <field name="action_id" t="xmlid_ref">webclient.xmlid_action</field>
+    </record>
+
+    <record model="webclient.menuitem" xmlid="webclient.menuitem2">
+        <field name="name" t="str">submenu 1 L1</field>
+        <field name="parent_id" t="xmlid_ref">webclient.menuitem1</field>
+    </record>
+
+    <record model="webclient.menuitem" xmlid="webclient.menuitem3">
+        <field name="name" t="str">submenu 2 L1</field>
+        <field name="parent_id" t="xmlid_ref">webclient.menuitem1</field>
+    </record>
+
+    <record model="webclient.menuitem" xmlid="webclient.menuitem4">
+        <field name="name" t="str">submenu 3 L1</field>
+        <field name="parent_id" t="xmlid_ref">webclient.menuitem1</field>
+    </record>
+
+    <record model="webclient.menuitem" xmlid="webclient.menuitem5">
+        <field name="name" t="str">submenu 3 L2 1</field>
+        <field name="parent_id" t="xmlid_ref">webclient.menuitem4</field>
+    </record>
+
+    <record model="webclient.menuitem" xmlid="webclient.menuitem6">
+        <field name="name" t="str">submenu 3 L2 2</field>
+        <field name="parent_id" t="xmlid_ref">webclient.menuitem4</field>
+    </record>
+
+    <record model="webclient.menuitem" xmlid="webclient.menuitem7">
+        <field name="name" t="str">submenu 3 L2 3 - ALL xmlids</field>
+        <field name="parent_id" t="xmlid_ref">webclient.menuitem4</field>
+        <field name="action_id" t="xmlid_ref">webclient.xmlid_action2</field>
     </record>
 </root>

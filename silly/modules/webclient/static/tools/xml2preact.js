@@ -1,7 +1,7 @@
 import { createElement, Fragment } from "@preact";
 import { saneXpath } from "@tools/xml";
 
-function safeIshEval(expr, ctx = {}) {
+export function safeIshEval(expr, ctx = {}) {
     const keys = Object.keys(ctx);
     const values = Object.values(ctx);
     const code = `return (${expr});`;

@@ -15,29 +15,17 @@ console.log(view.xml);
 
 
 class App extends Component {
-    async componentDidMount() {
-        const recordset = await (await env.model("core.xmlid").call("webclient_search", [[]], {})).call("webclient_read", [["id", "xmlid", "model_name", "model_id", "source_module"]]);
-        this.setState({ recordset });
-    }
-
     render() {
-        let extraEl = null;
-        if (this.state.recordset) {
-            extraEl = getView(view.xml, this.state.recordset);
-        }
         return xml2preact(`
 <template>
     <t t-component="ErrorHandler">
         <t t-component="LoadingOverlay"/>
-        <t t-component="MainNavigation">
-            <t t-out="extraEl"/>
-        </t>
+        <t t-component="MainNavigation"/>
     </t>
 </template>
             `,
             {
                 ErrorHandler,
-                extraEl,
                 MainNavigation,
                 LoadingOverlay,
             },

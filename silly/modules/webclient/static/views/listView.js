@@ -14,7 +14,7 @@ export class ListView extends View {
         // fix it at least!
         const recid = parseInt(e.target.closest("tr").dataset.recid);
         console.log(recid);
-        actionBus.publish(new Action({view: "webclient.view_2", recordset: this.props.recordset.getRecordAtIdx(recid-1)}));
+        actionBus.publish(new Action({view_xmlid: "webclient.view_2", recordset: this.props.recordset.getRecordAtIdx(recid-1)}));
         if (recid == 1) {
             throw new Error("test: record with ID 1 clicked");
         }

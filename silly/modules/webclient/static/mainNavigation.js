@@ -1,44 +1,53 @@
 import { Component } from "@preact";
-import { xml2preact } from "@tools/xml2preact";
+import { xml2preact, safeIshEval } from "@tools/xml2preact";
 import { actionBus, Action } from "@action";
 import { getView } from "@views/view";
 import { env } from "@orm";
-import { loadingNotifPromise } from "@appBus";
+import { loadingNotifPromise, loadingNotifAsync } from "@appBus";
 
 export class MainNavigation extends Component {
     state = {
         gridMenu: true,
         navHistory: [],
         navHistoryActiveIdx: -1,
-        menubar: [
-            {name: "test1", url: "#test1"},
-            {name: "test2", url: "#test2"},
-            {
-                name: "more",
-                children: [
-                    {name: "test3", url: "#test3"},
-                    {name: "test4", url: "#test4"},
-                    {name: "test5", url: "#test5"},
-                ],
-            },
-        ]
+        menubar: [],
+        mainMenuItems: [],
     };
 
     async componentDidMount() {
         actionBus.subscribe(async (act) => {
             console.log(act);
-            let view = await loadingNotifPromise("View", (await env.lookupXMLId(act.view, "webclient.view")).call("webclient_read", [["model_name", "xml"]]));
+            let [view, recordset] = await loadingNotifPromise("View, Recordset", (async () => {
+                let v = null;
+                if (act.view_xmlid) {
+                    v = await env.lookupXMLId(act.view_xmlid, "webclient.view");
+                } else {
+                    v = await env.model("webclient.view").call("browse", [act.view_id]);
+                }
+                let vd =  await v.call("webclient_read", [["model_name", "xml"]]);
+                let rs = act.recordset;
+                if (!rs) {
+                    rs = await (await env.model(vd.model_name).call("webclient_search", [safeIshEval(act.domain)], {})).call("webclient_read", [["id", "xmlid", "model_name", "model_id", "source_module"]]);
+                }
+                return [vd, rs];
+            })());
             console.log(view);
             console.log(view.xml);
             this.setState({
                 navHistory: [...this.state.navHistory.slice(0, this.state.navHistoryActiveIdx+1), {
                     name: "idk",
                     xml: view.xml,
-                    recordset: act.recordset,
+                    recordset: recordset,
                 }],
                 navHistoryActiveIdx: this.state.navHistoryActiveIdx + 1
             });
         });
+
+        loadingNotifPromise("Main Menu", env.model("webclient.menuitem").call("get_main_menu_dict")).then(
+            (items) => {
+                this.setState({mainMenuItems: items});
+            }
+        );
     }
 
     render() {
@@ -52,16 +61,20 @@ export class MainNavigation extends Component {
         </div>
         <div class="navbar-menu">
             <div t-if="!state.gridMenu" class="navbar-start">
+                <t t-set="idx" t-value="0"/>
                 <t t-foreach="state.menubar" t-as="item">
-                    <a t-if="!('children' in item)" class="navbar-item" t-att-href="item.url" t-out="item.name"/>
+                    <a t-if="!('children' in item)" class="navbar-item" t-att-onClick="menubarClick" t-att-data-idx="idx" t-out="item.name"/>
                     <div t-if="'children' in item" class="navbar-item has-dropdown is-hoverable">
                         <a class="navbar-link" t-out="item.name"/>
                         <div class="navbar-dropdown">
+                            <t t-set="idxb" t-value="0"/>
                             <t t-foreach="item.children" t-as="child">
-                                <a class="navbar-item" t-att-href="child.url" t-out="child.name"/>
+                                <a class="navbar-item" t-att-onClick="menubarClick" t-att-data-idx="idx" t-att-data-idxb="idxb" t-out="child.name"/>
+                                <t t-set="idxb" t-value="idxb + 1"/>
                             </t>
                         </div>
                     </div>
+                    <t t-set="idx" t-value="idx + 1"/>
                 </t>
             </div>
             <div class="navbar-end">
@@ -73,7 +86,7 @@ export class MainNavigation extends Component {
             </div>
         </div>
     </nav>
-    <nav class="breadcrumb">
+    <nav class="breadcrumb" t-if="!state.gridMenu">
         <ul>
             <t t-set="idx" t-value="0"/>
             <t t-foreach="state.navHistory" t-as="item">
@@ -99,9 +112,11 @@ export class MainNavigation extends Component {
         </t>
     </div>
     <t t-if="state.gridMenu">
-        <button class="button is-primary" t-att-onClick="testThingyButton">
-            test thingy
-        </button>
+        <t t-set="idx" t-value="0"/>
+        <t t-foreach="state.mainMenuItems" t-as="item">
+            <button class="button is-primary" t-att-onClick="mainMenuClick" t-att-data-idx="idx" t-out="item.name"/>
+            <t t-set="idx" t-value="idx + 1"/>
+        </t>
     </t>
 </template>`,
             {
@@ -112,13 +127,27 @@ export class MainNavigation extends Component {
                 breadcrumbClick: (e) => {
                     this.setState({navHistoryActiveIdx: parseInt(e.target.dataset.idx)});
                 },
-                testThingyButton: () => {
-                    (async () => {
-                        return await loadingNotifPromise("Model Data", (await env.model("core.xmlid").call("webclient_search", [[]], {})).call("webclient_read", [["id", "xmlid", "model_name", "model_id", "source_module"]]));
-                    })().then((rec) => {
-                        actionBus.publish(new Action({view: "webclient.view_1", recordset: rec}));
-                        this.setState({gridMenu: false});
-                    });
+                mainMenuClick: (e) => {
+                    const menuitem = this.state.mainMenuItems[parseInt(e.target.dataset.idx)];
+                    if (!menuitem.action) {
+                        return;
+                    }
+                    actionBus.publish(new Action({view_id: menuitem.action.view_id, domain: menuitem.action.domain}));
+                    loadingNotifAsync("Submenu", async () => {
+                        return (await env.model("webclient.menuitem").call("browse", [menuitem.id])).call("get_submenus_dict");
+                    }).then(
+                        (items) => {
+                            this.setState({menubar: items});
+                        }
+                    );
+                    this.setState({gridMenu: false});
+                },
+                menubarClick: (e) => {
+                    const menuitem = e.target.dataset.idxb ? this.state.menubar[parseInt(e.target.dataset.idx)].children[parseInt(e.target.dataset.idxb)] : this.state.menubar[parseInt(e.target.dataset.idx)];
+                    if (!menuitem.action) {
+                        return;
+                    }
+                    actionBus.publish(new Action({view_id: menuitem.action.view_id, domain: menuitem.action.domain}));
                 },
                 meowButton: () => {
                     console.log("meow");

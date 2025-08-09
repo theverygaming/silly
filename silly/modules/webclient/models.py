@@ -112,3 +112,50 @@ class View(silly.model.Model):
 
     model_name = sillyorm.fields.String()
     xml = sillyorm.fields.Text()
+
+
+class Action(silly.model.Model):
+    _name = "webclient.action"
+
+    view_id = sillyorm.fields.Many2one("webclient.view", required=True)
+    domain = sillyorm.fields.String(required=True, default="[]")
+
+    def to_dict(self):
+        self.ensure_one()
+        return {
+            "view_id": self.view_id.id,
+            "domain": self.domain,
+        }
+
+
+class Menuitem(silly.model.Model):
+    _name = "webclient.menuitem"
+
+    name = sillyorm.fields.String(required=True)
+    child_ids = sillyorm.fields.One2many("webclient.menuitem", "parent_id")
+    parent_id = sillyorm.fields.Many2one("webclient.menuitem")
+    action_id = sillyorm.fields.Many2one("webclient.action")
+
+    def get_dict(self):
+        self.ensure_one()
+        d = {
+            "id": self.id,
+            "name": self.name,
+        }
+        if self.action_id:
+            d["action"] = self.action_id.to_dict()
+        return d
+
+    def get_submenus_dict(self):
+        self.ensure_one()
+        ret = []
+        for child in self.child_ids:
+            x = child.get_dict()
+            if child.child_ids:
+                x["children"] = child.get_submenus_dict()
+            ret.append(x)
+        return ret
+
+    def get_main_menu_dict(self):
+        main_items = self.search([("parent_id", "=", None)])
+        return [rec.get_dict() for rec in main_items]
