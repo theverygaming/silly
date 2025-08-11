@@ -38,7 +38,7 @@ class Recordset {
         this.env = env;
         this.model = model;
         this.modelSpec = modelSpec;
-        this._fields = fields;
+        this._fieldCache = fields;
     }
 
     // Recordset methods
@@ -55,19 +55,61 @@ class Recordset {
         }
     }
 
-    getField(name) {
-        this.ensureOne();
-        if (this.getNRecords()) {
-            this._ensureIsRWAble();
+    async cacheFields(fields, cached = true) {
+        // filter out any fields that are already cached
+        let fieldsToRead = fields;
+        if (cached) {
+            fieldsToRead = fields.filter(field => 
+                !this._fieldCache.every((x) => (field in x))
+            );
         }
-        return this.getFieldMulti(name)[0];
+
+        // no fields to read? abort 
+        if (!fieldsToRead.length) {
+            return;
+        }
+
+        const res = await this.call("webclient_read", [fieldsToRead], {});
+        for (let idx = 0; idx < this._fieldCache.length; idx++) {
+            const rec = res.getRecordById(this._fieldCache[idx].id);
+            for (const field of fieldsToRead) {
+                this._fieldCache[idx][field] = rec.getFieldCached(field);
+            }
+        }
     }
 
-    getFieldMulti(name) {
+    clearFieldCache() {
+        this._fieldCache = this._fieldCache.map(f => ({id: f.id}));
+    }
+
+    async getField(name, cached = true) {
+        this.ensureOne();
+        return (await this.getFieldMulti(name, cached))[0];
+    }
+
+    async getFieldMulti(name, cached = true) {
         if (this.getNRecords()) {
             this._ensureIsRWAble();
         }
-        return this._fields.map(f => f[name]);
+        await this.cacheFields([name], cached);
+        return this.getFieldCachedMulti(name);
+    }
+
+    getFieldCached(name) {
+        this.ensureOne();
+        return this.getFieldCachedMulti(name)[0];
+    }
+
+    getFieldCachedMulti(name) {
+        if (this.getNRecords()) {
+            this._ensureIsRWAble();
+        }
+        return this._fieldCache.map(f => {
+            if (!(name in f)) {
+                throw new Error(`Field '${name}' is not cached`);
+            }
+            return f[name];
+        });
     }
 
     getFieldSpec(name) {
@@ -78,8 +120,8 @@ class Recordset {
     asProxy() {
         return new Proxy(this, {
             get(target, prop, receiver) {
-                if (!(prop in target) && target.getNRecords() == 1 && prop in target._fields[0]) {
-                    return target.getField(prop);
+                if (!(prop in target) && target.getNRecords() == 1 && target.modelSpec && prop in target.modelSpec.field_info) {
+                    return target.getFieldCached(prop);
                 }
                 return Reflect.get(...arguments);
             },
@@ -90,11 +132,16 @@ class Recordset {
         if (idx >= this.getNRecords()) {
             throw new Error(`cannot get record at index ${idx}, there are only ${this.getNRecords()} records in this recordset`);
         }
-        return new Recordset(this.env, this.model, this.modelSpec, [this._fields[idx]]).asProxy();
+        return new Recordset(this.env, this.model, this.modelSpec, [this._fieldCache[idx]]).asProxy();
+    }
+
+    getRecordById(id) {
+        const idx = this._fieldCache.findIndex(f => f.id === id);
+        return this.getRecordAtIdx(idx);
     }
 
     getNRecords() {
-        return this._fields.length;
+        return this._fieldCache.length;
     }
 
     [Symbol.iterator]() {
@@ -122,7 +169,7 @@ class Recordset {
         };
         const has_records = this.getNRecords() > 0;
         if (has_records) {
-            params.ids = this.getFieldMulti("id");
+            params.ids = this.getFieldCachedMulti("id");
         }
         let ret = await jsonrpc(this.env.url, has_records ? "env_exec_ids" : "env_exec", jsonrpc_id(), params);
         if (conv) {
