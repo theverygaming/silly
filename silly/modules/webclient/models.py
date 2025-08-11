@@ -6,7 +6,7 @@ class SillyAbstractBase(silly.model.AbstractModel):
     _name = "core.__silly_abstract_base"
     _extends = "core.__silly_abstract_base"
 
-    def webclient_model_spec(self):
+    def webclient_model_spec(self, traverse_rel=False):
         fetched_rel_specs = {}
 
         def _model_spec_core(model):
@@ -16,7 +16,7 @@ class SillyAbstractBase(silly.model.AbstractModel):
                     "type": type(field).__name__,
                     "rel_model": getattr(field, "_foreign_model", None),
                 }
-                if rsp := field_info[name]["rel_model"]:
+                if traverse_rel and (rsp := field_info[name]["rel_model"]):
                     if rsp not in fetched_rel_specs:
                         fetched_rel_specs[rsp] = None  # to prevent infinite recursion
                         fetched_rel_specs[rsp] = _model_spec_core(self.env[rsp])
@@ -25,7 +25,8 @@ class SillyAbstractBase(silly.model.AbstractModel):
             }
 
         ret = _model_spec_core(self)
-        ret["rel_specs"] = fetched_rel_specs
+        if traverse_rel:
+            ret["rel_specs"] = fetched_rel_specs
         return ret
 
     def webclient_read(self, field_names):
