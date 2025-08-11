@@ -42,6 +42,23 @@ class JSONRPCRoutes(http.Router):
             "id": req_id,
         }
 
+    def jsonrpc_conv_type(self, env, val):
+        if isinstance(val, sillyorm.model.Model):
+            val = {
+                "objtype": "sillyRecordset",
+                "model": val._name,
+                "records": [
+                    {
+                        "id": {
+                            "objtype": "sillyFieldValue",
+                            "value": x,
+                        },
+                    }
+                    for x in val._ids
+                ],
+            }
+        return val
+
     def jsonrpc_run(self, env, req):
         # Verify JSON
         if not (
@@ -95,22 +112,7 @@ class JSONRPCRoutes(http.Router):
                         env[rpc_params["model"]].browse(rpc_params["ids"]), rpc_params["fn"]
                     )(*rpc_params.get("args", []), **rpc_params.get("kwargs", {}))
 
-            if isinstance(res, sillyorm.model.Model):
-                res = {
-                    "objtype": "sillyRecordset",
-                    "model": res._name,
-                    "records": [
-                        {
-                            "id": {
-                                "objtype": "sillyFieldValue",
-                                "type": "Id",
-                                "rel_model": None,
-                                "value": x,
-                            },
-                        }
-                        for x in res._ids
-                    ],
-                }
+            res = self.jsonrpc_conv_type(env, res)
 
             # output JSON serializable? No? repr!
             try:

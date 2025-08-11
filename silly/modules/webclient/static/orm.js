@@ -5,37 +5,49 @@ function jsonrpc_id() {
 }
 
 function convORMJsonrpcType(env, obj) {
-    const isSillyRecordset = (obj) => typeof obj === "object" && obj !== null && obj.objtype === "sillyRecordset" && typeof obj.model === "string" && Array.isArray(obj.records);
-    const isSillyFieldValue = (obj) => typeof obj === "object" && obj !== null && obj.objtype === "sillyFieldValue" && typeof obj.type === "string";
+    const isSillyRecordset = (obj) => typeof obj === "object" && obj !== null && obj.objtype === "sillyRecordset" && typeof obj.model === "string" && Array.isArray(obj.records) && typeof obj.spec === "object";
+    const isSillyIntFieldValue = (obj) => typeof obj === "object" && obj !== null && obj.objtype === "sillyIntFieldValue" && typeof obj.type === "string";
     // TODO: actually convert field value types!
-    if (isSillyFieldValue(obj)) {
+    if (isSillyIntFieldValue(obj)) {
         const vals = obj;
-        vals.value = convORMJsonrpcType(env, vals.value);
-        return vals;
+        return convORMJsonrpcType(env, vals.value);
     }
     if (isSillyRecordset(obj)) {
+        const isSillyFieldValue = (obj) => typeof obj === "object" && obj !== null && obj.objtype === "sillyFieldValue";
         const fields = [];
         // accumulate ids and field values for the recordset, recurse into all field values and convert them
         for (const rec of obj.records) {
             const fields_obj = {};
-            for (const [key, value] of Object.entries(rec)) {
+            for (let [key, value] of Object.entries(rec)) {
+                if (isSillyFieldValue(value)) {
+                    value.objtype = "sillyIntFieldValue";
+                    value.type = obj.spec.field_info[key].type;
+                    value.rel_model = obj.spec.field_info[key].rel_model;
+                }
                 fields_obj[key] = convORMJsonrpcType(env, value);
             }
             fields.push(fields_obj);
         }
-        return new Recordset(env, obj.model, fields).asProxy();
+        return new Recordset(env, obj.model, obj.spec, fields).asProxy();
     }
     return obj;
 }
 
 class Recordset {
-    constructor(env, model, fields) {
+    constructor(env, model, modelSpec, fields) {
         this.env = env;
         this.model = model;
+        this.modelSpec = modelSpec;
         this._fields = fields;
     }
 
     // Recordset methods
+
+    _ensureIsRWAble() {
+        if (!this.modelSpec) {
+            throw new Error(`_ensureIsRWAble: missing model spec`);
+        }
+    }
 
     ensureOne() {
         if (this.getNRecords() != 1) {
@@ -45,26 +57,29 @@ class Recordset {
 
     getField(name) {
         this.ensureOne();
+        if (this.getNRecords()) {
+            this._ensureIsRWAble();
+        }
         return this.getFieldMulti(name)[0];
     }
 
     getFieldMulti(name) {
+        if (this.getNRecords()) {
+            this._ensureIsRWAble();
+        }
         return this._fields.map(f => f[name]);
     }
 
-    getFieldValue(name) {
-        return this.getField(name).value;
-    }
-
-    getFieldValueMulti(name) {
-        return this.getFieldMulti(name).map(f => f.value);
+    getFieldSpec(name) {
+        this._ensureIsRWAble();
+        return this.modelSpec.field_info[name];
     }
 
     asProxy() {
         return new Proxy(this, {
             get(target, prop, receiver) {
                 if (!(prop in target) && target.getNRecords() == 1 && prop in target._fields[0]) {
-                    return target.getFieldValue(prop);
+                    return target.getField(prop);
                 }
                 return Reflect.get(...arguments);
             },
@@ -75,7 +90,7 @@ class Recordset {
         if (idx >= this.getNRecords()) {
             throw new Error(`cannot get record at index ${idx}, there are only ${this.getNRecords()} records in this recordset`);
         }
-        return new Recordset(this.env, this.model, [this._fields[idx]]).asProxy();
+        return new Recordset(this.env, this.model, this.modelSpec, [this._fields[idx]]).asProxy();
     }
 
     getNRecords() {
@@ -107,13 +122,17 @@ class Recordset {
         };
         const has_records = this.getNRecords() > 0;
         if (has_records) {
-            params.ids = this.getFieldValueMulti("id");
+            params.ids = this.getFieldMulti("id");
         }
         let ret = await jsonrpc(this.env.url, has_records ? "env_exec_ids" : "env_exec", jsonrpc_id(), params);
         if (conv) {
             ret = convORMJsonrpcType(this.env, ret);
         }
         return ret;
+    }
+
+    async getModelSpec() {
+        this.modelSpec = await this.call("webclient_model_spec");
     }
 
     // Syntax sugar RPC methods
@@ -125,11 +144,11 @@ class Environment {
     }
 
     model(name) {
-        return new Recordset(this, name, []);
+        return new Recordset(this, name, null, []);
     }
 
     async lookupXMLId(xmlid, model = null) {
-        return await this.model("core.xmlid").call("lookup", [xmlid], {...(model && {model: model})})
+        return await this.model("core.xmlid").call("lookup", [xmlid], {...(model && {model: model})});
     }
 }
 

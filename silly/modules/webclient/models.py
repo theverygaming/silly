@@ -6,16 +6,27 @@ class SillyAbstractBase(silly.model.AbstractModel):
     _name = "core.__silly_abstract_base"
     _extends = "core.__silly_abstract_base"
 
-    def webclient_model_info(self):
-        field_info = {}
-        for name, field in self._fields.items():
-            field_info[name] = {
-                "type": type(field).__name__,
-                "rel_model": getattr(field, "_foreign_model", None),
+    def webclient_model_spec(self):
+        fetched_rel_specs = {}
+
+        def _model_spec_core(model):
+            field_info = {}
+            for name, field in model._fields.items():
+                field_info[name] = {
+                    "type": type(field).__name__,
+                    "rel_model": getattr(field, "_foreign_model", None),
+                }
+                if rsp := field_info[name]["rel_model"]:
+                    if rsp not in fetched_rel_specs:
+                        fetched_rel_specs[rsp] = None  # to prevent infinite recursion
+                        fetched_rel_specs[rsp] = _model_spec_core(self.env[rsp])
+            return {
+                "field_info": field_info,
             }
-        return {
-            "field_info": field_info,
-        }
+
+        ret = _model_spec_core(self)
+        ret["rel_specs"] = fetched_rel_specs
+        return ret
 
     def webclient_read(self, field_names):
         field_name_parts = [x.split(".") for x in field_names]
@@ -24,8 +35,6 @@ class SillyAbstractBase(silly.model.AbstractModel):
             field = record._fields[name]
             data = {
                 "objtype": "sillyFieldValue",
-                "type": type(field).__name__,
-                "rel_model": getattr(field, "_foreign_model", None),
             }
             return data
 
@@ -52,12 +61,11 @@ class SillyAbstractBase(silly.model.AbstractModel):
                                     {
                                         "id": {
                                             "objtype": "sillyFieldValue",
-                                            "type": "Id",
-                                            "rel_model": None,
                                             "value": rec[field],
                                         },
                                     },
                                 ],
+                                "spec": self.env[rel_model].webclient_model_spec(),
                             }
                         } | get_field_info(record, field)
                     else:
@@ -88,6 +96,7 @@ class SillyAbstractBase(silly.model.AbstractModel):
                             "objtype": "sillyRecordset",
                             "model": submodel_name,
                             "records": [related_data_by_id.get(rel_id)],
+                            "spec": self.env[submodel_name].webclient_model_spec(),
                         }
             return base_data
 
@@ -97,6 +106,7 @@ class SillyAbstractBase(silly.model.AbstractModel):
             "objtype": "sillyRecordset",
             "model": self._name,
             "records": subfield_data,
+            "spec": self.webclient_model_spec(),
         }
 
     def webclient_search(self, domain, *args, **kwargs):

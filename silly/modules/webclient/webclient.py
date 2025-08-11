@@ -1,8 +1,10 @@
 import json
 from pathlib import PurePath
 import silly.modload
+import sillyorm
 
 from silly import http
+from silly.modules.jsonrpc.routes import JSONRPCRoutes
 
 
 class WebclientRoutes(http.Router):
@@ -25,3 +27,11 @@ class WebclientRoutes(http.Router):
             },
         )
         # TODO: error page
+
+
+class InheritJSONRPCRoutes(JSONRPCRoutes):
+    def jsonrpc_conv_type(self, env, val):
+        ret = super().jsonrpc_conv_type(env, val)
+        if isinstance(val, sillyorm.model.Model):
+            ret["spec"] = env[val._name].webclient_model_spec()
+        return ret
