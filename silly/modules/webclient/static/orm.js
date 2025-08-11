@@ -32,32 +32,24 @@ class Recordset {
     constructor(env, model, fields) {
         this.env = env;
         this.model = model;
-        this.fields = fields;
+        this._fields = fields;
     }
 
     // Recordset methods
 
     ensureOne() {
-        if (this.fields.length != 1) {
-            throw new Error(`ensureOne found ${this.fields.length} IDs in recordset`);
+        if (this.getNRecords() != 1) {
+            throw new Error(`ensureOne found ${this.getNRecords()} IDs in recordset`);
         }
-    }
-
-    get id() {
-        return this.getFieldValue("id");
-    }
-
-    get ids() {
-        return this.getFieldValueMulti("id");
     }
 
     getField(name) {
         this.ensureOne();
-        return this.fields[0][name];
+        return this.getFieldMulti(name)[0];
     }
 
     getFieldMulti(name) {
-        return this.fields.map(f => f[name]);
+        return this._fields.map(f => f[name]);
     }
 
     getFieldValue(name) {
@@ -71,7 +63,7 @@ class Recordset {
     asProxy() {
         return new Proxy(this, {
             get(target, prop, receiver) {
-                if (!(prop in target) &&target.ids.length == 1 && prop in target.fields[0]) {
+                if (!(prop in target) && target.getNRecords() == 1 && prop in target._fields[0]) {
                     return target.getFieldValue(prop);
                 }
                 return Reflect.get(...arguments);
@@ -80,23 +72,22 @@ class Recordset {
     }
 
     getRecordAtIdx(idx) {
-        if (idx >= this.fields.length) {
-            throw new Error(`cannot get record at index ${idx}, there are only ${this.fields.length} records in this recordset`);
+        if (idx >= this.getNRecords()) {
+            throw new Error(`cannot get record at index ${idx}, there are only ${this.getNRecords()} records in this recordset`);
         }
-        return new Recordset(this.env, this.model, [this.fields[idx]]).asProxy();
+        return new Recordset(this.env, this.model, [this._fields[idx]]).asProxy();
     }
 
     getNRecords() {
-        return this.fields.length;
+        return this._fields.length;
     }
 
     [Symbol.iterator]() {
         let idx = 0;
-        const ids = this.ids;
 
         return {
             next: () => {
-                if (idx < ids.length) {
+                if (idx < this.getNRecords()) {
                     return { value: this.getRecordAtIdx(idx++), done: false };
                 } else {
                     return { done: true };
@@ -107,19 +98,21 @@ class Recordset {
 
     // Core RPC methods
 
-    async call(method, args = [], kwargs = {}) {
+    async call(method, args = [], kwargs = {}, conv = true) {
         const params = {
             model: this.model,
             fn: method,
             args: args,
             kwargs: kwargs,
         };
-        const has_records = this.fields.length > 0;
+        const has_records = this.getNRecords() > 0;
         if (has_records) {
-            params.ids = this.ids;
+            params.ids = this.getFieldValueMulti("id");
         }
         let ret = await jsonrpc(this.env.url, has_records ? "env_exec_ids" : "env_exec", jsonrpc_id(), params);
-        ret = convORMJsonrpcType(this.env, ret);
+        if (conv) {
+            ret = convORMJsonrpcType(this.env, ret);
+        }
         return ret;
     }
 

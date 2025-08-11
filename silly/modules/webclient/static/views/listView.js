@@ -12,11 +12,10 @@ export class ListView extends View {
         // TODO: work with index in recordset or smth instead maybe probably or idk
         // (thinking of paging that's prolly also bad so should work by ID..)
         // fix it at least!
-        const recid = parseInt(e.target.closest("tr").dataset.recid);
-        console.log(recid);
-        actionBus.publish(new Action({view_xmlid: "webclient.view_2", recordset: this.props.recordset.getRecordAtIdx(recid-1)}));
-        if (recid == 1) {
-            throw new Error("test: record with ID 1 clicked");
+        const recidx = parseInt(e.target.closest("tr").dataset.recidx);
+        actionBus.publish(new Action({view_xmlid: "webclient.view_2", recordset: this.props.recordset.getRecordAtIdx(recidx)}));
+        if (recidx == 1) {
+            throw new Error("test: record with Index 1 clicked");
         }
     }
 
@@ -35,12 +34,12 @@ export class ListView extends View {
 
         // rows
         const rowTemplate = rowNode;
-        const rows = Array.from(props.recordset).map(record => {
+        const rows = Array.from(props.recordset).map((record, idx) => {
             return this.transformTableElements(rowTemplate, record, (node) => {
                 if (node.type == "row") {
                     return {
                         onClick: onRowClick,
-                        "data-recid": record.id,
+                        "data-recidx": idx,
                     };
                 }
                 return null;
