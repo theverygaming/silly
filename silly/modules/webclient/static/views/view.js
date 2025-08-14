@@ -5,7 +5,34 @@ import { saneXpath } from "@tools/xml";
 
 
 export class View extends Component {
-    
+    transformElements(node, tagMap, record, extraPropsFn = null) {
+        if (!node) {
+            return null;
+        }
+
+        // if it's a string we bail out early
+        if (typeof node === "string") {
+            return node;
+        }
+
+        let extraProps = extraPropsFn?.(node) || {};
+
+        const children = node.props?.children ? toChildArray(node.props.children).map(c => this.transformElements(c, tagMap, record, extraPropsFn)) : null;
+
+        // add our props to fields
+        if (node.type === FieldComponent) {
+            return cloneElement(node, { ...extraProps, ...node.props, record }, children);
+        }
+
+        // transform some tags
+        if (node.type in tagMap) {
+            // transform tag according to the map
+            return createElement(tagMap[node.type] , { ...extraProps }, children);
+        } else {
+            // just add the transformed children
+            return cloneElement(node, {...extraProps, ...node.props}, children);
+        }
+    }
 }
 
 function xmlToPreact(node) {

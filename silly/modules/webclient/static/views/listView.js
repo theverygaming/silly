@@ -20,6 +20,12 @@ export class ListView extends View {
     }
 
     render(props, state) {
+        const tagMap = {
+            "headCell": "th",
+            "cell": "td",
+            "row": "tr",
+        };
+        
         const onRowClick = (e) => {
             this.onRowClick(e);
         };
@@ -29,13 +35,13 @@ export class ListView extends View {
 
         // table head
         let thead = createElement("thead", {}, createElement("tr", { }, toChildArray(headNode.props.children).map(child => {
-            return this.transformTableElements(child, null);
+            return this.transformElements(child, tagMap, null);
         })));
 
         // rows
         const rowTemplate = rowNode;
         const rows = Array.from(props.recordset).map((record, idx) => {
-            return this.transformTableElements(rowTemplate, record, (node) => {
+            return this.transformElements(rowTemplate, tagMap, record, (node) => {
                 if (node.type == "row") {
                     return {
                         onClick: onRowClick,
@@ -49,40 +55,6 @@ export class ListView extends View {
             thead,
             createElement("tbody", {}, rows),
         );
-    }
-
-    transformTableElements(node, record, extraPropsFn = null) {
-        if (!node) {
-            return null;
-        }
-
-        // if it's a string we bail out early
-        if (typeof node === "string") {
-            return node;
-        }
-
-        let extraProps = extraPropsFn?.(node) || {};
-
-        const children = node.props?.children ? toChildArray(node.props.children).map(c => this.transformTableElements(c, record, extraPropsFn)) : null;
-
-        // add our props to fields
-        if (node.type === FieldComponent) {
-            return cloneElement(node, { ...extraProps, ...node.props, record }, children);
-        }
-
-        // transform some tags
-        const tagMap = {
-            "headCell": "th",
-            "cell": "td",
-            "row": "tr",
-        };
-        if (node.type in tagMap) {
-            // transform tag according to the map
-            return createElement(tagMap[node.type] , { ...extraProps }, children);
-        } else {
-            // just add the transformed children
-            return cloneElement(node, {...extraProps, ...node.props}, children);
-        }
     }
 }
 
