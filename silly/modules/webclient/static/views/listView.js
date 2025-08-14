@@ -1,7 +1,6 @@
-import { createElement, cloneElement, toChildArray } from "@preact";
+import { createElement, toChildArray } from "@preact";
 import { View } from "@views/view";
 import { registry } from "@registry";
-import { FieldComponent } from "@views/field";
 import { actionBus, Action } from "@action";
 
 
@@ -35,13 +34,13 @@ export class ListView extends View {
 
         // table head
         let thead = createElement("thead", {}, createElement("tr", { }, toChildArray(headNode.props.children).map(child => {
-            return this.transformElements(child, tagMap, null);
+            return this.transformElements(child, tagMap, {});
         })));
 
         // rows
         const rowTemplate = rowNode;
         const rows = Array.from(props.recordset).map((record, idx) => {
-            return this.transformElements(rowTemplate, tagMap, record, (node) => {
+            return this.transformElements(rowTemplate, tagMap, {record}, (node) => {
                 if (node.type == "row") {
                     return {
                         onClick: onRowClick,

@@ -1,8 +1,6 @@
-import { createElement, cloneElement, toChildArray, Fragment } from "@preact";
+import { createElement, toChildArray, Fragment } from "@preact";
 import { View } from "@views/view";
 import { registry } from "@registry";
-import { FieldComponent } from "@views/field";
-
 
 export class FormView extends View {
     state = {};
@@ -16,12 +14,12 @@ export class FormView extends View {
 
         // head
         let head = createElement("div", {}, toChildArray(headNode.props.children).map(child => {
-            return this.transformElements(child, tagMap, null);
+            return this.transformElements(child, tagMap, {});
         }));
 
         // stuff
         const record = props.recordset.getRecordAtIdx(0);
-        const body = this.transformElements(formNode, tagMap, record);
+        const body = this.transformElements(formNode, tagMap, {record});
         return createElement("div", {},
             head,
             createElement("div", {}, body),

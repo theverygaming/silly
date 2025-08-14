@@ -36,6 +36,14 @@ function xmlToPreact(node, ctx = {}) {
                 }
                 continue;
             }
+            // t-attrs
+            if (attr.name == "t-attrs") {
+                const val = safeIshEval(attr.value, ctx);
+                if (val != undefined && val != null) {
+                    Object.assign(out_attrs, {...out_attrs, ...val});
+                }
+                continue;
+            }
             // t-if
             if (attr.name == "t-if") {
                 if(!safeIshEval(attr.value, ctx)) {

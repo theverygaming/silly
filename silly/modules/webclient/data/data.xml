@@ -38,7 +38,7 @@
                     </head>
                     <form>
                         <field name="id" style="color: green;"/>
-                        <field name="xmlid"/>
+                        <field name="xmlid" label="XML ID" editable="1"/>
                         <div style="color: red;">
                             <field name="id"/>
                         </div>
