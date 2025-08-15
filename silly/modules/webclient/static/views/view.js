@@ -5,7 +5,7 @@ import { saneXpath } from "@tools/xml";
 
 
 export class View extends Component {
-    transformElements(node, tagMap, fieldProps, extraPropsFn = null) {
+    transformElements(node, tagMap, fieldProps, fieldOverrideProps = {}, extraPropsFn = null) {
         if (!node) {
             return null;
         }
@@ -17,11 +17,11 @@ export class View extends Component {
 
         let extraProps = extraPropsFn?.(node) || {};
 
-        const children = node.props?.children ? toChildArray(node.props.children).map(c => this.transformElements(c, tagMap, fieldProps, extraPropsFn)) : null;
+        const children = node.props?.children ? toChildArray(node.props.children).map(c => this.transformElements(c, tagMap, fieldProps, fieldOverrideProps, extraPropsFn)) : null;
 
         // add our props to fields
         if (node.type === FieldComponent) {
-            return cloneElement(node, { ...extraProps, ...fieldProps, ...node.props }, children);
+            return cloneElement(node, { ...extraProps, ...fieldProps, ...node.props, ...fieldOverrideProps }, children);
         }
 
         // transform some tags

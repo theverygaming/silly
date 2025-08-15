@@ -14,12 +14,12 @@ export class FormView extends View {
 
         // head
         let head = createElement("div", {}, toChildArray(headNode.props.children).map(child => {
-            return this.transformElements(child, tagMap, {});
+            return this.transformElements(child, tagMap, {}, {});
         }));
 
         // stuff
         const record = props.recordset.getRecordAtIdx(0);
-        const body = this.transformElements(formNode, tagMap, {record});
+        const body = this.transformElements(formNode, tagMap, {record}, {});
         return createElement("div", {},
             head,
             createElement("div", {}, body),
