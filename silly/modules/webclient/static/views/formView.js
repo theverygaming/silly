@@ -19,7 +19,7 @@ export class FormView extends View {
 
         // stuff
         const record = props.recordset.getRecordAtIdx(0);
-        const body = this.transformElements(formNode, tagMap, {record}, {});
+        const body = this.transformElements(formNode, tagMap, {record, editable: true}, {});
         return createElement("div", {},
             head,
             createElement("div", {}, body),

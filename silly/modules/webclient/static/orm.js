@@ -6,46 +6,74 @@ function jsonrpc_id() {
 
 function convORMJsonrpcType(env, obj) {
     const isSillyRecordset = (obj) => typeof obj === "object" && obj !== null && obj.objtype === "sillyRecordset" && typeof obj.model === "string" && Array.isArray(obj.records) && typeof obj.spec === "object";
-    const isSillyIntFieldValue = (obj) => typeof obj === "object" && obj !== null && obj.objtype === "sillyIntFieldValue" && typeof obj.type === "string";
-    // TODO: actually convert field value types!
-    if (isSillyIntFieldValue(obj)) {
-        const vals = obj;
-        return convORMJsonrpcType(env, vals.value);
-    }
     if (isSillyRecordset(obj)) {
-        const isSillyFieldValue = (obj) => typeof obj === "object" && obj !== null && obj.objtype === "sillyFieldValue";
-        const fields = [];
-        // accumulate ids and field values for the recordset, recurse into all field values and convert them
-        for (const rec of obj.records) {
-            const fields_obj = {};
-            for (let [key, value] of Object.entries(rec)) {
-                if (isSillyFieldValue(value)) {
-                    value.objtype = "sillyIntFieldValue";
-                    value.type = obj.spec.field_info[key].type;
-                    value.rel_model = obj.spec.field_info[key].rel_model;
-                }
-                fields_obj[key] = convORMJsonrpcType(env, value);
-            }
-            fields.push(fields_obj);
-        }
-        return new Recordset(env, obj.model, obj.spec, fields).asProxy();
+        return Recordset.deserialize(env, obj);
     }
     return obj;
 }
 
 class Recordset {
-    constructor(env, model, modelSpec, fields) {
+    constructor(env, model, modelSpec, fields, fieldCacheDirty=false, editHistory=null) {
         this.env = env;
         this.model = model;
         this.modelSpec = modelSpec;
         this._fieldCache = fields;
+        this._fieldCacheDirty = fieldCacheDirty;
+        this._editHistory = editHistory ? editHistory : [];
+    }
+
+    // Serialization & Deserialization
+
+    static deserialize(env, obj) {
+        const isSillyFieldValue = (obj) => typeof obj === "object" && obj !== null && obj.objtype === "sillyFieldValue";
+        const fields = [];
+        for (const rec of obj.records) {
+            const fields_obj = {};
+            for (let [key, value] of Object.entries(rec)) {
+                if (!isSillyFieldValue(value)) {
+                    throw new Error("recordset value is not a sillyFieldValue");
+                }
+                //value.type = obj.spec.field_info[key].type;
+                //value.rel_model = obj.spec.field_info[key].rel_model;
+                // TODO: actually convert field value types!
+                fields_obj[key] = convORMJsonrpcType(env, value.value);
+            }
+            fields.push(fields_obj);
+        }
+        return new Recordset(env, obj.model, obj.spec, fields).asProxy();
+    }
+
+    serialize(deserializeable=false) {
+        this._ensureIsRWAble();
+        // TODO: support nested recordsets
+        const obj = {
+            objtype: "sillyRecordset",
+            model: this.model,
+            records: [],
+        }
+        if (deserializeable) {
+            obj.spec = this.modelSpec;
+        }
+
+        for (const fc of this._fieldCache) {
+            const rs = {};
+            for (const [key, value] of Object.entries(fc)) {
+                rs[key] = {
+                    objtype: "sillyFieldValue",
+                    value: value,
+                };
+            }
+            obj.records.push(rs);
+        }
+
+        return obj;
     }
 
     // Recordset methods
 
     _ensureIsRWAble() {
         if (!this.modelSpec) {
-            throw new Error(`_ensureIsRWAble: missing model spec`);
+            throw new Error("_ensureIsRWAble: missing model spec");
         }
     }
 
@@ -56,6 +84,10 @@ class Recordset {
     }
 
     async cacheFields(fields, cached = true) {
+        if (this._fieldCacheDirty) {
+            throw new Error("won't overwrite fields on unsaved recordset");
+        }
+        
         // filter out any fields that are already cached
         let fieldsToRead = fields;
         if (cached) {
@@ -78,7 +110,10 @@ class Recordset {
         }
     }
 
-    clearFieldCache() {
+    clearFieldCache(discard_changes=false) {
+        if (this._fieldCacheDirty && !discard_changes) {
+            throw new Error("won't overwrite fields on unsaved recordset");
+        }
         this._fieldCache = this._fieldCache.map(f => ({id: f.id}));
     }
 
@@ -112,6 +147,14 @@ class Recordset {
         });
     }
 
+    setField(name, value) {
+        this.ensureOne();
+        this._ensureIsRWAble();
+        this._editHistory.push(this._fieldCache);
+        this._fieldCache[0][name] = value;
+        this._fieldCacheDirty = true;
+    }
+
     getFieldSpec(name) {
         this._ensureIsRWAble();
         return this.modelSpec.field_info[name];
@@ -132,7 +175,9 @@ class Recordset {
         if (idx >= this.getNRecords()) {
             throw new Error(`cannot get record at index ${idx}, there are only ${this.getNRecords()} records in this recordset`);
         }
-        return new Recordset(this.env, this.model, this.modelSpec, [this._fieldCache[idx]]).asProxy();
+        // FIXME: it turns out if we pass the field cache like this the same object will be passed onto the children.. We don't really want that
+        // as then when you change a child value the parent value changes and it shits itself fairly badly
+        return new Recordset(this.env, this.model, this.modelSpec, [structuredClone(this._fieldCache[idx])], this._fieldCacheDirty, structuredClone(this._editHistory)).asProxy();
     }
 
     getRecordById(id) {
@@ -142,6 +187,20 @@ class Recordset {
 
     getNRecords() {
         return this._fieldCache.length;
+    }
+
+    async save() {
+        if (!this._fieldCacheDirty) {
+            return;
+        }
+        console.log(this.serialize());
+        //await this.call("webclient_write", [this.serialize()], {});
+        this._fieldCacheDirty = false;
+        this._editHistory = [];
+    }
+
+    hasUnsavedChanges() {
+        return this._fieldCacheDirty;
     }
 
     [Symbol.iterator]() {
@@ -160,7 +219,10 @@ class Recordset {
 
     // Core RPC methods
 
-    async call(method, args = [], kwargs = {}, conv = true) {
+    async call(method, args = [], kwargs = {}, conv = true, dirty_ok = false) {
+        if (this._fieldCacheDirty && !dirty_ok) {
+            throw new Error("can't call function on unsaved recordset");
+        }
         const params = {
             model: this.model,
             fn: method,
