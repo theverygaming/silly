@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <record model="core.template" xmlid="webclient.menubar">
+        <field name="xml" t="str">
+            <template>
+                <nav t-if="not mainmenu" class="navbar" role="navigation" aria-label="main navigation">
+                    <div class="navbar-menu">
+                        <div class="navbar-start">
+                            <a class="navbar-item" href="https://google.com">Google</a>
+                            <!--
+                            <t t-set="idx" t-value="0"/>
+                            <t t-foreach="state.menubar" t-as="item">
+                                <a t-if="!('children' in item)" class="navbar-item" t-att-onClick="menubarClick" t-att-data-idx="idx" t-out="item.name"/>
+                                <div t-if="'children' in item" class="navbar-item has-dropdown is-hoverable">
+                                    <a class="navbar-link" t-out="item.name"/>
+                                    <div class="navbar-dropdown">
+                                        <t t-set="idxb" t-value="0"/>
+                                        <t t-foreach="item.children" t-as="child">
+                                            <a class="navbar-item" t-att-onClick="menubarClick" t-att-data-idx="idx" t-att-data-idxb="idxb" t-out="child.name"/>
+                                            <t t-set="idxb" t-value="idxb + 1"/>
+                                        </t>
+                                    </div>
+                                </div>
+                                <t t-set="idx" t-value="idx + 1"/>
+                            </t>
+                            -->
+                        </div>
+                        <div class="navbar-end">
+                            <div class="navbar-item">
+                                <button class="button is-primary">
+                                    meow
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+                <div t-if="mainmenu">
+                    <t t-foreach="[]" t-as="item">
+                        <button class="button is-primary" t-att-onClick="mainMenuClick" t-att-data-idx="idx" t-out="item.name"/>
+                    </t>
+                </div>
+            </template>
+        </field>
+        <field name="inherit_id" t="None"/>
+        <field name="inherit_mode" t="str">root</field>
+        <field name="inherit_sequence" t="int">100</field>
+    </record>
+</root>
