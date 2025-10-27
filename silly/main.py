@@ -73,13 +73,15 @@ def _worker(worker_type, shutdown_event, main_process_queue, **kwargs):
 
 def _web_init():
     starlette_app = starlette.applications.Starlette(
-        debug=True,  # FIXME: careful!
+        debug=True,  # FIXME: debug only!
         routes=_routes,
     )
     hypercorn_config = hypercorn.Config()
     hypercorn_config.bind = "0.0.0.0:5000"
-    hypercorn_config.accesslog = "-"
-    hypercorn_config.errorlog = "-"
+    hypercorn_config.accesslog = logging.getLogger("hypercorn.access")
+    hypercorn_config.errorlog = logging.getLogger("hypercorn.error")
+    # https://hypercorn.readthedocs.io/en/latest/how_to_guides/logging.html#access-log-atoms
+    hypercorn_config.access_log_format = '%(h)s %(l)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
     hypercorn_config.use_reuse_port = True
     # we want the sockets shared between the workers
     hypercorn_sockets = hypercorn_config.create_sockets()
