@@ -41,6 +41,7 @@
             python313Packages.starlette
             python313Packages.hypercorn
             python313Packages.psycopg2
+            python313Packages.fastapi
           ];
 
           src = ./.;

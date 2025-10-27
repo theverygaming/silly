@@ -23,6 +23,7 @@ if __name__ == "__main__":
                     "cron",
                     "cron_samples",
                     "modulemanager",
+                    "fastapi",
                 ],
                 throw_exc=True,
             )
