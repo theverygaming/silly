@@ -90,22 +90,15 @@ def update(to_change, uninstall):
             )
             _logger.info("migrated module %s (%d/%d)", modname, i + 1, len(to_install))
 
+    _logger.info("running automigrations")
+    globalvars.registry.init_db_tables(automigrate="auto")
+
     # down migrations
     for i, modname in enumerate(to_uninstall):
         modload.run_migrations(
             globalvars.registry, modname, installed_versions.get(modname), "base", downgrade=True
         )
-        # get rid of the versions table (alembic won't do this for us!)
-        with globalvars.registry.engine.connect() as conn:
-            table_name_esc = sqlalchemy.sql.compiler.IdentifierPreparer(
-                globalvars.registry.engine.dialect
-            ).quote(f"__silly_alembic_version_{modname}")
-            conn.execute(sqlalchemy.sql.text(f"DROP TABLE IF EXISTS {table_name_esc}"))
         _logger.info("down-migrated module %s (%d/%d)", modname, i + 1, len(to_uninstall))
-
-    # generate new migrations
-    # TODO: dev only...
-    modload.generate_migrations(globalvars.registry)
 
     globalvars.registry.init_db_tables(automigrate="none")
     with globalvars.registry.environment(autocommit=True) as env:
@@ -150,9 +143,7 @@ def load_core(allow_core_init):
         globalvars.registry.resolve_tables()
         manifest = modload.get_manifest("core")
         modload.run_migrations(globalvars.registry, "core", None, manifest["version"])
-        # TODO: dev only...
-        modload.generate_migrations(globalvars.registry, "core")
-        globalvars.registry.init_db_tables(automigrate="none")
+        globalvars.registry.init_db_tables(automigrate="auto")
         with globalvars.registry.environment(autocommit=True) as env:
             modload.load_all_data(env)
             env["core.module"].create(
