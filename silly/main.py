@@ -16,12 +16,6 @@ from . import modload, mod, http, globalvars, cron
 _logger = logging.getLogger(__name__)
 
 
-class CustomRegistry(sillyorm.Registry):
-    @staticmethod
-    def _table_cmp_should_include(obj, name, type_, reflected, compare_to) -> bool:
-        return not (type_ == "table" and re.match(r"__silly_alembic_version_.+", name) is not None)
-
-
 _routes = None
 
 
@@ -30,7 +24,7 @@ def init(config, modules_to_install=[], modules_to_uninstall=[], update=False):
     config.apply_cfg()
     _logger.info("silly version [...] starting")
     modload.add_module_paths([str(pathlib.Path(__file__).parent / "modules")])
-    globalvars.registry = CustomRegistry(config["connstr"])
+    globalvars.registry = sillyorm.Registry(config["connstr"])
     mod.load_core(update and not modules_to_uninstall)
     if update:
         if modules_to_install and modules_to_uninstall:
