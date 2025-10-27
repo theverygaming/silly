@@ -24,7 +24,7 @@ export class ListView extends View {
             "cell": "td",
             "row": "tr",
         };
-        
+
         const onRowClick = (e) => {
             this.onRowClick(e);
         };

@@ -87,16 +87,16 @@ class Recordset {
         if (this._fieldCacheDirty) {
             throw new Error("won't overwrite fields on unsaved recordset");
         }
-        
+
         // filter out any fields that are already cached
         let fieldsToRead = fields;
         if (cached) {
-            fieldsToRead = fields.filter(field => 
+            fieldsToRead = fields.filter(field =>
                 !this._fieldCache.every((x) => (field in x))
             );
         }
 
-        // no fields to read? abort 
+        // no fields to read? abort
         if (!fieldsToRead.length) {
             return;
         }

@@ -28,7 +28,7 @@ psql:
 	PGPASSWORD="postgres" psql -d postgres -U postgres -h 127.0.0.1 $@
 
 .PHONY: format
-format: 
+format:
 	black silly tests modules \
     --line-length 100 \
     --preview \

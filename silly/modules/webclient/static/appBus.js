@@ -22,7 +22,7 @@ export function loadingNotif(msg) {
         appBus.publish(new AppBusMessage(
             MESSAGE_TYPES.LOADING,
             {msg, state: false},
-        )); 
+        ));
     };
     return finish;
 }

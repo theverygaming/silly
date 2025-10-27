@@ -21,7 +21,7 @@ function xmlToPreact(node, ctx = {}) {
     }
     if (node.nodeType === Node.ELEMENT_NODE) {
         let eltype = node.tagName;
-        
+
         let special_state = null;
         let special_state_var = null;
 

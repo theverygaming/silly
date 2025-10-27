@@ -4,7 +4,7 @@ import { xml2preact } from "@tools/xml2preact";
 export class FieldComponent extends Component {
     render(props, state) {
         const attrProps = Object.fromEntries(
-            Object.entries(props).filter(([key]) => 
+            Object.entries(props).filter(([key]) =>
                 !["name", "record", "children", "label", "editable"].includes(key)
             )
         );
