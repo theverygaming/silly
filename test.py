@@ -6,7 +6,7 @@ import silly
 if __name__ == "__main__":
     config = silly.config.SillyConfig()
     config.set_cmdline_args({
-        "loglevel": "INFO",
+        "loglevel": "DEBUG",
         "connstr": "sqlite:///test.db",
     })
 
