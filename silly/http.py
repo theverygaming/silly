@@ -70,6 +70,11 @@ def route(*args, with_env: bool = True, **kwargs):
     return decorator
 
 
+def routes(function):
+    function.is_routes_fn = True
+    return function
+
+
 # TODO: maybe it would be good if the routers got initialized in module load order
 
 
@@ -114,7 +119,7 @@ def init_routers():
         final_classes = list(_unique(get_final_classes(cls)))
         router_ext_strs = [f"{x.__module__}.{x.__name__}" for x in final_classes if x is not cls]
         if len(router_ext_strs) > 0:
-            _logger.info(
+            _logger.debug(
                 "Router %s.%s getting extended by: " + ", ".join(router_ext_strs),
                 cls.__module__,
                 cls.__name__,
@@ -158,5 +163,18 @@ def init_routers():
 
             # create the actual route
             routes.append(starlette.routing.Route(route_url, fn, **route_kwargs))
+
+        for fn_name, fn in inspect.getmembers(final_cls, inspect.ismethod):
+            # Skip all functions that don't have is_routes_fn set anywhere
+            if not any(
+                map(
+                    lambda cls: hasattr(getattr(cls, fn_name, None), "is_routes_fn"),
+                    type(final_cls).mro(),
+                )
+            ):
+                continue
+
+            # append the routes from that function
+            routes += fn()
 
     return routes
