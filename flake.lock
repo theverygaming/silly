@@ -66,11 +66,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1761654907,
-        "narHash": "sha256-1eI/w6rt2ydO33OnklvITrKIbMjFBOxv8IHTt1qzpxA=",
+        "lastModified": 1761692583,
+        "narHash": "sha256-hbJORcuH0guzdCVIZ7lihQgA+N2tPWl4vHVEsTbQ7HU=",
         "owner": "theverygaming",
         "repo": "sillyORM",
-        "rev": "aceb7d4901c521e5756d1fb7fa50c21053bee6cf",
+        "rev": "6fb987837f81f6662f9b0ab0755a0effec646ed8",
         "type": "github"
       },
       "original": {

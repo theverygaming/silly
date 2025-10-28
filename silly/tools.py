@@ -28,3 +28,10 @@ def unique(it):
             continue
         visited.add(x)
         yield x
+
+
+class ModuleExtensibleClass:
+    @classmethod
+    def module_extensible_get_final_extended_class(cls):
+        final_classes = list(unique(get_final_classes(cls)))
+        return type(cls.__name__, tuple(reversed(final_classes)), {})

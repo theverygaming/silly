@@ -11,7 +11,7 @@ import pathlib
 import hypercorn
 import hypercorn.asyncio
 import asyncio
-from . import modload, mod, http, globalvars, cron
+from . import modload, mod, http, globalvars, cron, sillyorm_ext
 
 _logger = logging.getLogger(__name__)
 
@@ -19,12 +19,32 @@ _logger = logging.getLogger(__name__)
 _routes = None
 
 
+def _reconstruct_registry(config):
+    _logger.debug("(re)constructing registry")
+    prev_attrs = {}
+    if globalvars.registry is not None:
+        globalvars.registry.engine.pool.dispose()
+        prev_attrs = {
+            "metadata": globalvars.registry.metadata,
+            "_raw_models": globalvars.registry._raw_models,
+            "_models": globalvars.registry._models,
+        }
+        globalvars.registry = None
+    new_registry = sillyorm_ext.Registry.module_extensible_get_final_extended_class()(
+        config["connstr"],
+        environment_class=sillyorm_ext.Environment.module_extensible_get_final_extended_class(),
+    )
+    for attr, val in prev_attrs.items():
+        setattr(new_registry, attr, val)
+    globalvars.registry = new_registry
+
+
 def init(config, modules_to_install=[], modules_to_uninstall=[], update=False):
     global _routes
     config.apply_cfg()
     _logger.info("silly version [...] starting")
     modload.add_module_paths([str(pathlib.Path(__file__).parent / "modules")])
-    globalvars.registry = sillyorm.Registry(config["connstr"])
+    _reconstruct_registry(config)
     mod.load_core(update and not modules_to_uninstall)
     if update:
         if modules_to_install and modules_to_uninstall:
@@ -35,9 +55,13 @@ def init(config, modules_to_install=[], modules_to_uninstall=[], update=False):
             mod.update(modules_to_install, False)
         elif modules_to_uninstall:
             mod.load_all()
+            # reconstruct to allow modules to extend the registry/environment classes
+            _reconstruct_registry(config)
             mod.update(modules_to_uninstall, True)
     else:
         mod.load_all()
+        # reconstruct to allow modules to extend the registry/environment classes
+        _reconstruct_registry(config)
     _routes = http.init_routers()
 
 
