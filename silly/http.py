@@ -3,7 +3,7 @@ import functools
 import inspect
 import starlette.routing
 import starlette.responses
-from . import globalvars
+from . import globalvars, tools
 
 _logger = logging.getLogger(__name__)
 
@@ -88,35 +88,11 @@ class Router:
             Router.direct_children.append(cls)
 
 
-def _unique(it):
-    visited = set()
-    for x in it:
-        if x in visited:
-            continue
-        visited.add(x)
-        yield x
-
-
 def init_routers():
     routes = []
 
-    # Given a class, goes through all it's subclasses and
-    # then returns only the classes that don't have any more children
-    # This is used to make our inheritance mechanism work,
-    # we will inherit from these classes to build our final
-    # Router class
-    def get_final_classes(cls):
-        res = []
-        # descend
-        for s in cls.__subclasses__():
-            res.extend(get_final_classes(s))
-        # we have arrived at the end
-        if len(res) == 0:
-            res.append(cls)
-        return res
-
     for cls in Router.direct_children:
-        final_classes = list(_unique(get_final_classes(cls)))
+        final_classes = list(tools.unique(tools.get_final_classes(cls)))
         router_ext_strs = [f"{x.__module__}.{x.__name__}" for x in final_classes if x is not cls]
         if len(router_ext_strs) > 0:
             _logger.debug(
@@ -144,7 +120,7 @@ def init_routers():
 
             # reversed because we want the classes higher up in the hierachy first so we can
             # have routes lower down overwrite parameters
-            for cls2 in _unique(reversed(type(final_cls).mro())):
+            for cls2 in tools.unique(reversed(type(final_cls).mro())):
                 if not hasattr(cls2, fn_name):
                     continue
                 sub_fn = getattr(cls2, fn_name)
