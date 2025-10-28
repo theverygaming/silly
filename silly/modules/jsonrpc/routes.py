@@ -54,7 +54,7 @@ class JSONRPCRoutes(http.Router):
                             "value": x,
                         },
                     }
-                    for x in val._ids
+                    for x in val.ids
                 ],
             }
         return val
