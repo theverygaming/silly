@@ -25,6 +25,7 @@ if __name__ == "__main__":
                     "modulemanager",
                     "fastapi",
                     "fastapi_sample",
+                    "users_access",
                 ],
                 throw_exc=True,
             )
