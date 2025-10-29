@@ -1,0 +1,2 @@
+class SillyException(Exception):
+    pass

@@ -2,11 +2,12 @@ import logging
 import sillyorm
 import sqlalchemy
 from . import modload, model, globalvars
+from .exceptions import SillyException
 
 _logger = logging.getLogger(__name__)
 
 
-class SillyRestartException(Exception):
+class SillyRestartException(SillyException):
     pass
 
 
