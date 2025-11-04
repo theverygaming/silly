@@ -41,18 +41,26 @@ class SillyAbstractBase(silly.model.AbstractModel):
         env_sudo = self.env.sudo()
         # FIXME: search should allow many2many lookup lmfao
         # FIXME: filter & mapped tools on recordset
-        user_groups = env_sudo["users_access.group"].browse(
-            [
-                g.id
-                for g in env_sudo["users_access.group"].search([])
-                if g.user_ids and self.env.uid in g.user_ids.ids
-            ]
-        )
+        user_group_ids = [
+            g.id
+            for g in env_sudo["users_access.group"].search([])
+            if g.user_ids and self.env.uid in g.user_ids.ids
+        ]
         model_access = env_sudo["users_access.model_access"].search(
             [
                 ("model", "=", self._name),
             ]
         )
+        access = False
+        for ma in model_access:
+            if not ma.group_id or ma.group_id.id in user_group_ids:
+                if getattr(ma, perm):
+                    access = True
+                    break
+        if not access:
+            raise SillyAccessError(
+                f"UID {self.env.uid} does not have {perm} access on {self._name}"
+            )
 
     def create(self, vals):
         self._check_access_rights("perm_create")
