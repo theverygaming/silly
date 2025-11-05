@@ -128,7 +128,7 @@ class View(silly.model.Model):
 class Action(silly.model.Model):
     _name = "webclient.action"
 
-    view_id = sillyorm.fields.Many2one("webclient.view", required=True)
+    view_id = sillyorm.fields.Many2one("webclient.view", required=True, ondelete="cascade")
     domain = sillyorm.fields.String(required=True, default="[]")
 
     def to_dict(self):
