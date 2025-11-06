@@ -128,7 +128,7 @@ class View(silly.model.Model):
 class Action(silly.model.Model):
     _name = "webclient.action"
 
-    view_id = sillyorm.fields.Many2one("webclient.view", required=True, ondelete="cascade")
+    view_id = sillyorm.fields.Many2one("webclient.view", ondelete="cascade", required=True)
     domain = sillyorm.fields.String(required=True, default="[]")
 
     def to_dict(self):
@@ -144,8 +144,8 @@ class Menuitem(silly.model.Model):
 
     name = sillyorm.fields.String(required=True)
     child_ids = sillyorm.fields.One2many("webclient.menuitem", "parent_id")
-    parent_id = sillyorm.fields.Many2one("webclient.menuitem")
-    action_id = sillyorm.fields.Many2one("webclient.action")
+    parent_id = sillyorm.fields.Many2one("webclient.menuitem", ondelete="cascade")
+    action_id = sillyorm.fields.Many2one("webclient.action", ondelete="cascade")
 
     def get_dict(self):
         self.ensure_one()
