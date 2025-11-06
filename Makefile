@@ -9,6 +9,7 @@ MODULES_TO_TEST := $(shell find . -name "__manifest__.py" | xargs -n1 dirname | 
 
 .PHONY: test
 test:
+	rm -f silly_test_run.db
 	./silly-entry --connstr "sqlite:///silly_test_run.db" --loglevel DEBUG update --modules $(MODULES_TO_TEST)
 	./silly-entry --connstr "sqlite:///silly_test_run.db" --loglevel DEBUG test
 	./silly-entry --connstr "sqlite:///silly_test_run.db" --loglevel DEBUG uninstall --modules $(MODULES_TO_TEST)
