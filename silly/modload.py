@@ -121,7 +121,7 @@ def _load_module(name, registry):
                 " beforehand"
             )
 
-    for k, v in manifest["staticfiles"].items():
+    for k, v in manifest.get("staticfiles", {}).items():
         staticfiles[k] = modpath / "static" / v
 
     mod = _import_py_module(f"silly.modules.{name}", str(modpath / "__init__.py"))
@@ -177,7 +177,7 @@ def get_manifest(name):
             return False
         if not isinstance(mdict.get("dependencies"), list):
             return False
-        if not isinstance(mdict.get("staticfiles"), dict):
+        if not isinstance(mdict.get("staticfiles", {}), dict):
             return False
         if not isinstance(mdict.get("data"), list):
             return False
