@@ -3,7 +3,6 @@
     "dependencies": [
         "product",
     ],
-    "staticfiles": {},
     "data": [
         "data/location.xml",
     ],

@@ -3,6 +3,5 @@
     "dependencies": [
         "users",
     ],
-    "staticfiles": {},
     "data": [],
 }

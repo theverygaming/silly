@@ -3,7 +3,6 @@
     "dependencies": [
         "html_base",
     ],
-    "staticfiles": {},
     "data": [
         "templates/speedscope.xml",
     ],

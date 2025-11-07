@@ -4,7 +4,6 @@
         "html_base",
         "webfinger",
     ],
-    "staticfiles": {},
     "data": [
         "templates/templates.xml",
         "data/data.xml",

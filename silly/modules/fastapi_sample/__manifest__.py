@@ -3,6 +3,5 @@
     "dependencies": [
         "fastapi",
     ],
-    "staticfiles": {},
     "data": [],
 }
