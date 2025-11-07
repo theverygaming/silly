@@ -2,10 +2,6 @@ import sillyorm
 import silly
 
 
-class SillyAccessError(silly.exceptions.SillyException):
-    pass
-
-
 class CustomEnvironment(silly.sillyorm_ext.Environment):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -37,7 +33,9 @@ class SillyAbstractBase(silly.model.AbstractModel):
         if self.env.as_superuser:
             return
         if self.env.uid is None:
-            raise SillyAccessError("no UID set and we are not running as superuser")
+            raise silly.exceptions.SillyAccessError(
+                "no UID set and we are not running as superuser"
+            )
         env_sudo = self.env.sudo()
         # FIXME: search should allow many2many lookup lmfao
         # FIXME: filter & mapped tools on recordset
@@ -58,7 +56,7 @@ class SillyAbstractBase(silly.model.AbstractModel):
                     access = True
                     break
         if not access:
-            raise SillyAccessError(
+            raise silly.exceptions.SillyAccessError(
                 f"UID {self.env.uid} does not have {perm} access on {self._name}"
             )
 

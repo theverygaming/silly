@@ -1,6 +1,6 @@
 import sillyorm
 from silly.tests import TransactionCase
-from silly.modules.users_access.models import SillyAccessError
+from silly.exceptions import SillyAccessError
 
 
 class UsersAccessTest(TransactionCase):
