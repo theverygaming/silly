@@ -27,6 +27,7 @@ if __name__ == "__main__":
                     "fastapi_sample",
                     "users_access",
                     "product",
+                    "stock",
                 ],
                 throw_exc=True,
             )

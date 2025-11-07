@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <record model="stock.location" xmlid="stock.location_inventory_adjustment">
+        <field name="name" t="str">[INTERNAL LOCATION] Inventory adjustment</field>
+        <field name="parent_id" t="None"/>
+    </record>
+</root>
