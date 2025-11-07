@@ -80,6 +80,7 @@ def _load_datafile(env, fname, modname):
 
 
 staticfiles = {}
+assets = {}
 
 
 def add_module_paths(paths):
@@ -124,6 +125,21 @@ def _load_module(name, registry):
     for k, v in manifest.get("staticfiles", {}).items():
         staticfiles[k] = modpath / "static" / v
 
+    for bundle_name, bundle_contents in manifest.get("assets", {}).items():
+        if bundle_name not in assets:
+            assets[bundle_name] = {}
+        for asset_type, asset_defs in bundle_contents.items():
+            if asset_type not in assets[bundle_name]:
+                assets[bundle_name][asset_type] = []
+            for at in asset_defs:
+                assets[bundle_name][asset_type].append(
+                    {
+                        "module": name,
+                        "path": str(modpath / at[0]),
+                        "compiler": at[1],
+                    }
+                )
+
     mod = _import_py_module(f"silly.modules.{name}", str(modpath / "__init__.py"))
 
     for d in manifest["data"]:
@@ -156,9 +172,11 @@ def unload_all():
 
     # modules
     global staticfiles
+    global assets
     global _data_to_load
     global loaded_modules
     staticfiles = {}
+    assets = {}
     _data_to_load = []
     loaded_modules = []
     for mod in sys.modules.copy():

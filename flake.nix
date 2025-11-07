@@ -42,6 +42,7 @@
             python313Packages.hypercorn
             python313Packages.psycopg2
             python313Packages.fastapi
+            esbuild
           ];
 
           src = ./.;
